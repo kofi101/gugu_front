@@ -1,0 +1,24 @@
+
+
+const Complete = () => {
+  return (
+    <svg
+      width="110"
+      height="110"
+      viewBox="0 0 131 131"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <circle cx="65.5" cy="65.5" r="65.5" fill="#71B744" />
+      <path
+        d="M38.209 64.6382L60.3835 81.875L92.7923 49.125"
+        stroke="white"
+        stroke-width="15"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+      />
+    </svg>
+  );
+};
+
+export default Complete;

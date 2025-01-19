@@ -6,41 +6,46 @@ import DeleteSvg from "../../assets/svg/deleteSvg";
 
 const notificationsData: Notification[] = [
   {
-    id: 1,
-    title: "Order Confirmed - Order 367928532",
-    content: "25W Hot Melt Glue Gun has been confirmed.",
+    notificationId: 1,
+    messageSubject: "Order Confirmed - Order 367928532",
+    messageBody: "25W Hot Melt Glue Gun has been confirmed.",
+    status: 0,
     isChecked: false,
     isOpen: true,
     isRead: true,
   },
   {
-    id: 2,
-    title: "Order Confirmed - Order 367928532",
-    content: "25W Hot Melt Glue Gun has been confirmed.",
+    notificationId: 2,
+    messageSubject: "Order Confirmed - Order 367928532",
+    messageBody: "25W Hot Melt Glue Gun has been confirmed.",
+    status: 0,
     isChecked: false,
     isOpen: false,
     isRead: true,
   },
   {
-    id: 3,
-    title: "Order Confirmed - Order 367928532",
-    content: "25W Hot Melt Glue Gun has been confirmed.",
+    notificationId: 3,
+    messageSubject: "Order Confirmed - Order 367928532",
+    messageBody: "25W Hot Melt Glue Gun has been confirmed.",
+    status: 0,
     isChecked: false,
     isOpen: false,
     isRead: false,
   },
   {
-    id: 4,
-    title: "Order Confirmed - Order 367928532",
-    content: "25W Hot Melt Glue Gun has been confirmed.",
+    notificationId: 4,
+    messageSubject: "Order Confirmed - Order 367928532",
+    messageBody: "25W Hot Melt Glue Gun has been confirmed.",
+    status: 0,
     isChecked: false,
     isOpen: false,
     isRead: false,
   },
   {
-    id: 5,
-    title: "Order Confirmed - Order 367928532",
-    content: "25W Hot Melt Glue Gun has been confirmed.",
+    notificationId: 5,
+    messageSubject: "Order Confirmed - Order 367928532",
+    messageBody: "25W Hot Melt Glue Gun has been confirmed.",
+    status: 0,
     isChecked: false,
     isOpen: false,
     isRead: false,
@@ -52,7 +57,7 @@ const Notifications = () => {
   const toggleNotification = (id: number) => {
     setNotifications(
       notifications.map((notification) =>
-        notification.id === id
+        notification.notificationId === id
           ? { ...notification, isOpen: !notification.isOpen }
           : notification
       )
@@ -62,7 +67,7 @@ const Notifications = () => {
   const toggleCheckbox = (id: number) => {
     setNotifications(
       notifications.map((notification) =>
-        notification.id === id
+        notification.notificationId === id
           ? { ...notification, isChecked: !notification.isChecked }
           : notification
       )
@@ -75,34 +80,43 @@ const Notifications = () => {
           <p>Notifications</p>
           {notifications.some((notification) => notification.isChecked) && (
             <div className="flex justify-end space-x-4">
-              <MailSvg />
-              <MailOpen />
-              <DeleteSvg />
+              <div className="cursor-pointer">
+                <MailSvg />
+              </div>
+              <div className="cursor-pointer">
+                <MailOpen />
+              </div>
+              <div className="cursor-pointer">
+                <DeleteSvg />
+              </div>
             </div>
           )}
         </div>
       </div>
 
       {notifications.map((notification) => (
-        <div key={notification.id} className="border border-gray-300 ">
+        <div
+          key={notification.notificationId}
+          className="border border-gray-300 "
+        >
           <div className="flex items-center justify-between p-4">
             <input
               type="checkbox"
               checked={notification.isChecked}
-              onChange={() => toggleCheckbox(notification.id)}
+              onChange={() => toggleCheckbox(notification.notificationId)}
               className="mr-4 cursor-pointer"
             />
             <span
-              onClick={() => toggleNotification(notification.id)}
+              onClick={() => toggleNotification(notification.notificationId)}
               className={`flex-1 cursor-pointer ${
                 notification.isRead ? `` : `font-bold`
               }`}
             >
-              {notification.title}
+              {notification.messageSubject}
             </span>
           </div>
           {notification.isOpen && (
-            <div className="p-4">{notification.content}</div>
+            <div className="p-4">{notification.messageBody}</div>
           )}
         </div>
       ))}

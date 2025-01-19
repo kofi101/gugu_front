@@ -175,7 +175,6 @@ const Checkout = () => {
     });
   };
 
-  useEffect(() => {}, []);
   useEffect(() => {
     userToken ? handleFetchUserDetails() : "";
   }, [userToken]);

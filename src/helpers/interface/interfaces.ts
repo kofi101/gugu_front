@@ -142,9 +142,10 @@ export interface menuItemProps {
   icon: JSX.Element;
 }
 export interface Notification {
-  id: number;
-  title: string;
-  content: string;
+  notificationId: number;
+  messageSubject: string;
+  messageBody: string;
+  status: number,
   isChecked: boolean;
   isOpen: boolean;
   isRead: boolean;

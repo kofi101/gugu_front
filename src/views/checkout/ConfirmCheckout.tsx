@@ -109,10 +109,10 @@ const ConfirmCheckout = () => {
     API.post(`${paymentStatus}`, payload)
       .then((response) => {
         console.log(response);
-        if (response.status === 200) {
+        if (response.data.status === 'success') {
           console.log(response.data);
           setIsLoading(false);
-          toast.success("Order confirmed successfully.", {
+          toast.success("Order payment confirmed successfully.", {
             position: "top-right",
             autoClose: 2000,
           });
@@ -121,7 +121,7 @@ const ConfirmCheckout = () => {
           }, 2000);
         } else {
           setIsLoading(false);
-          toast.error("Error confirming order.", {
+          toast.error("Error confirming order payment.", {
             position: "top-right",
             autoClose: 2000,
           });

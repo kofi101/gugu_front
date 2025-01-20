@@ -74,14 +74,9 @@ function useInactivityHook() {
     }
     const handleActivity = () => resetTimeout();
 
-    // const handleBeforeUnload = (event: BeforeUnloadEvent) => {
-    //   handleLogout();
-    //   event.preventDefault();
-    // };
-
     window.addEventListener("mousemove", handleActivity);
     window.addEventListener("keydown", handleActivity);
-    // window.addEventListener("beforeunload", handleBeforeUnload);
+    
 
     resetTimeout();
 
@@ -89,7 +84,6 @@ function useInactivityHook() {
       clearTimeout(timeoutRef.current!);
       window.removeEventListener("mousemove", handleActivity);
       window.removeEventListener("keydown", handleActivity);
-    //   window.removeEventListener("beforeunload", handleBeforeUnload);
     };
   }, [user]);
 

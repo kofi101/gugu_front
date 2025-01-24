@@ -20,8 +20,8 @@ const AboutUs = () => {
         <p>About</p>
       </div>
       <div className="flex flex-col gap-5">
-        <div className="relative">
-          <img src={BackgroundImage} alt="" />
+        <div className="relative h-[540px]">
+          <img src={BackgroundImage} alt="" className="h-[540px] object-cover w-full" />
           <div className="absolute bottom-0 bg-black-primary-400 h-[50%] w-full opacity-80 text-white-primary-400 py-10">
             <div className="flex flex-col items-center justify-center">
               <p className="text-xl font-bold">Welcome to</p>

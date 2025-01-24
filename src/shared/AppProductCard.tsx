@@ -20,7 +20,7 @@ const AppProductCard: React.FC<productCardProp> = ({ product }) => {
   };
 
   return (
-    <div className="text-center bg-white border cursor-pointer border-gray-primary-400">
+    <div className="text-center bg-white border cursor-pointer border-gray-primary-400 h-[274px]">
       <div className="relative">
         {(product.productImages?.length ?? 0) > 0 && (
           <img
@@ -34,11 +34,11 @@ const AppProductCard: React.FC<productCardProp> = ({ product }) => {
       </div>
 
       <div
-        className="py-2 font-semibold"
+        className="py-2 pt-8 font-semibold"
         onClick={() => onProductClick(product)}
       >
         {product.productName && (
-          <p className="">{subStringLongText(product.productName, 14)}</p>
+          <p className="">{subStringLongText(product.productName, 20)}</p>
         )}
         {product.salesPrice !== undefined && (
           <p className="text-primary-500">{formatMoney(product.discountPrice ? product.discountPrice :  product.salesPrice)}</p>

@@ -105,7 +105,7 @@ const AppCategoryCard: React.FC<categoryProductProp> = ({ category }) => {
       <div className="p-2 ">
         {category.productName && (
           <div className="mb-2 text-lg font-semibold">
-            {subStringLongText(category.productName, 20)}
+            {subStringLongText(category.productName, 22)}
           </div>
         )}
         <div

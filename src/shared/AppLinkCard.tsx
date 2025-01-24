@@ -4,9 +4,9 @@ import { linkCardProp } from "../helpers/type/types";
 
 const AppLinkCard:React.FC<linkCardProp> = ({ className, imageUrl, productName, productTitle, price }) => {
   return (
-    <div className="relative w-full">
-      <div className="h-[160px]">
-        <img className="object-cover h-[160px] w-full" src={imageUrl} alt="" />
+    <div className="relative w-full h-[230px]">
+      <div className="">
+        <img className="object-cover w-full h-[230px]" src={imageUrl} alt="" />
         <div className={`${className} text-white-primary-400 flex flex-col items-center`}>
           <p className="text-xs uppercase md:text-sm ">{productTitle}</p>
           <p className="mb-2 text-xs uppercase md:text-lg">{productName}</p>

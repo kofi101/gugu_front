@@ -19,7 +19,7 @@ const AppCarousel: React.FC<CarouselProps> = ({
   }, [currentSlide, goToNextSlide, autoPlayInterval]);
   return (
     <div className="carousel-container">
-      <div className="carousel-slide h-[350px] overflow-hidden">
+      <div className="carousel-slide h-[450px] overflow-hidden">
       <div className="absolute inset-0 bg-black opacity-50"></div>
         <img
           src={slides[currentSlide].imageUrl}

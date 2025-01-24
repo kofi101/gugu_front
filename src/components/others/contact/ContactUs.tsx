@@ -7,6 +7,7 @@ import AppButton from "../../../shared/AppButton";
 import { useState } from "react";
 import API, { contactUs } from "../../../endpoint";
 import { toast } from "react-toastify";
+import TradeFair from "../../../assets/images/TradeFair.jpg"
 const ContactUs = () => {
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
@@ -85,8 +86,8 @@ const ContactUs = () => {
         <p>Contact us</p>
       </div>
       <div className="flex gap-5 mt-4 mb-10 ">
-        <div className="w-1/2 border">
-          <img src="" alt="" />
+        <div className="w-1/2">
+          <img src={TradeFair} className="object-cover h-full" alt="" />
         </div>
         <div className="w-1/2 ">
           <div className="p-4 text-xl font-bold text-center">

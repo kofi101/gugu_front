@@ -7,6 +7,7 @@ import SearchProducts from "../views/customer/SearchProducts"
 import Cart from "../views/cart/Cart"
 import WishList from "../views/wishList/WishList"
 import Promotions from "../views/others/promo/Promotions"
+import IndividualPromo from "../components/others/promo/IndividualPromotion"
 import About from "../views/others/about/About"
 import ContactUs from "../views/others/contact/Contact"
 import Support from "../views/others/support/Support"
@@ -30,6 +31,7 @@ export const routerPath = {
     CART: "/cart",
     WISHLIST: "/wishlist",
     PROMOTIONS: "/promotions",
+    PROMOTIONS_PRODUCTS: "/promotion-products",
     ABOUT: "/about",
     CONTACT: "/contact-us",
     SUPPORT: "/support",
@@ -82,6 +84,10 @@ export const appRoutes  = [
     {
         path: routerPath.PROMOTIONS,
         element: <Promotions />
+    },
+    {
+        path: routerPath.PROMOTIONS_PRODUCTS,
+        element: <IndividualPromo />
     },
     {
         path: routerPath.ABOUT,

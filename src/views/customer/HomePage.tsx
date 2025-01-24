@@ -144,7 +144,7 @@ const HomePage = () => {
     <div className="h-full homeBack">
       <div className="mx-auto md:w-3/5">
         <AppCarousel slides={slides} autoPlayInterval={3000} />
-        <div className="flex gap-2 py-2 bg-white">
+        <div className="flex gap-2 bg-white h-[230px] my-3">
           <AppLinkCard
             className="absolute top-10 md:top-10 md:left-4"
             imageUrl={laptop}
@@ -182,7 +182,7 @@ const HomePage = () => {
           </div>
         </div>
         {productLoading ? (
-          <div className="flex justify-center my-8">
+          <div className="flex justify-center my-8 h-[250px] items-center">
             <CircularProgress className="circularProgress !text-gray-primary-400" />
           </div>
         ) : (
@@ -206,7 +206,7 @@ const HomePage = () => {
                   <img
                     src={EmptyProduct}
                     alt="empty product image"
-                    className="w-32 "
+                    className="w-32 h-[250px]"
                   />
                 </div>
               </div>
@@ -214,13 +214,13 @@ const HomePage = () => {
           </div>
         )}
 
-        <div className="flex gap-2 pt-3 bg-white-primary-400">
+        <div className="flex gap-2 bg-white-primary-400 h-[230px] mt-[14px] ">
           <AppLinkCard
             price={140}
             productTitle="Colorful kick"
             productName="Iwatch series 2"
             imageUrl={Iwatch}
-            className="absolute top-10 left-4"
+            className="absolute top-10 left-4 h-[174px]"
           />
           <AppLinkCard
             price={145}
@@ -235,7 +235,7 @@ const HomePage = () => {
             Featured Products
           </p>
           {isLoading ? (
-            <div className="flex justify-center my-8">
+            <div className="flex justify-center my-8 h-[274px] items-center">
               <CircularProgress className="circularProgress !text-gray-primary-400" />
             </div>
           ) : (
@@ -259,7 +259,7 @@ const HomePage = () => {
                     <img
                       src={EmptyProduct}
                       alt="empty product image"
-                      className="w-32 "
+                      className="w-32 h-[250px]"
                     />
                   </div>
                 </div>

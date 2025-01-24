@@ -164,6 +164,29 @@ const ProductDetailsPage = () => {
     }
   };
 
+  const handleBuyNow = (product: Product) => {
+    if (product && total !== null && counter !== null) {
+      const productToAdd = {
+        ...product,
+        quantity: counter,
+        salesPrice: total,
+      };
+      if (isUserLoggedIn) {
+        dispatch(
+          addUserItemsToCart({
+            customerId: isUserLoggedIn.uid,
+            product: productToAdd,
+            cartId: cartId!,
+          }) as any
+        );
+      } else {
+        dispatch(guestAddToCart(productToAdd));
+      }
+      navigate(routerPath.CART);
+    }
+    
+  }
+
   const tabs: TabProps[] = [
     {
       title: "Description",
@@ -379,7 +402,7 @@ const ProductDetailsPage = () => {
                     />
                   ) : (
                     <AppButton
-                      clickHandler={() => {}}
+                      clickHandler={() => {handleBuyNow(productDetail!)}}
                       title="Buy now"
                       icon={<BsCart3 />}
                       className="flex items-center justify-center w-full gap-10 px-8 py-2 uppercase rounded-lg bg-primary-600 text-white-primary-400 hover:bg-primary-500"

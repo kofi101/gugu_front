@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useState } from "react";
 import { menuItemProps } from "../../helpers/interface/interfaces";
 import { CgProfile } from "react-icons/cg";
@@ -31,19 +32,19 @@ import {
 import { resetUserCart } from "../../store/features/cartFeature";
 import { routerPath } from "../../routes/Router";
 
-const menuItems: menuItemProps[] = [
-  { name: "My Account", icon: <CgProfile /> },
-  { name: "Orders", icon: <OrderSvg /> },
-  { name: "Notification", icon: <MailSvg /> },
-  { name: "Reviews", icon: <ReviewsSvg /> },
-  { name: "Vouchers", icon: <VoucherSvg /> },
-];
-
 const MyAccount = () => {
   const [active, setActive] = useState<string>("My Account");
   const navigate = useNavigate();
   const dispatch = useDispatch();
+  // const user = useSelector((store: any) => store?.user);
 
+  const menuItems: menuItemProps[] = [
+    { name: "My Account", icon: <CgProfile /> },
+    { name: "Orders", icon: <OrderSvg /> },
+    { name: `Notification`, icon: <MailSvg /> },
+    { name: "Reviews", icon: <ReviewsSvg /> },
+    { name: "Vouchers", icon: <VoucherSvg /> },
+  ];
   const handleLogout = () => {
     signOut(auth).then(() => {
       dispatch(setUser(null));
@@ -55,7 +56,7 @@ const MyAccount = () => {
       dispatch(setDeliveryDestination(null));
       dispatch(setOrderDetailsId(null));
       dispatch(setDetailsToAddReview(null));
-      dispatch(setReviewId(null))
+      dispatch(setReviewId(null));
       localStorage.clear();
       dispatch(resetUserCart());
       toast.success("Sign-out successful.", {

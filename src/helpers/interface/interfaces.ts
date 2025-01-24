@@ -14,6 +14,7 @@ export interface UserState {
   orderDetailsId: string | null;
   detailsToAddReview: { prodId: string; orderNum: string };
   reviewId: string | null;
+  notificationNumber: number | null;
 }
 
 export interface selectInputProp {
@@ -250,24 +251,16 @@ export interface productReviewProps {
   deliveryDate: string;
   salesPrice: number;
   productImage: string;
-
-//   {
-//     "productId": 80,
-//     "orderNumber": "GUGU10384101",
-//     "productName": "Shoes - medium",
-//     "salesPrice": 0.6,
-//     "submittedDate": "2025-01-14T15:25:29.275411",
-//     "numberOfStars": 3,
-//     "shortReview": "Testing Products Reviews",
-//     "reviewDetails": "Testing Products Reviews, Testing Products Reviews, Testing Products Reviews, Testing Products Reviews",
-//     "productImage": "https://linqworthstorage.blob.core.windows.net/linqworthstorage/sad.jpg"
-// }
 }
 
-// export interface pendingReviewsProp {
-//   reviewId: number;
-//   productName: string;
-//   productImage: string;
-//   submittedDate: string;
-//   orderNumber: string;
-// }
+export interface NotificationProps {
+  notificationId: number,
+    messageSubject: string,
+    messageBody: string,
+    status: number,
+    isChecked: boolean,
+    isOpen: boolean,
+    isRead: boolean,
+}[]
+
+

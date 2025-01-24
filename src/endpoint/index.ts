@@ -82,6 +82,12 @@ export const getCustomerSubmittedReviews = `${BASE_URL}ProductReview/Reviews`;
 export const getEditReviewDetails = `${BASE_URL}ProductReview/EditPendingReviews`;
 export const getAddReviewDetails = `${BASE_URL}ProductReview/AddPendingReviews`;
 
+//notifications
+export const getNotifications = `${BASE_URL}Notification/GetNotificationMessages`;
+export const updateNoficationsAsRead = `${BASE_URL}Notification/UpdateNotificationStatus`;
+export const updateNoficationsAsUnRead = `${BASE_URL}Notification/UpdateNotificationStatusMarkAsUnRead`;
+export const deleteNotification = `${BASE_URL}Notification/DeleteNotifications`;
+
 //upload files
 export const uploadFile = `${BASE_URL}FilesManager/UploadFileDocuments`;
 

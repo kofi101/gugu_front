@@ -154,10 +154,10 @@ import { customerOrderDetails } from "../../helpers/interface/interfaces";
                 <p>Payment Information</p>
               </div>
               <div className="flex flex-col gap-4 p-4 border bg-base-gray-200">
-                <div>
+                {/* <div>
                   <p className="text-sm font-bold">Payment Method</p>
                   <p className="text-sm">Cash on delivery</p>
-                </div>
+                </div> */}
 
                 <div className="flex flex-col gap-1">
                   <p className="text-sm font-bold">Payment Details</p>

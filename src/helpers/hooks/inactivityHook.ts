@@ -1,5 +1,98 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { useEffect, useRef } from "react";
+// /* eslint-disable @typescript-eslint/no-explicit-any */
+// import { useEffect, useRef } from "react";
+// import { useDispatch, useSelector } from "react-redux";
+// import { useNavigate } from "react-router";
+// import { auth } from "../../firebase/config";
+// import { signOut } from "firebase/auth";
+// import { toast } from "react-toastify";
+// import { routerPath } from "../../routes/Router";
+// import {
+//   setCartId,
+//   setCheckoutDetailsFilled,
+//   setDeliveryDestination,
+//   setDetailsToAddReview,
+//   setMobilePaymentId,
+//   setOrderDetailsId,
+//   setOrderId,
+//   setOtpNumber,
+//   setPaymentNumber,
+//   setReviewId,
+//   setUser,
+//   setUserToken,
+//   setWishListId,
+// } from "../../store/features/userSliceFeature";
+
+// const inactivityTime = 1000 * 60 * 5;
+
+// function useInactivityHook() {
+//   const dispatch = useDispatch();
+//   const navigate = useNavigate();
+//   const user = useSelector((store: any) => store?.user?.currentUser);
+
+//   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+//   const handleLogout = () => {
+//     signOut(auth).then(() => {
+//       dispatch(setUser(null));
+//       dispatch(setUserToken(null));
+//       dispatch(setCartId(null));
+//       dispatch(setWishListId(null));
+//       dispatch(setOrderId(null));
+//       dispatch(setMobilePaymentId(null));
+//       dispatch(setPaymentNumber(null));
+//       dispatch(setOtpNumber(null));
+//       dispatch(setCheckoutDetailsFilled(false));
+//       dispatch(setDeliveryDestination(null));
+//       dispatch(setOrderDetailsId(null));
+//       dispatch(setDetailsToAddReview(null));
+//       dispatch(setReviewId(null));
+//       toast.success("No activity detected, user logged out", {
+//         position: "top-right",
+//         autoClose: 2000,
+//       });
+//       setTimeout(() => {
+//         navigate(routerPath.HOMEPAGE);
+//       }, 2000);
+//     });
+//   };
+
+//   const resetTimeout = () => {
+//     if (timeoutRef.current) {
+//       clearTimeout(timeoutRef.current);
+//     }
+//     timeoutRef.current = setTimeout(() => {
+//       handleLogout();
+//     }, inactivityTime);
+//   };
+
+//   useEffect(() => {
+//     if (user === null) {
+//       if (timeoutRef.current) {
+//         clearTimeout(timeoutRef.current);
+//       }
+//       return;
+//     }
+//     const handleActivity = () => resetTimeout();
+
+//     window.addEventListener("mousemove", handleActivity);
+//     window.addEventListener("keydown", handleActivity);
+
+//     resetTimeout();
+
+//     return () => {
+//       clearTimeout(timeoutRef.current!);
+//       window.removeEventListener("mousemove", handleActivity);
+//       window.removeEventListener("keydown", handleActivity);
+//     };
+//   }, [user]);
+
+//   return null;
+// }
+
+// export default useInactivityHook;
+
+import { useEffect, useRef, useCallback } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router";
 import { auth } from "../../firebase/config";
@@ -22,7 +115,7 @@ import {
   setWishListId,
 } from "../../store/features/userSliceFeature";
 
-const inactivityTime = 1000 * 60 * 5;
+const inactivityTime = 1000 * 60 * 5; // 5 minutes
 
 function useInactivityHook() {
   const dispatch = useDispatch();
@@ -31,7 +124,7 @@ function useInactivityHook() {
 
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
 
-  const handleLogout = () => {
+  const handleLogout = useCallback(() => {
     signOut(auth).then(() => {
       dispatch(setUser(null));
       dispatch(setUserToken(null));
@@ -54,38 +147,40 @@ function useInactivityHook() {
         navigate(routerPath.HOMEPAGE);
       }, 2000);
     });
-  };
+  }, [dispatch, navigate]);
 
-  const resetTimeout = () => {
+  const resetTimeout = useCallback(() => {
     if (timeoutRef.current) {
       clearTimeout(timeoutRef.current);
     }
-    timeoutRef.current = setTimeout(() => {
-      handleLogout();
-    }, inactivityTime);
-  };
+    timeoutRef.current = setTimeout(handleLogout, inactivityTime);
+  }, [handleLogout]);
 
   useEffect(() => {
-    if (user === null) {
+    if (!user) {
       if (timeoutRef.current) {
         clearTimeout(timeoutRef.current);
       }
       return;
     }
-    const handleActivity = () => resetTimeout();
+
+    const handleActivity = () => {
+      resetTimeout();
+    };
 
     window.addEventListener("mousemove", handleActivity);
     window.addEventListener("keydown", handleActivity);
-    
 
     resetTimeout();
 
     return () => {
-      clearTimeout(timeoutRef.current!);
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+      }
       window.removeEventListener("mousemove", handleActivity);
       window.removeEventListener("keydown", handleActivity);
     };
-  }, [user]);
+  }, [user, resetTimeout]);
 
   return null;
 }

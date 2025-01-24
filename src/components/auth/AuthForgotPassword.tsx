@@ -10,6 +10,7 @@ import { toast } from "react-toastify";
 
 const AuthForgotPassword = () => {
   const navigate = useNavigate();
+  const [loading, setLoading] = useState(false);
   const [forgotInput, setForgotInput] = useState({
     email: "",
     newPassword: "",
@@ -28,11 +29,13 @@ const AuthForgotPassword = () => {
     return [email, true];
   };
   const handleFirebaseResetPassword = () => {
+    setLoading(true);
     if (!forgotInput.email) {
       toast.error("Email is required", {
         autoClose: 2000,
         position: "top-right",
       });
+      setLoading(false);
       return;
     } else {
       const [email, emailValid] = validateEmail(forgotInput.email);
@@ -43,12 +46,14 @@ const AuthForgotPassword = () => {
         });
         return;
       } else {
+        setLoading(true);
         sendPasswordResetEmail(auth, email)
           .then(() => {
             toast.success("Reset password link sent. Check your email.", {
               autoClose: 2000,
               position: "top-right",
             });
+            setLoading(false);
             setTimeout(() => {
               navigate(routerPath.LOGIN);
             }, 2000);
@@ -58,13 +63,6 @@ const AuthForgotPassword = () => {
           });
       }
     }
-    // sendPasswordResetEmail(auth, forgotInput.email)
-    //   .then(() => {
-    //     console.log("Email sent");
-    //   })
-    //   .catch((error) => {
-    //     console.log(error);
-    //   });
   };
   return (
     <div className="flex flex-col md:mt-8 md:w-3/5 ">
@@ -82,17 +80,18 @@ const AuthForgotPassword = () => {
           onChange={handleChange}
           className="w-full px-6 py-3 rounded-md outline-none bg-base-gray-200"
         />
-        <AppInput
+        {/* <AppInput
           id="newPassword"
           placeholder="New Password"
           type="email"
           value={forgotInput.newPassword}
           onChange={handleChange}
           className="w-full px-6 py-3 rounded-md outline-none bg-base-gray-200"
-        />
+        /> */}
       </div>
 
       <AppButton
+      loading={loading}
         title="Confirm"
         clickHandler={handleFirebaseResetPassword}
         className="w-full py-3 mt-4 rounded-md bg-primary-500 text-white-primary-400"

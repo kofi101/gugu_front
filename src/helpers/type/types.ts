@@ -21,7 +21,7 @@ export type inputProp = {
   type: string;
   placeholder?: string;
   value: string | number;
-  onChange: (event: {value: string, id: string}) => void;
+  onChange: (event: { value: string; id: string }) => void;
   className?: string;
   disabled?: boolean;
 };
@@ -47,7 +47,12 @@ export type CategorySideBarProps = {
 };
 
 export type CarouselProps = {
-  slides: { imageUrl: string; promo: string; caption: string; link: string }[];
+  slides: {
+    productId: string;
+    image: string;
+    promotionDescription: string;
+    productName: string;
+  }[];
   autoPlayInterval?: number;
 };
 export type linkCardProp = {
@@ -56,6 +61,7 @@ export type linkCardProp = {
   productName: string;
   productTitle: string;
   price: number;
+  substringNumber: number;
 };
 
 export type loggedInUser = {
@@ -67,6 +73,5 @@ export type loggedInUser = {
   shipping_BillingAddress: string;
   id: string;
   fullName: string;
-  city?: string
+  city?: string;
 };
-

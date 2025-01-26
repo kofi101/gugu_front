@@ -2,22 +2,22 @@
 import { useEffect, useState } from "react";
 import "../../styles/AppCustomCss.css";
 import AppCarousel from "../../shared/AppCarousel";
-import Pebbles from "../../assets/images/pebble.jpg";
-import Force from "../../assets/images/airforce.jpg";
-import Supra from "../../assets/images/supra.jpg";
+// import Pebbles from "../../assets/images/pebble.jpg";
+// import Force from "../../assets/images/airforce.jpg";
+// import Supra from "../../assets/images/supra.jpg";
 import AppLinkCard from "../../shared/AppLinkCard";
-import tv from "../../assets/images/tv.png";
+// import tv from "../../assets/images/tv.png";
 import { RxCaretRight } from "react-icons/rx";
-import mic from "../../assets/images/mic.png";
-import laptop from "../../assets/images/laptop.jpeg";
-import drive from "../../assets/images/drive.jpg";
+// import mic from "../../assets/images/mic.png";
+// import laptop from "../../assets/images/laptop.jpeg";
+// import drive from "../../assets/images/drive.jpg";
 import AppProductCard from "../../shared/AppProductCard";
-import Iwatch from "../../assets/images/iwatch.jpeg";
+// import Iwatch from "../../assets/images/iwatch.jpeg";
 import { fetchProductToStore } from "../../store/features/productFeature";
 import { useDispatch, useSelector } from "react-redux";
 import { Product } from "../../helpers/interface/interfaces";
 import { CircularProgress } from "@mui/material";
-import API, { productsEndpoint } from "../../endpoint/index";
+import API, { carouselBanner, productsEndpoint } from "../../endpoint/index";
 import { featuredProductsUrl } from "../../endpoint/index";
 import EmptyProduct from "../../assets/images/no-products-found.png";
 import { toast } from "react-toastify";
@@ -25,34 +25,35 @@ import { addUserItemsToCart } from "../../store/features/cartFeature";
 import { useNavigate } from "react-router";
 import { routerPath } from "../../routes/Router";
 
+
 type ProductCardProp = Product[];
 const intialProducts: ProductCardProp = [];
 
-const slides = [
-  {
-    imageUrl: Pebbles,
-    promo: "50% off - selected items",
-    caption: "Macbook Pro 2021",
-    link: "/shop",
-  },
-  {
-    imageUrl: Force,
-    promo: "Holiday Promo | 50% off Sale",
-    caption: "Sony PS5",
-    link: "/shop",
-  },
-  {
-    imageUrl: Supra,
-    promo: "Independence day | 20% on all items",
-    caption: "FIfa 2022 PS5",
-    link: "/shop",
-  },
-  // {
-  //   imageUrl: "https://via.placeholder.com/800x300?text=Slide+4",
-  //   caption: "Slide 4",
-  //   link: "/shop",
-  // },
-];
+// const slides = [
+//   {
+//     imageUrl: Pebbles,
+//     promo: "50% off - selected items",
+//     caption: "Macbook Pro 2021",
+//     link: "/shop",
+//   },
+//   {
+//     imageUrl: Force,
+//     promo: "Holiday Promo | 50% off Sale",
+//     caption: "Sony PS5",
+//     link: "/shop",
+//   },
+//   {
+//     imageUrl: Supra,
+//     promo: "Independence day | 20% on all items",
+//     caption: "FIfa 2022 PS5",
+//     link: "/shop",
+//   },
+//   // {
+//   //   imageUrl: "https://via.placeholder.com/800x300?text=Slide+4",
+//   //   caption: "Slide 4",
+//   //   link: "/shop",
+//   // },
+// ];
 const HomePage = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -68,6 +69,8 @@ const HomePage = () => {
     useState<ProductCardProp>(intialProducts);
   const [featuredProducts, setFeaturedProducts] =
     useState<ProductCardProp>(intialProducts);
+
+    const [slides, setSlides] = useState([])
 
   const fetchHomeProductsSliced = async () => {
     setIsLoading(true);
@@ -130,10 +133,20 @@ const HomePage = () => {
     }
     localStorage.removeItem("guestUserCart");
   };
+
+  const getBannerImages = () => {
+    API.get(`${carouselBanner}`).then((response) => {
+      if(response.status === 200) {
+
+        setSlides(response.data)
+      }
+    })
+  }
   useEffect(() => {
     dispatch(fetchProductToStore() as any);
     fetchHomePageFeaturedProducts();
     fetchHomeProductsSliced();
+    getBannerImages();
 
     if (isUserLoggedIn) {
       addGuestCartToUserCart();
@@ -146,25 +159,28 @@ const HomePage = () => {
         <AppCarousel slides={slides} autoPlayInterval={3000} />
         <div className="flex gap-2 bg-white h-[230px] my-3">
           <AppLinkCard
-            className="absolute top-10 md:top-10 md:left-4"
-            imageUrl={laptop}
-            price={1200}
-            productTitle="Ultra slim style"
-            productName="The best notebook"
+            className="absolute top-[70px] md:top-16 md:left-4"
+            imageUrl={featuredProducts?.length ? featuredProducts[0]?.productImages?.[0] || "" : ""}
+            price={featuredProducts?.length ? featuredProducts[0]?.discountPrice ? featuredProducts[0]?.discountPrice : featuredProducts[0]?.salesPrice  || 0 : 0}
+            productTitle={featuredProducts?.length ? featuredProducts[0]?.productCategory || "" : ""}
+            productName={featuredProducts?.length ? featuredProducts[0]?.productName || "" : ""}
+            substringNumber={30}
           />
           <AppLinkCard
-            className="absolute text-center top-4 md:top-6 md:left-14"
-            imageUrl={drive}
-            price={25}
-            productTitle="Ultra slim style"
-            productName="The best notebook"
+            className="absolute text-center top-4 md:top-6 md:left-10"
+            imageUrl={featuredProducts?.length ? featuredProducts[1]?.productImages?.[0] || "" : ""}
+            price={featuredProducts?.length ? featuredProducts[1]?.discountPrice ? featuredProducts[1]?.discountPrice : featuredProducts[1]?.salesPrice  || 0 : 0}
+            productTitle={featuredProducts?.length ? featuredProducts[1]?.productCategory || "" : ""}
+            productName={featuredProducts?.length ? featuredProducts[1]?.productName || "" : ""}
+            substringNumber={25}
           />
           <AppLinkCard
-            className="absolute right-4 top-10"
-            imageUrl={mic}
-            price={500}
-            productTitle="Ultra slim style"
-            productName="Audio & visual"
+            className="absolute !text-right right-6 top-16"
+            imageUrl={featuredProducts?.length ? featuredProducts[2]?.productImages?.[0] || "" : ""}
+            price={featuredProducts?.length ? featuredProducts[2]?.discountPrice ? featuredProducts[2]?.discountPrice : featuredProducts[2]?.salesPrice  || 0 : 0}
+            productTitle={featuredProducts?.length ? featuredProducts[2]?.productCategory || "" : ""}
+            productName={featuredProducts?.length ? featuredProducts[2]?.productName || "" : ""}
+            substringNumber={30}
           />
         </div>
         <div className="p-4 bg-primary-500">
@@ -216,17 +232,19 @@ const HomePage = () => {
 
         <div className="flex gap-2 bg-white-primary-400 h-[230px] mt-[14px] ">
           <AppLinkCard
-            price={140}
-            productTitle="Colorful kick"
-            productName="Iwatch series 2"
-            imageUrl={Iwatch}
+            price={featuredProducts?.length ? featuredProducts[3]?.discountPrice ? featuredProducts[3]?.discountPrice : featuredProducts[3]?.salesPrice  || 0 : 0}
+            productTitle={featuredProducts?.length ? featuredProducts[3]?.productCategory || "" : ""}
+            productName={featuredProducts?.length ? featuredProducts[3]?.productName || "" : ""}
+            imageUrl={featuredProducts?.length ? featuredProducts[3]?.productImages?.[0] || "" : ""}
+            substringNumber={45}
             className="absolute top-10 left-4 h-[174px]"
           />
           <AppLinkCard
-            price={145}
-            productTitle="Going"
-            productName="Somewhere?"
-            imageUrl={tv}
+            price={featuredProducts?.length ? featuredProducts[4]?.discountPrice ? featuredProducts[4]?.discountPrice : featuredProducts[4]?.salesPrice  || 0 : 0}
+            productTitle={featuredProducts?.length ? featuredProducts[4]?.productCategory || "" : ""}
+            productName={featuredProducts?.length ? featuredProducts[4]?.productName || "" : ""}
+            imageUrl={featuredProducts?.length ? featuredProducts[4]?.productImages?.[0] || "" : ""}
+substringNumber={45}
             className="absolute top-10 left-4"
           />
         </div>

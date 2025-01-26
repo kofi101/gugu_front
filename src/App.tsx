@@ -3,7 +3,7 @@ import { appRoutes } from "./routes/Router";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import MainLayout from "./views/main/MainLayout";
-import useInactivityHook from "./helpers/hooks/inactivityHook";
+// import useInactivityHook from "./helpers/hooks/inactivityHook";
 import useBrowserCloseHook from "./helpers/hooks/browserCloseHook";
 
 function App() {
@@ -12,7 +12,7 @@ function App() {
     <div className="text-black-primary-400 app">
       <Router>
         <ToastContainer />
-        <InactivityHandler/>
+        {/* <InactivityHandler/> */}
         <MainLayout>
           <Routes>
             {appRoutes.map(({ path, element }, key) => (
@@ -25,9 +25,9 @@ function App() {
   );
 }
 
-function InactivityHandler() {
-  useInactivityHook();
-  return null;
-}
+// function InactivityHandler() {
+//   useInactivityHook();
+//   return null;
+// }
 
 export default App;

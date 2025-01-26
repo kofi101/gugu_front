@@ -35,6 +35,8 @@ const AuthRegister = () => {
     address: "",
     shippingBillingAddress: "",
   });
+  const [visiblePassword, setVisiblePassword] = useState(false);
+
   const handleChange = (event: { id: string; value: string }) => {
     const { id, value } = event;
     setAuthCustomerInput((prev) => ({
@@ -100,6 +102,10 @@ const AuthRegister = () => {
     return [address, true];
   };
 
+  const showPassword = () => {
+    setVisiblePassword(visiblePassword ? false : true);
+  };
+
   const validateRegistrationDetails = () => {
     let isValidDetails = true;
 
@@ -163,8 +169,6 @@ const AuthRegister = () => {
     navigate(routerPath.LOGIN);
   };
 
-  
-
   const handleSaveToDb = (email: string, UID: string) => {
     const registerData = {
       userType: isUserType,
@@ -175,11 +179,10 @@ const AuthRegister = () => {
       address: authCustomerInput.address,
       shipping_BillingAddress: authCustomerInput.shippingBillingAddress,
       createdBy: UID,
-      firebaseId: UID
+      firebaseId: UID,
     };
     API.post(addUserDetails, registerData)
       .then((response) => {
-      
         if (response.data.status === "success") {
           setIsLoading(false);
           toast.success("Registration successful", {
@@ -269,9 +272,9 @@ const AuthRegister = () => {
         <AppInput
           id="password"
           placeholder="Password"
-          type="password"
           value={authCustomerInput.password}
           onChange={handleChange}
+          type={visiblePassword ? "text" : "password"}
           className="w-full px-6 py-3 rounded-md outline-none bg-base-gray-200"
         />
         {passwordError && (
@@ -280,9 +283,9 @@ const AuthRegister = () => {
         <AppInput
           id="confirmPassword"
           placeholder="Confirm Password"
-          type="password"
           value={authCustomerInput.confirmPassword}
           onChange={handleChange}
+          type={visiblePassword ? "text" : "password"}
           className="w-full px-6 py-3 rounded-md outline-none bg-base-gray-200"
         />
         {confirmPasswordError && (
@@ -290,6 +293,21 @@ const AuthRegister = () => {
             {confirmPasswordError}
           </p>
         )}
+        <div className="flex items-center gap-1 ">
+          <input
+            type="checkbox"
+            name="show password"
+            id="showpwd"
+            onClick={showPassword}
+            className="!bg-red-400 cursor-pointer"
+          />
+          <label
+            htmlFor="showpwd"
+            className="text-xs cursor-pointer shwPwd text-primary-600"
+          >
+            show password
+          </label>
+        </div>
         <AppInput
           id="address"
           placeholder="Address"

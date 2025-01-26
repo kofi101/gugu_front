@@ -18,6 +18,7 @@ export const productsEndpoint = `${BASE_URL}Customer/GetProducts`;
 export const featuredProductsUrl = `${BASE_URL}Customer/FeaturedProducts`;
 export const productBrands = `${BASE_URL}Management/Brands`;
 export const searchProducts = `${BASE_URL}Customer/GetSearchProducts`;
+export const carouselBanner = `${BASE_URL}Customer/CarouselBanner`;
 
 //cart
 export const userCart = `${BASE_URL}Cart/CreateCartList/`;
@@ -54,6 +55,7 @@ export const checkoutOrder = `${BASE_URL}Orders/Checkout`;
 export const useCurrentAddress = `${BASE_URL}User/GetCheckoutAddress`;
 export const saveDeliveryAddress = `${BASE_URL}Orders/Delivery`;
 export const orderSendToDetails = `${BASE_URL}Orders/CheckoutDetails`;
+export const searchOrders = `${BASE_URL}Orders/SearchOrders`;
 
 export const paidOrders = `${BASE_URL}Orders/CustomerOrders`
 export const paidOrderDetails = `${BASE_URL}Orders/CustomerOrderDetails`
@@ -90,6 +92,9 @@ export const deleteNotification = `${BASE_URL}Notification/DeleteNotifications`;
 
 //upload files
 export const uploadFile = `${BASE_URL}FilesManager/UploadFileDocuments`;
+
+//company details
+export const getCompanyDetails = `${BASE_URL}Management/CompanyDetails`;
 
 
 const API: AxiosInstance = axios.create({

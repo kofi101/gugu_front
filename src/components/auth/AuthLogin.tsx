@@ -20,7 +20,11 @@ import {
   uppercasePattern,
 } from "../../helpers/functions/constants";
 import { toast } from "react-toastify";
-import API, { createCustomerCart, getBearerToken, userWishList } from "../../endpoint";
+import API, {
+  createCustomerCart,
+  getBearerToken,
+  userWishList,
+} from "../../endpoint";
 
 const AuthLogin = () => {
   const dispatch = useDispatch();
@@ -28,6 +32,7 @@ const AuthLogin = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [emailError, setEmailError] = useState("");
   const [passwordError, setPasswordError] = useState("");
+  const [visiblePassword, setVisiblePassword] = useState(false);
 
   const [authInput, setAuthInput] = useState({
     emailPhone: "",
@@ -93,6 +98,10 @@ const AuthLogin = () => {
     return isValidDetails;
   };
 
+  const showPassword = () => {
+    setVisiblePassword(visiblePassword ? false : true);
+  };
+
   const createCartOnLogin = (customerId: string) => {
     API.post(`${createCustomerCart}`, { emailAddress: customerId })
       .then((response) => {
@@ -106,14 +115,15 @@ const AuthLogin = () => {
   };
 
   const createWishListOnLogin = (customerId: string) => {
-    API.post(`${userWishList}`, {customerId: customerId}).then(response => {
-      const wishListId = response.data.wishListId;
-      dispatch(setWishListId(wishListId));
-    }).catch(error => {
-      console.log(error);
-    
-    });
-  }
+    API.post(`${userWishList}`, { customerId: customerId })
+      .then((response) => {
+        const wishListId = response.data.wishListId;
+        dispatch(setWishListId(wishListId));
+      })
+      .catch((error) => {
+        console.log(error);
+      });
+  };
 
   const handleLogin = () => {
     const isValidDetails = validateLoginDetails();
@@ -129,7 +139,7 @@ const AuthLogin = () => {
 
               dispatch(setUserToken(token));
               createCartOnLogin(user.email!);
-              createWishListOnLogin(user.uid)
+              createWishListOnLogin(user.uid);
               dispatch(setUser(user));
               setIsLoading(false);
 
@@ -183,7 +193,7 @@ const AuthLogin = () => {
         <AppInput
           id="password"
           placeholder="Password"
-          type="password"
+          type={visiblePassword ? "text" : "password"}
           value={authInput.password}
           onChange={handleChange}
           className="w-full px-6 py-3 rounded-md outline-none bg-base-gray-200"
@@ -192,11 +202,28 @@ const AuthLogin = () => {
           <p className="-mt-8 text-xs text-red-primary-400">{passwordError}</p>
         )}
       </div>
-      <p className="flex justify-end my-2 text-sm text-gray-tertiary-600 cursor-">
+      <div className="flex justify-between">
+        <div className="flex items-center gap-1">
+          <input
+            type="checkbox"
+            name="show password"
+            id="showpwd"
+            onClick={showPassword}
+          />
+          <label
+            htmlFor="showpwd"
+            className="text-xs cursor-pointer shwPwd text-gray-tertiary-600"
+          >
+            show password
+          </label>
+        </div>
+        <p className="flex justify-end my-2 text-sm text-gray-tertiary-600 cursor-">
         <span className="cursor-pointer" onClick={goToForgotPassword}>
           Forgot Password?
         </span>
       </p>
+      </div>
+      
       <AppButton
         title="Login"
         clickHandler={handleLogin}

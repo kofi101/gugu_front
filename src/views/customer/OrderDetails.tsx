@@ -88,10 +88,10 @@ import { customerOrderDetails } from "../../helpers/interface/interfaces";
           <CircularProgress className="circularProgress !text-gray-primary-400" />
         </div>
       ) : (
-        <div className=" h-[450px] overflow-y-scroll custom-scrollbar flex flex-col gap-2">
-          <div className="p-4 bg-base-gray-200">
+        <div className=" h-[500px] overflow-y-scroll custom-scrollbar flex flex-col gap-2">
+          <div className="p-4 bg-base-gray-200 h-[250px] border-1 border-red-500">
             <div className="flex justify-between">
-              <div className="">
+              <div className="flex flex-col gap-2">
                 <p className={`${boldFont}`}>
                   Order no. {orderDetails?.orderSummary?.checkOutOrderNumber}
                 </p>
@@ -115,7 +115,7 @@ import { customerOrderDetails } from "../../helpers/interface/interfaces";
                 </p>
               </div>
             </div>
-            <div className="mt-2">
+            <div className="flex flex-col gap-2 my-2">
               <p className={`${boldFont} text-sm`}>Status History</p>
               <StatusProgress currentStep={currentStep} />
             </div>
@@ -137,10 +137,10 @@ import { customerOrderDetails } from "../../helpers/interface/interfaces";
                     />
                   </div>
                   <div>
-                    <p className={`${boldFont}`}>
+                    <p className={`${boldFont} text-[18px]`}>
                       {subStringLongText(detail?.productName as string, 20)}
                     </p>
-                    <p className={`${boldFont}`}>
+                    <p className={`${boldFont} text-xl`}>
                       {formatMoney(detail?.salesPrice)}
                     </p>
                     <p className="text-sm">Qty: {detail?.quantity}</p>
@@ -150,14 +150,10 @@ import { customerOrderDetails } from "../../helpers/interface/interfaces";
             </div>
 
             <div className="w-1/2">
-              <div className="flex items-center p-3 font-bold bg-gray-primary-400">
+              <div className="flex items-center p-3 !pl-4 font-bold bg-gray-primary-400">
                 <p>Payment Information</p>
               </div>
-              <div className="flex flex-col gap-4 p-4 border bg-base-gray-200">
-                {/* <div>
-                  <p className="text-sm font-bold">Payment Method</p>
-                  <p className="text-sm">Cash on delivery</p>
-                </div> */}
+              <div className="flex flex-col gap-4 p-4 border bg-base-gray-200 h-[200px]">
 
                 <div className="flex flex-col gap-1">
                   <p className="text-sm font-bold">Payment Details</p>
@@ -177,10 +173,10 @@ import { customerOrderDetails } from "../../helpers/interface/interfaces";
                   </p>
                 </div>
               </div>
-              <div className="flex items-center p-3 font-bold bg-gray-primary-400">
+              <div className="flex items-center p-3 font-bold bg-gray-primary-400 ">
                 <p>Delivery Information</p>
               </div>
-              <div className="flex flex-col gap-4 p-4 border bg-base-gray-200">
+              <div className="flex flex-col gap-4 p-4 border bg-base-gray-200 h-[170px]">
                 <div className="flex flex-col gap-1">
                   <p className="text-sm">
                     {orderDetails?.deliveryInformation.destination}

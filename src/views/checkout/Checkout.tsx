@@ -39,8 +39,9 @@ import {
   setDetailsToAddReview,
   setReviewId,
 } from "../../store/features/userSliceFeature";
-import API, { getUserDetails, makePayment } from "../../endpoint";
+import API, { getCompanyDetails, getUserDetails, makePayment } from "../../endpoint";
 import { loggedInUser } from "../../helpers/type/types";
+import { companyDetailsProps } from "../../helpers/interface/interfaces";
 
 type PartialUser = Partial<loggedInUser>;
 
@@ -63,7 +64,7 @@ const Checkout = () => {
   const [myAccount, setMyAccount] = useState(false);
   const [isCustomerDetailsOpen, setIsCustomerDetailsOpen] = useState(true);
   const [isDeliveryDetailsOpen, setIsDeliveryDetailsOpen] = useState(false);
-
+  const [companyDetails, setCompanyDetails] = useState<companyDetailsProps>();
   const [isFormComplete, setIsFormComplete] = useState(false);
 
   const [isLoading, setIsLoading] = useState(false);
@@ -164,7 +165,7 @@ const Checkout = () => {
       dispatch(setDeliveryDestination(null));
       dispatch(setOrderDetailsId(null));
       dispatch(setDetailsToAddReview(null));
-      dispatch(setReviewId(null))
+      dispatch(setReviewId(null));
       toast.success("Sign-out successful.", {
         position: "top-right",
         autoClose: 2000,
@@ -175,7 +176,18 @@ const Checkout = () => {
     });
   };
 
+  const handleGetCompanyInformation = () => {
+    API.get(`${getCompanyDetails}`)
+      .then((response) => {
+        if (response.status === 200) {
+          setCompanyDetails(response.data);
+        }
+      })
+      .catch();
+  };
+
   useEffect(() => {
+    handleGetCompanyInformation()
     userToken ? handleFetchUserDetails() : "";
   }, [userToken]);
   return (
@@ -242,8 +254,8 @@ const Checkout = () => {
               </div>
             )}
             <div className="text-white">
-              <p>Call Us Now: 000 888 336 22</p>
-              <p>Email: info@gugu@gmail.com</p>
+            <p>Call Us Now: {companyDetails?.callUseNowNumber}</p>
+            <p>Email: {companyDetails?.siteDisplayEmail}</p>
             </div>
           </div>
         </div>

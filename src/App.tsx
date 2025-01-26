@@ -4,10 +4,10 @@ import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import MainLayout from "./views/main/MainLayout";
 // import useInactivityHook from "./helpers/hooks/inactivityHook";
-import useBrowserCloseHook from "./helpers/hooks/browserCloseHook";
+// import useBrowserCloseHook from "./helpers/hooks/browserCloseHook";
 
 function App() {
-  useBrowserCloseHook()
+  // useBrowserCloseHook()
   return (
     <div className="text-black-primary-400 app">
       <Router>

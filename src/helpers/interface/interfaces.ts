@@ -263,4 +263,12 @@ export interface NotificationProps {
     isRead: boolean,
 }[]
 
+export interface companyDetailsProps {
+  callUseNowNumber: string,
+  siteDisplayEmail: string,
+  welcomeMessage: string,
+  ourVision: string,
+  ourMission: string
+}
+
 

@@ -30,10 +30,11 @@ import {
   setUserToken,
   setWishListId,
 } from "../../store/features/userSliceFeature";
-import API, { getUserDetails, getCategories } from "../../endpoint";
+import API, { getUserDetails, getCategories, getCompanyDetails } from "../../endpoint";
 import { loggedInUser } from "../../helpers/type/types";
 import { fetchUserCart, resetUserCart } from "../../store/features/cartFeature";
 import { fetchWishListFromServer } from "../../store/features/wishListFeature";
+import { companyDetailsProps } from "../../helpers/interface/interfaces";
 
 type PartialUser = Partial<loggedInUser>;
 
@@ -50,6 +51,7 @@ const TopBar = () => {
     search: "",
   });
   const [category, setCategory] = useState([]);
+  const [companyDetails, setCompanyDetails] = useState<companyDetailsProps>()
 
   const handleFetchUserDetails = () => {
     API.get(`${getUserDetails}${user?.uid}`).then((response) => {
@@ -63,10 +65,19 @@ const TopBar = () => {
     });
   };
 
+  const handleGetCompanyInformation = () => {
+    API.get(`${getCompanyDetails}`).then(response => {
+      if(response.status === 200) {
+        setCompanyDetails(response.data)
+      }
+    }).catch()
+  }
+
   useEffect(() => {
     setCurrentUser(user);
     userToken ? handleFetchUserDetails() : "";
     fetchCategories();
+    handleGetCompanyInformation()
     dispatch(fetchUserCart() as any);
     dispatch(fetchWishListFromServer() as any);
   }, [userToken]);
@@ -115,7 +126,6 @@ const TopBar = () => {
 
   const goToSearch = () => {
     
-
     navigate(`${routerPath.SEARCHPRODUCTS}${searchInput.search}`);
   }
   return (
@@ -202,8 +212,8 @@ const TopBar = () => {
             />
           </div>
           <div className="hidden text-left text-black-primary-400 md:block">
-            <p>Call Us Now: 0234333247</p>
-            <p>Email:info.gugu@gmail.com</p>
+            <p>Call Us Now: {companyDetails?.callUseNowNumber}</p>
+            <p>Email: {companyDetails?.siteDisplayEmail}</p>
           </div>
         </div>
       </div>

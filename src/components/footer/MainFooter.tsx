@@ -5,8 +5,9 @@ import AppButton from "../../shared/AppButton";
 import "../../styles/AppCustomCss.css";
 import { routerPath } from "../../routes/Router";
 import { useNavigate } from "react-router";
-import GuguLogo from "../../assets/gugu2.png"
-import API, { getCategories  } from "../../endpoint";
+import GuguLogo from "../../assets/gugu2.png";
+import API, { getCategories, getCompanyDetails } from "../../endpoint";
+import { companyDetailsProps } from "../../helpers/interface/interfaces";
 
 const MainFooter = () => {
   const navigate = useNavigate();
@@ -14,13 +15,15 @@ const MainFooter = () => {
   const [searchInput, setSearchInput] = useState({
     search: "",
   });
-  const fetchCategories = () =>{
-      
+
+  const [companyDetails, setCompanyDetails] = useState<companyDetailsProps>();
+
+  const fetchCategories = () => {
     API.get(`${getCategories}`).then((response) => {
-      const responsedata =  response.data
-      setCategory(responsedata)
+      const responsedata = response.data;
+      setCategory(responsedata);
     });
-  }
+  };
   const handleSearch = (event: { id: string; value: string }) => {
     const { id, value } = event;
     setSearchInput((prev) => ({
@@ -30,19 +33,28 @@ const MainFooter = () => {
   };
   const handleCategoryClick = (item: number) => {
     console.log("category clicked", item);
-    
+
     navigate(routerPath.CATEGORIES);
-  }
+  };
+
+  const handleGetCompanyInformation = () => {
+    API.get(`${getCompanyDetails}`)
+      .then((response) => {
+        if (response.status === 200) {
+          setCompanyDetails(response.data);
+        }
+      })
+      .catch();
+  };
 
   const goToSearch = () => {
-    
-
     navigate(`${routerPath.SEARCHPRODUCTS}${searchInput.search}`);
-  }
+  };
 
   useEffect(() => {
-    fetchCategories()
-  },[])
+    fetchCategories();
+    handleGetCompanyInformation();
+  }, []);
   return (
     <div className="text-center mainFooter">
       <div>
@@ -71,8 +83,8 @@ const MainFooter = () => {
             />
           </div>
           <div className="hidden text-left text-white-primary-400 md:block">
-            <p>Call Us Now: 0234333247</p>
-            <p>Email:info@gugu@gmail.com</p>
+            <p>Call Us Now: {companyDetails?.callUseNowNumber}</p>
+            <p>Email: {companyDetails?.siteDisplayEmail}</p>
           </div>
         </div>
         <div className="py-2 bg-black md:py-6">
@@ -80,8 +92,7 @@ const MainFooter = () => {
             GUGU!
           </p> */}
           <div className="flex items-center justify-center mb-3">
-            
-          <img src={GuguLogo} alt="" className="w-[130px]"  />
+            <img src={GuguLogo} alt="" className="w-[130px]" />
           </div>
           <div>
             <ul className="flex items-center justify-center gap-4 uppercase items text-white-primary-400">

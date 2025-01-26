@@ -32,6 +32,7 @@ import {
 } from "../../store/features/userSliceFeature";
 import { IoLogOutOutline } from "react-icons/io5";
 import API, {
+  getCompanyDetails,
   getUserDetails,
   orderSendToDetails,
   paymentStatus,
@@ -39,6 +40,7 @@ import API, {
 import { FaCheckCircle } from "react-icons/fa";
 import { CircularProgress } from "@mui/material";
 import { useLocation } from "react-router";
+import { companyDetailsProps } from "../../helpers/interface/interfaces";
 
 type PartialUser = Partial<loggedInUser>;
 const ConfirmCheckout = () => {
@@ -52,7 +54,7 @@ const ConfirmCheckout = () => {
   const user = useSelector((store: any) => store?.user?.currentUser);
   const userToken = useSelector((store: any) => store?.user?.userToken);
   // const cart = useSelector((store: any) => store?.cart);
-  const { orderId } = useSelector((store: any) => store?.user);
+  const userOrderId = useSelector((store: any) => store?.user);
   const [currentUser, setCurrentUser] = useState<PartialUser>();
   const [myAccount, setMyAccount] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -76,6 +78,7 @@ const ConfirmCheckout = () => {
     };
   }>({});
   const [sendToLoading, setSendToLoading] = useState(false);
+  const [companyDetails, setCompanyDetails] = useState<companyDetailsProps>();
 
   const handleFetchUserDetails = () => {
     API.get(`${getUserDetails}${user?.uid}`).then((response) => {
@@ -85,10 +88,12 @@ const ConfirmCheckout = () => {
 
   const handleFetchSendToDetails = () => {
     setSendToLoading(true);
-    API.get(`${orderSendToDetails}/${orderId}`).then((response) => {
-      setDeliveryDetails(response?.data);
-      setSendToLoading(false);
-    });
+    API.get(`${orderSendToDetails}/${userOrderId?.orderId}`).then(
+      (response) => {
+        setDeliveryDetails(response?.data);
+        setSendToLoading(false);
+      }
+    );
   };
 
   const handleMyAccount = () => {
@@ -109,7 +114,7 @@ const ConfirmCheckout = () => {
     API.post(`${paymentStatus}`, payload)
       .then((response) => {
         console.log(response);
-        if (response.data.status === 'success') {
+        if (response.data.status === "success") {
           console.log(response.data);
           setIsLoading(false);
           toast.success("Order payment confirmed successfully.", {
@@ -150,7 +155,7 @@ const ConfirmCheckout = () => {
       dispatch(setDeliveryDestination(null));
       dispatch(setOrderDetailsId(null));
       dispatch(setDetailsToAddReview(null));
-      dispatch(setReviewId(null))
+      dispatch(setReviewId(null));
       toast.success("Sign-out successful.", {
         position: "top-right",
         autoClose: 2000,
@@ -160,10 +165,20 @@ const ConfirmCheckout = () => {
       }, 2000);
     });
   };
+  const handleGetCompanyInformation = () => {
+    API.get(`${getCompanyDetails}`)
+      .then((response) => {
+        if (response.status === 200) {
+          setCompanyDetails(response.data);
+        }
+      })
+      .catch();
+  };
 
   useEffect(() => {
     userToken ? handleFetchUserDetails() : "";
     handleFetchSendToDetails();
+    handleGetCompanyInformation();
   }, [userToken]);
 
   return (
@@ -230,8 +245,8 @@ const ConfirmCheckout = () => {
               </div>
             )}
             <div className="text-white">
-              <p>Call Us Now: 000 888 336 22</p>
-              <p>Email: info@gugu@gmail.com</p>
+              <p>Call Us Now: {companyDetails?.callUseNowNumber}</p>
+              <p>Email: {companyDetails?.siteDisplayEmail}</p>
             </div>
           </div>
         </div>

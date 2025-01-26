@@ -303,7 +303,7 @@ const AuthRegister = () => {
           />
           <label
             htmlFor="showpwd"
-            className="text-xs cursor-pointer shwPwd text-primary-600"
+            className="text-xs cursor-pointer shwPwd text-gray-tertiary-600"
           >
             show password
           </label>

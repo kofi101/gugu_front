@@ -21,7 +21,7 @@ import EmptySearch from "../../assets/images/Product-Search-Not-Found1.webp";
 
 const CategoriesView = () => {
   const dispatch = useDispatch<AppDispatch>();
-  // const dispatch = useDispatch();
+
   const [priceChange, setPriceChange] = useState({
     firstPrice: 0,
     secondPrice: 0,

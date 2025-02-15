@@ -19,6 +19,7 @@ export const featuredProductsUrl = `${BASE_URL}Customer/FeaturedProducts`;
 export const productBrands = `${BASE_URL}Management/Brands`;
 export const searchProducts = `${BASE_URL}Customer/GetSearchProducts`;
 export const carouselBanner = `${BASE_URL}Customer/CarouselBanner`;
+export const promosProduct = `${BASE_URL}Customer/OtherPromotionProducts`;
 
 //cart
 export const userCart = `${BASE_URL}Cart/CreateCartList/`;

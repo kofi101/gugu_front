@@ -53,7 +53,7 @@ const ConfirmCheckout = () => {
 
   const user = useSelector((store: any) => store?.user?.currentUser);
   const userToken = useSelector((store: any) => store?.user?.userToken);
-  // const cart = useSelector((store: any) => store?.cart);
+
   const userOrderId = useSelector((store: any) => store?.user);
   const [currentUser, setCurrentUser] = useState<PartialUser>();
   const [myAccount, setMyAccount] = useState(false);

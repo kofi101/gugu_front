@@ -186,7 +186,7 @@ const HomePage = () => {
         <div className="p-4 bg-primary-500">
           <div className="flex justify-between text-white-primary-400 item-center">
             <p className="text-white-primary-400">
-              Holiday Promo | 50% off Sale
+              Promos
             </p>
             <div
               onClick={() => navigate(routerPath.PROMOTIONS)}

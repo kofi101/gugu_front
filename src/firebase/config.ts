@@ -5,17 +5,7 @@ import {getAuth} from "firebase/auth";
 // TODO: Add SDKs for Firebase products that you want to use
 // https://firebase.google.com/docs/web/setup#available-libraries
 
-// Your web app's Firebase configuration
-// For Firebase JS SDK v7.20.0 and later, measurementId is optional
-// const firebaseConfig = {
-//   apiKey: "AIzaSyD8ZyuluGyShYAKrV47Zysv7tucYamB97g",
-//   authDomain: "gugu-auth.firebaseapp.com",
-//   projectId: "gugu-auth",
-//   storageBucket: "gugu-auth.appspot.com",
-//   messagingSenderId: "839522501088",
-//   appId: "1:839522501088:web:d102e02d10e518a580eb85",
-//   measurementId: "G-J0NMHVCZKZ"
-// };
+
 const firebaseConfig = {
   apiKey: "AIzaSyCS215kkKvJj14AaD6beVXh__PLUyI75kc",
   authDomain: "gugu-8c9ac.firebaseapp.com",

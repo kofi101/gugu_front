@@ -1,10 +1,14 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import AppInput from "../../shared/AppInput";
 import AppButton from "../../shared/AppButton";
 import { useNavigate } from "react-router-dom";
 import { routerPath } from "../../routes/Router";
 import { auth } from "../../firebase/config";
-import { signInWithEmailAndPassword } from "firebase/auth";
+import {
+  signInWithEmailAndPassword,
+  GoogleAuthProvider,
+  signInWithPopup,
+} from "firebase/auth";
 import { useDispatch } from "react-redux";
 import {
   setCartId,
@@ -21,19 +25,22 @@ import {
 } from "../../helpers/functions/constants";
 import { toast } from "react-toastify";
 import API, {
+  addUserDetails,
   createCustomerCart,
   getBearerToken,
+  userType,
   userWishList,
 } from "../../endpoint";
 
 const AuthLogin = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
+  const provider = new GoogleAuthProvider();
   const [isLoading, setIsLoading] = useState(false);
   const [emailError, setEmailError] = useState("");
   const [passwordError, setPasswordError] = useState("");
   const [visiblePassword, setVisiblePassword] = useState(false);
-
+  const [isUserType, setIsUserType] = useState("");
   const [authInput, setAuthInput] = useState({
     emailPhone: "",
     password: "",
@@ -171,6 +178,69 @@ const AuthLogin = () => {
         });
     }
   };
+
+  useEffect(() => {
+    API.get(userType)
+      .then((response) => {
+        const retrieveCustomer = response.data.filter(
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          (data: any) => data.name === "Customer"
+        );
+        setIsUserType(retrieveCustomer[0]?.name);
+      })
+      .catch((error) => {
+        console.log(error);
+      });
+  }, []);
+
+  const handleSaveToDb = async (email: string, UID: string, name: string) => {
+    const registerData = {
+      userType: isUserType,
+      id: UID,
+      fullName: name,
+      email: email,
+      phoneNumber: "",
+      address: "",
+      shipping_BillingAddress: "",
+      createdBy: UID,
+      firebaseId: UID,
+    };
+    await API.post(addUserDetails, registerData)
+      .then((response) => {
+        if (response.data.status === "success") {
+          setIsLoading(false);
+        } else {
+          setIsLoading(false);
+        }
+      })
+      .catch((error) => {
+        console.log(error);
+      });
+  };
+
+  const handleSigInWithGoggle = async () => {
+    try {
+      const result = await signInWithPopup(auth, provider);
+      const user = result.user;
+     
+      await handleSaveToDb(user.email!, user.uid, user.displayName!);
+      const response = await API.post(`${getBearerToken}`, { email: user.email });
+      const token = response.data.token;
+      dispatch(setUserToken(token));
+      createCartOnLogin(user.email!);
+      createWishListOnLogin(user.uid);
+      dispatch(setUser(user));
+      toast.success("Login successful", {
+        autoClose: 2000,
+        position: "top-right",
+      });
+      setTimeout(() => {
+        navigate(routerPath.HOMEPAGE);
+      }, 2000);
+    } catch (error) {
+      console.log(error);
+    }
+  };
   return (
     <div className="flex flex-col h-full mt-20 md:w-3/5 ">
       <div className="mb-5 text-center">
@@ -218,12 +288,12 @@ const AuthLogin = () => {
           </label>
         </div>
         <p className="flex justify-end my-2 text-sm text-gray-tertiary-600 cursor-">
-        <span className="cursor-pointer" onClick={goToForgotPassword}>
-          Forgot Password?
-        </span>
-      </p>
+          <span className="cursor-pointer" onClick={goToForgotPassword}>
+            Forgot Password?
+          </span>
+        </p>
       </div>
-      
+
       <AppButton
         title="Login"
         clickHandler={handleLogin}
@@ -240,7 +310,7 @@ const AuthLogin = () => {
         <div className="w-full">
           <AppButton
             title="G"
-            clickHandler={() => console.log("clicked")}
+            clickHandler={() => handleSigInWithGoggle()}
             className="w-full py-1 text-3xl font-bold rounded-md bg-red-primary-400 text-white-primary-400"
           />
         </div>

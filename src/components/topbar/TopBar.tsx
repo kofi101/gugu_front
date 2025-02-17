@@ -211,7 +211,7 @@ const TopBar = () => {
               className="px-4 py-2 md:h-[50px] rounded-r-full bg-primary-500 text-white-primary-400"
             />
           </div>
-          <div className="hidden text-left text-black-primary-400 md:block">
+          <div className="hidden text-left text-black-primary-400 md:block w-[240px]">
             <p>Call Us Now: {companyDetails?.callUseNowNumber}</p>
             <p>Email: {companyDetails?.siteDisplayEmail}</p>
           </div>

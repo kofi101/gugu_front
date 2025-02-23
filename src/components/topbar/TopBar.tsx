@@ -3,10 +3,12 @@ import { useState, useEffect } from "react";
 import AppButton from "../../shared/AppButton";
 import AppInput from "../../shared/AppInput";
 import AppSelect from "../../shared/AppSelect";
-import { RxCaretDown } from "react-icons/rx";
+// import { RxCaretDown } from "react-icons/rx";
 import { CgProfile } from "react-icons/cg";
 import { BiCart } from "react-icons/bi";
 import { IoLogOutOutline } from "react-icons/io5";
+import { FaRegCircleUser } from "react-icons/fa6";
+import { MdLogin } from "react-icons/md";
 import { routerPath } from "../../routes/Router";
 import { useNavigate } from "react-router";
 import Badge from "@mui/material/Badge";
@@ -21,6 +23,7 @@ import { toast } from "react-toastify";
 import {
   setCartId,
   setCheckoutDetailsFilled,
+  setCompanyInfo,
   setDeliveryDestination,
   setDetailsToAddReview,
   setOrderDetailsId,
@@ -30,11 +33,16 @@ import {
   setUserToken,
   setWishListId,
 } from "../../store/features/userSliceFeature";
-import API, { getUserDetails, getCategories, getCompanyDetails } from "../../endpoint";
+import API, {
+  getUserDetails,
+  getCategories,
+  getCompanyDetails,
+} from "../../endpoint";
 import { loggedInUser } from "../../helpers/type/types";
 import { fetchUserCart, resetUserCart } from "../../store/features/cartFeature";
 import { fetchWishListFromServer } from "../../store/features/wishListFeature";
 import { companyDetailsProps } from "../../helpers/interface/interfaces";
+import { sellOnGuguLink } from "../../helpers/functions/constants";
 
 type PartialUser = Partial<loggedInUser>;
 
@@ -51,7 +59,7 @@ const TopBar = () => {
     search: "",
   });
   const [category, setCategory] = useState([]);
-  const [companyDetails, setCompanyDetails] = useState<companyDetailsProps>()
+  const [companyDetails, setCompanyDetails] = useState<companyDetailsProps>();
 
   const handleFetchUserDetails = () => {
     API.get(`${getUserDetails}${user?.uid}`).then((response) => {
@@ -66,18 +74,21 @@ const TopBar = () => {
   };
 
   const handleGetCompanyInformation = () => {
-    API.get(`${getCompanyDetails}`).then(response => {
-      if(response.status === 200) {
-        setCompanyDetails(response.data)
-      }
-    }).catch()
-  }
+    API.get(`${getCompanyDetails}`)
+      .then((response) => {
+        if (response.status === 200) {
+          setCompanyDetails(response.data);
+          dispatch(setCompanyInfo(response.data));
+        }
+      })
+      .catch();
+  };
 
   useEffect(() => {
     setCurrentUser(user);
     userToken ? handleFetchUserDetails() : "";
     fetchCategories();
-    handleGetCompanyInformation()
+    handleGetCompanyInformation();
     dispatch(fetchUserCart() as any);
     dispatch(fetchWishListFromServer() as any);
   }, [userToken]);
@@ -92,7 +103,7 @@ const TopBar = () => {
   const handleMyAccount = () => {
     setMyAccount(!myAccount);
   };
- 
+
   const handleLogout = () => {
     signOut(auth).then(() => {
       dispatch(setUser(null));
@@ -100,11 +111,11 @@ const TopBar = () => {
       dispatch(setCartId(null));
       dispatch(setWishListId(null));
       dispatch(setOrderId(null));
-      dispatch(setCheckoutDetailsFilled(false))
-      dispatch(setDeliveryDestination(null))
-      dispatch(setOrderDetailsId(null))
-      dispatch(setDetailsToAddReview(null))
-      dispatch(setReviewId(null))
+      dispatch(setCheckoutDetailsFilled(false));
+      dispatch(setDeliveryDestination(null));
+      dispatch(setOrderDetailsId(null));
+      dispatch(setDetailsToAddReview(null));
+      dispatch(setReviewId(null));
 
       localStorage.clear();
       dispatch(resetUserCart());
@@ -120,68 +131,24 @@ const TopBar = () => {
 
   const handleCategoryClick = (item: number) => {
     console.log("category clicked", item);
-   
+
     navigate(routerPath.CATEGORIES);
   };
 
   const goToSearch = () => {
-    
     navigate(`${routerPath.SEARCHPRODUCTS}${searchInput.search}`);
+  };
+
+  const sellOnGugu = () => {
+    window.location.href = sellOnGuguLink;
   }
   return (
     <div className="text-center">
-      <div className=" bg-primary-500">
+      <div className=" bg-primary-500 h-[30px]">
         {currentUser ? (
-          <div className="w-3/5 py-[3px] h-[30px] md:flex justify-end items-center mx-auto hidden ">
-            <p
-              onClick={handleMyAccount}
-              className="cursor-pointer text-white-primary-400"
-            >
-              {currentUser.fullName}
-            </p>
-            <RxCaretDown
-              onClick={handleMyAccount}
-              className="cursor-pointer text-white-primary-400"
-            />
-            {myAccount ? (
-              <div className="absolute w-32 p-2 border rounded-lg bg-white-primary-400 top-8">
-                <ul>
-                  <li
-                    onClick={() => navigate(routerPath.MYACCOUNT)}
-                    className="flex items-center justify-between py-1 cursor-pointer hover:bg-white-primary-400 hover:text-primary-500"
-                  >
-                    <p>My Acount</p>
-                    <CgProfile />
-                  </li>
-                  <li
-                    onClick={() => navigate(routerPath.CART)}
-                    className="flex items-center justify-between py-1 cursor-pointer hover:bg-white-primary-400 hover:text-primary-500"
-                  >
-                    <p>Cart</p>
-                    <BiCart />
-                  </li>
-                  <li
-                    onClick={handleLogout}
-                    className="flex items-center justify-between py-1 cursor-pointer hover:bg-white-primary-400 hover:text-primary-500"
-                  >
-                    <p>Logout</p>
-                    <IoLogOutOutline />
-                  </li>
-                </ul>
-              </div>
-            ) : (
-              ""
-            )}
-          </div>
+          <p className=" text-white-primary-400">{currentUser.fullName}</p>
         ) : (
-          <div className="w-3/5 py-[3px] h-[30px] md:flex justify-end items-center mx-auto hidden text-white-primary-400  ">
-            <span
-              className="cursor-pointer"
-              onClick={() => navigate(routerPath.LOGIN)}
-            >
-              Login
-            </span>
-          </div>
+          ""
         )}
       </div>
 
@@ -247,9 +214,9 @@ const TopBar = () => {
               </li>
               <li
                 className="cursor-pointer"
-                onClick={() => navigate(routerPath.SUPPORT)}
+                onClick={() => sellOnGugu()}
               >
-                Support
+                Sell on Gugu
               </li>
             </ul>
           </div>
@@ -284,6 +251,53 @@ const TopBar = () => {
                 <img src={CartSvg} alt="" className="w-[22px] h-[20px]" />
               </Badge>
             </div>
+            {currentUser ? (
+              <div className="">
+              
+                <div
+                  onClick={handleMyAccount}
+                  className="flex items-center p-1 rounded-md cursor-pointer bg-primary-600"
+                >
+                  <FaRegCircleUser className="!font-bold text-white-primary-400 h-[20px]" />
+                </div>
+                {myAccount ? (
+                  <div className="absolute z-10 w-32 p-2 border rounded-lg bg-white-primary-400 top-56">
+                    <ul>
+                      <li
+                        onClick={() => navigate(routerPath.MYACCOUNT)}
+                        className="flex items-center justify-between py-1 cursor-pointer hover:bg-white-primary-400 hover:text-primary-500"
+                      >
+                        <p>My Acount</p>
+                        <CgProfile />
+                      </li>
+                      <li
+                        onClick={() => navigate(routerPath.CART)}
+                        className="flex items-center justify-between py-1 cursor-pointer hover:bg-white-primary-400 hover:text-primary-500"
+                      >
+                        <p>Cart</p>
+                        <BiCart />
+                      </li>
+                      <li
+                        onClick={handleLogout}
+                        className="flex items-center justify-between py-1 cursor-pointer hover:bg-white-primary-400 hover:text-primary-500"
+                      >
+                        <p>Logout</p>
+                        <IoLogOutOutline />
+                      </li>
+                    </ul>
+                  </div>
+                ) : (
+                  ""
+                )}
+              </div>
+            ) : (
+              <div
+                onClick={() => navigate(routerPath.LOGIN)}
+                className="flex items-center p-1 rounded-md cursor-pointer bg-primary-600"
+              >
+                <MdLogin className="!font-bold text-white-primary-400" />
+              </div>
+            )}
           </div>
         </div>
       </div>

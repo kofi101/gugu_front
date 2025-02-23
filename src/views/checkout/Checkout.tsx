@@ -118,7 +118,7 @@ const Checkout = () => {
             autoClose: 2000,
           });
           setTimeout(() => {
-            // navigate(routerPath.CONFIRMCHECKOUTDETAILS);
+            
             window.location.href = response.data.redirect_url;
           }, 2000);
           dispatch(setCheckoutDetailsFilled(false));

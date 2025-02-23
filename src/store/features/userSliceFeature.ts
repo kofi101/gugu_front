@@ -15,7 +15,8 @@ const initialState: UserState = {
   orderDetailsId: null,
   detailsToAddReview: {prodId: '', orderNum: ''},
   reviewId: null,
-  notificationNumber: null
+  notificationNumber: null,
+  companyInfo: null
 };
 
 export const userSlice = createSlice({
@@ -63,6 +64,9 @@ export const userSlice = createSlice({
     },
     setNotificationNumber: (state, action) => {
       state.notificationNumber = action.payload
+    },
+    setCompanyInfo: (state, action) => {
+      state.companyInfo = action.payload
     }
   },
 });
@@ -81,7 +85,8 @@ export const {
   setOrderDetailsId,
   setDetailsToAddReview,
   setReviewId,
-  setNotificationNumber
+  setNotificationNumber,
+  setCompanyInfo
 } = userSlice.actions;
 
 export const selectUser = (state: { users: UserState }) => state.users;

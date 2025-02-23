@@ -20,6 +20,7 @@ import {
   digitPattern,
   emailPattern,
   lowercasePattern,
+  sellOnGuguLink,
   specialCharPattern,
   uppercasePattern,
 } from "../../helpers/functions/constants";
@@ -241,6 +242,9 @@ const AuthLogin = () => {
       console.log(error);
     }
   };
+  const sellOnGugu = () => {
+    window.location.href = sellOnGuguLink;
+  }
   return (
     <div className="flex flex-col h-full mt-20 md:w-3/5 ">
       <div className="mb-5 text-center">
@@ -330,6 +334,17 @@ const AuthLogin = () => {
             onClick={goToRegistration}
           >
             Join Now
+          </span>
+        </p>
+      </div>
+      <div className="text-center ">
+        <p>
+          Want to sell on Gugu?{" "}
+          <span
+            className="cursor-pointer text-primary-500"
+            onClick={sellOnGugu}
+          >
+            Sign Up Here
           </span>
         </p>
       </div>

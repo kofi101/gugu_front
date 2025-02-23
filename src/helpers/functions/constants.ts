@@ -8,6 +8,8 @@ export const addressString = /^[a-zA-Z0-9\s,.'-]{3,}$/;
 export const itemsPerPage = 6;
 export const boldFont = "font-bold ";
 
+export const sellOnGuguLink = "https://admin.gugugh.com/"
+
 import Vest from "../../assets/images/vest.jpeg";
 import Nike from "../../assets/images/camera.jpg";
 import Bag from "../../assets/images/bag.jpg";

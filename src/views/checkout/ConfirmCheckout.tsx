@@ -109,13 +109,12 @@ const ConfirmCheckout = () => {
     const payload = {
       token: urlToken,
     };
-    console.log(payload);
 
     API.post(`${paymentStatus}`, payload)
       .then((response) => {
         console.log(response);
         if (response.data.status === "success") {
-          console.log(response.data);
+          
           setIsLoading(false);
           toast.success("Order payment confirmed successfully.", {
             position: "top-right",

@@ -1,12 +1,15 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import BackgroundImage from "../../../assets/images/LoginBack.jpg";
 import Concentrated from "../../../assets/images/concentrated.png";
 import Target from "../../../assets/images/target.png";
 import { routerPath } from "../../../routes/Router";
 import { useNavigate } from "react-router";
 import { RxCaretRight } from "react-icons/rx";
+import { useSelector } from "react-redux";
 
 const AboutUs = () => {
   const navigate = useNavigate();
+  const user = useSelector((store: any) => store?.user?.companyInfo);
   return (
     <div className="w-3/5 mx-auto mb-5">
       <div className="flex items-center py-3 text-primary-500">
@@ -34,29 +37,25 @@ const AboutUs = () => {
             </div>
           </div>
         </div>
-        <div className="flex gap-5 border">
+        <div className="flex gap-5 ">
           <div className="relative w-1/2 border">
             <img src={Concentrated} alt="" className="object-cover w-full" />
-            <div className="absolute bottom-0 h-full pt-8 bg-black-primary-400 opacity-80 text-white-primary-400">
+            <div className="absolute bottom-0 w-full h-full pt-8 bg-black-primary-400 opacity-80 text-white-primary-400">
               <div className="flex flex-col items-center justify-center">
                 <p className="text-lg font-bold">Our Vision</p>
                 <p className="w-4/5">
-                  Lorem ipsum dolor sit amet, consectetur adipisc elit. Nullam
-                  nec purus ac turpis fermentum. Integer sit amet metus nec
-                  libero.
+                  {user?.ourVision}
                 </p>
               </div>
             </div>
           </div>
           <div className="relative w-1/2 border">
             <img src={Target} alt="" className="object-cover w-full" />
-            <div className="absolute bottom-0 h-full pt-8 bg-black-primary-400 opacity-80 text-white-primary-400">
+            <div className="absolute bottom-0 w-full h-full pt-8 bg-black-primary-400 opacity-80 text-white-primary-400">
               <div className="flex flex-col items-center justify-center">
                 <p className="text-lg font-bold">Our Mision</p>
                 <p className="w-4/5">
-                  Lorem ipsum dolor sit amet, consectetur adipisc elit. Nullam
-                  nec purus ac turpis fermentum. Integer sit amet metus nec
-                  libero.
+                  {user?.ourMission}
                 </p>
               </div>
             </div>

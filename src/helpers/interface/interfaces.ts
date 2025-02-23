@@ -15,6 +15,7 @@ export interface UserState {
   detailsToAddReview: { prodId: string; orderNum: string };
   reviewId: string | null;
   notificationNumber: number | null;
+  companyInfo: null;
 }
 
 export interface selectInputProp {

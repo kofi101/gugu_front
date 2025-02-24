@@ -8,6 +8,7 @@ import { useNavigate } from "react-router";
 import GuguLogo from "../../assets/gugu2.png";
 import API, { getCategories, getCompanyDetails } from "../../endpoint";
 import { companyDetailsProps } from "../../helpers/interface/interfaces";
+import { sellOnGuguLink } from "../../helpers/functions/constants";
 
 const MainFooter = () => {
   const navigate = useNavigate();
@@ -50,6 +51,9 @@ const MainFooter = () => {
   const goToSearch = () => {
     navigate(`${routerPath.SEARCHPRODUCTS}${searchInput.search}`);
   };
+  const sellOnGugu = () => {
+      window.location.href = sellOnGuguLink;
+    }
 
   useEffect(() => {
     fetchCategories();
@@ -121,10 +125,10 @@ const MainFooter = () => {
                 Contact
               </li>
               <li
-                className="text-xs cursor-pointer md:text-[16px]"
-                onClick={() => navigate(routerPath.SUPPORT)}
+                className="cursor-pointer"
+                onClick={() => sellOnGugu()}
               >
-                Support
+                Sell on Gugu
               </li>
             </ul>
           </div>

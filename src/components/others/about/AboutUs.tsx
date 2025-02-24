@@ -24,15 +24,23 @@ const AboutUs = () => {
       </div>
       <div className="flex flex-col gap-5">
         <div className="relative h-[540px]">
-          <img src={BackgroundImage} alt="" className="h-[540px] object-cover w-full" />
+          <img
+            src={BackgroundImage}
+            alt=""
+            className="h-[540px] object-cover w-full"
+          />
           <div className="absolute bottom-0 bg-black-primary-400 h-[50%] w-full opacity-80 text-white-primary-400 py-10">
             <div className="flex flex-col items-center justify-center">
               <p className="text-xl font-bold">Welcome to</p>
               <p className="text-xl font-bold">GUGU GHANA LIMITED</p>
-              <p className="w-4/5 mt-8">
-                Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam
-                nec purus ac turpis fermentum. Integer sit amet metus nec
-                libero.
+              <p className="w-4/5 mt-8 h-[125px] overflow-y-auto">
+                Ghana Unlimited (GUGU) is a groundbreaking e-commerce platform
+                committed to promoting and celebrating the best of Ghana.
+                Founded with a vision to empower local businesses and artisans,
+                GUGU provides a dedicated online marketplace for products and
+                services made in Ghana. Our platform brings together the rich
+                diversity of Ghanaian creativity and enterprise, offering a
+                space where quality and authenticity are paramount. 
               </p>
             </div>
           </div>
@@ -43,9 +51,7 @@ const AboutUs = () => {
             <div className="absolute bottom-0 w-full h-full pt-8 bg-black-primary-400 opacity-80 text-white-primary-400">
               <div className="flex flex-col items-center justify-center">
                 <p className="text-lg font-bold">Our Vision</p>
-                <p className="w-4/5">
-                  {user?.ourVision}
-                </p>
+                <p className="w-4/5 h-[170px] overflow-y-auto">{user?.ourVision}</p>
               </div>
             </div>
           </div>
@@ -54,9 +60,7 @@ const AboutUs = () => {
             <div className="absolute bottom-0 w-full h-full pt-8 bg-black-primary-400 opacity-80 text-white-primary-400">
               <div className="flex flex-col items-center justify-center">
                 <p className="text-lg font-bold">Our Mision</p>
-                <p className="w-4/5">
-                  {user?.ourMission}
-                </p>
+                <p className="w-4/5 h-[170px] overflow-y-auto">{user?.ourMission}</p>
               </div>
             </div>
           </div>

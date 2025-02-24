@@ -10,7 +10,7 @@ import { IoLogOutOutline } from "react-icons/io5";
 import { FaRegCircleUser } from "react-icons/fa6";
 import { MdLogin } from "react-icons/md";
 import { routerPath } from "../../routes/Router";
-import { useNavigate } from "react-router";
+import { useNavigate } from "react-router-dom";
 import Badge from "@mui/material/Badge";
 import "../../styles/AppCustomCss.css";
 import FavSvg from "../../assets/svg/gugu_favourite.svg";
@@ -251,7 +251,7 @@ const TopBar = () => {
                 <img src={CartSvg} alt="" className="w-[22px] h-[20px]" />
               </Badge>
             </div>
-            {currentUser ? (
+            {user?.uid ? (
               <div className="">
               
                 <div

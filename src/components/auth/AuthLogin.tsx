@@ -8,6 +8,7 @@ import {
   signInWithEmailAndPassword,
   GoogleAuthProvider,
   signInWithPopup,
+  sendEmailVerification,
 } from "firebase/auth";
 import { useDispatch } from "react-redux";
 import {
@@ -223,6 +224,7 @@ const AuthLogin = () => {
     try {
       const result = await signInWithPopup(auth, provider);
       const user = result.user;
+      await sendEmailVerification(user);
      
       await handleSaveToDb(user.email!, user.uid, user.displayName!);
       const response = await API.post(`${getBearerToken}`, { email: user.email });

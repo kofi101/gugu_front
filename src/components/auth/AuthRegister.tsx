@@ -3,7 +3,7 @@ import AppButton from "../../shared/AppButton";
 import AppInput from "../../shared/AppInput";
 import { useNavigate } from "react-router-dom";
 import { routerPath } from "../../routes/Router";
-import { createUserWithEmailAndPassword } from "firebase/auth";
+import { createUserWithEmailAndPassword, sendEmailVerification } from "firebase/auth";
 import { auth } from "../../firebase/config";
 import { addUserDetails, userType } from "../../endpoint/index";
 import API from "../../endpoint/index";
@@ -205,18 +205,19 @@ const AuthRegister = () => {
       });
   };
 
-  const handleRegistration = () => {
+  const handleRegistration = async () => {
     const isVaildDetails = validateRegistrationDetails();
     if (!isVaildDetails) return;
     if (isVaildDetails) {
       setIsLoading(true);
-      createUserWithEmailAndPassword(
+      await createUserWithEmailAndPassword(
         auth,
         authCustomerInput.email,
         authCustomerInput.password
       )
-        .then((userCredential) => {
+        .then(async (userCredential) => {
           const user = userCredential.user;
+          await sendEmailVerification(user);
           handleSaveToDb(user?.email as string, user?.uid as string);
         })
         .catch((error) => {

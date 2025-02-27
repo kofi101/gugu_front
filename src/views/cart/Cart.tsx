@@ -76,13 +76,15 @@ const Cart = () => {
 
   useEffect(() => {
     dispatch(fetchUserCart() as any);
-    setCartTotal(
-      cart?.guestUserCart?.reduce(
-        (acc: any, item: any) => acc + item.salesPrice,
-        0
-      )
-    );
+    
   }, []);
+  useEffect(() => {
+    if (cart?.guestUserCart) {
+      setCartTotal(
+        cart?.guestUserCart.reduce((acc: number, item: Product) => acc + item.salesPrice!, 0)
+      );
+    }
+  }, [cart?.guestUserCart]);
   useEffect(() => {
     const storedRecentlyViewed = localStorage.getItem("recentlyViewed");
     if (storedRecentlyViewed) {
@@ -105,7 +107,7 @@ const Cart = () => {
       couponCode: promoInput.code,
       cartId: cartId,
     };
-    // console.log("coupon payload", payload);
+   
     if (!promoInput.code) {
       toast.error("Please enter a coupon code", {
         autoClose: 2000,

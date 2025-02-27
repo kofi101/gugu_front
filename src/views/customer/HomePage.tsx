@@ -17,7 +17,7 @@ import API, { carouselBanner, productsEndpoint } from "../../endpoint/index";
 import { featuredProductsUrl } from "../../endpoint/index";
 import EmptyProduct from "../../assets/images/no-products-found.png";
 import { toast } from "react-toastify";
-import { addUserItemsToCart } from "../../store/features/cartFeature";
+import { addUserItemsToCart, guestRemoveFromCart } from "../../store/features/cartFeature";
 import { useNavigate } from "react-router";
 import { routerPath } from "../../routes/Router";
 
@@ -101,6 +101,7 @@ const HomePage = () => {
             cartId: cartId!,
           }) as any
         );
+        dispatch(guestRemoveFromCart(product) as any);
       });
     }
     localStorage.removeItem("guestUserCart");

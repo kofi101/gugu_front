@@ -171,7 +171,7 @@ const Cart = () => {
       <div className="gap-4 md:flex">
         <div className="md:w-[75%] h-[500px] overflow-y-scroll custom-scrollbar">
           <div className="px-3 py-3 bg-gray-primary-400">
-            {user ? (
+            {user?.uid ? (
               <div>
                 {cart?.userCart?.cartProducts?.length === 1 ||
                 cart?.userCart?.cartProducts?.length === 0 ? (
@@ -200,7 +200,7 @@ const Cart = () => {
             )}
           </div>
 
-          {user ? (
+          {user?.uid ? (
             <div className="flex flex-col gap-4">
               {cart?.userCart?.cartProducts?.length > 0 ? (
                 cart?.userCart?.cartProducts?.map((item: Product) => (
@@ -241,7 +241,7 @@ const Cart = () => {
             <div className="flex justify-between px-2 py-2 font-medium border-b bg-base-gray-200 border-gray-primary-400">
               <p>
                 Items Total (
-                {user
+                {user?.uid
                   ? cart?.userCart?.cartProducts?.length
                   : cart?.guestUserCart?.length}
                 )
@@ -291,7 +291,7 @@ const Cart = () => {
                 <AppButton
                   loading={isloading}
                   clickHandler={() =>
-                    user ? handleCheckout() : navigate(routerPath.LOGIN)
+                    user?.uid ? handleCheckout() : navigate(routerPath.LOGIN)
                   }
                   title="checkout"
                   icon={<BsCart3 />}

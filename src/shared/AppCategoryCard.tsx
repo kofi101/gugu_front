@@ -41,7 +41,7 @@ const AppCategoryCard: React.FC<categoryProductProp> = ({ category }) => {
         productId: category.productId || 0,
         quantity: 1,
       };
-      if (currentUser) {
+      if (currentUser?.uid) {
         dispatch(
           addUserItemsToCart({
             customerId: currentUser?.uid,
@@ -55,7 +55,7 @@ const AppCategoryCard: React.FC<categoryProductProp> = ({ category }) => {
     }
   };
   const onCategoryFavoriteClick = (category: Product) => {
-    if (currentUser) {
+    if (currentUser?.uid) {
       dispatch(
         addItemToUserWishList({
           customerId: currentUser?.uid,

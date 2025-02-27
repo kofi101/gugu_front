@@ -28,7 +28,7 @@ const WishList = () => {
       <div className="gap-4 md:flex">
         <div className="md:w-full h-[500px] overflow-y-scroll custom-scrollbar mb-8">
           <div className="px-3 py-3 bg-gray-primary-400">
-            {user ? (
+            {user?.uid ? (
               <div>
                 {wish?.userWishList?.wishListProducts?.length === 1 ||
                 wish?.userWishList?.wishListProducts?.length === 0 ? (
@@ -56,7 +56,7 @@ const WishList = () => {
             )}
           </div>
           {/* wish?.userWishList?.wishListProducts?.length */}
-          {user ? (
+          {user?.uid ? (
             <div className="flex flex-col gap-4">
             {wish?.userWishList?.wishListProducts?.length > 0 ? (
               wish?.userWishList?.wishListProducts?.map((item: Product) => (

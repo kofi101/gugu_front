@@ -89,8 +89,8 @@ const TopBar = () => {
     userToken ? handleFetchUserDetails() : "";
     fetchCategories();
     handleGetCompanyInformation();
-    dispatch(fetchUserCart() as any);
-    dispatch(fetchWishListFromServer() as any);
+    user?.uid ? dispatch(fetchUserCart() as any) : '';
+    user?.uid ? dispatch(fetchWishListFromServer() as any): '';
   }, [userToken]);
 
   const handleSearch = (event: { id: string; value: string }) => {

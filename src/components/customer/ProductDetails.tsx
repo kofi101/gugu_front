@@ -115,7 +115,7 @@ const ProductDetailsPage = () => {
 
   const handleFavoriteClick = (product: Product) => {
     setFavoriteClicked((prev) => !prev);
-    if (isUserLoggedIn) {
+    if (isUserLoggedIn?.uid) {
       favoriteClicked
         ? dispatch(
             removeItemsFromUserWishList({
@@ -150,7 +150,7 @@ const ProductDetailsPage = () => {
         productId: product.productId,
         quantity: counter,
       };
-      if (isUserLoggedIn) {
+      if (isUserLoggedIn?.uid) {
         dispatch(
           addUserItemsToCart({
             customerId: customerId,
@@ -171,7 +171,7 @@ const ProductDetailsPage = () => {
         quantity: counter,
         salesPrice: total,
       };
-      if (isUserLoggedIn) {
+      if (isUserLoggedIn?.uid) {
         dispatch(
           addUserItemsToCart({
             customerId: isUserLoggedIn.uid,

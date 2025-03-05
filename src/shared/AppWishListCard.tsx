@@ -45,7 +45,7 @@ const AppWishListCard: React.FC<WishListItemProp> = ({ item }) => {
         ...product,
         quantity: 1,
       };
-      if (user) {
+      if (user?.uid) {
         dispatch(
           moveWishListToCart({
             customerId: user?.uid ?? '',

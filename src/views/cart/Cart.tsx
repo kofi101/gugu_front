@@ -75,13 +75,17 @@ const Cart = () => {
   };
 
   useEffect(() => {
-    dispatch(fetchUserCart() as any);
-    
+    if (user?.uid) {
+      dispatch(fetchUserCart() as any);
+    }
   }, []);
   useEffect(() => {
     if (cart?.guestUserCart) {
       setCartTotal(
-        cart?.guestUserCart.reduce((acc: number, item: Product) => acc + item.salesPrice!, 0)
+        cart?.guestUserCart.reduce(
+          (acc: number, item: Product) => acc + item.salesPrice!,
+          0
+        )
       );
     }
   }, [cart?.guestUserCart]);
@@ -107,7 +111,7 @@ const Cart = () => {
       couponCode: promoInput.code,
       cartId: cartId,
     };
-   
+
     if (!promoInput.code) {
       toast.error("Please enter a coupon code", {
         autoClose: 2000,
@@ -118,10 +122,12 @@ const Cart = () => {
     } else {
       API.post(`${coupons}`, payload)
         .then((response) => {
-          
           if (response.status === 200) {
             console.log("entering coupon", response.data);
-            if(response.data.message === "Coupon not found." || response.data.message === "Coupon already used.") {
+            if (
+              response.data.message === "Coupon not found." ||
+              response.data.message === "Coupon already used."
+            ) {
               toast.error(`${response.data.message}`, {
                 autoClose: 2000,
                 position: "top-right",
@@ -273,7 +279,7 @@ const Cart = () => {
                 loading={isCodeLoading}
               />
             </div>
-           
+
             <div className="px-2 pt-6 border-b bg-base-gray-200 border-gray-primary-400">
               <div className="flex justify-between">
                 <p className="uppercase">Total</p>

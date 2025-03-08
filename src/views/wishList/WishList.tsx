@@ -19,7 +19,7 @@ const WishList = () => {
     dispatch(fetchWishListFromServer() as any);
   }, []);
   return (
-    <div className="mx-auto md:w-3/5">
+    <div className="">
       <div className="flex items-center py-3">
         <p className="cursor-pointer">Home</p>
         <RxCaretRight />

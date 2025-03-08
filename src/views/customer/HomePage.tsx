@@ -127,7 +127,7 @@ const HomePage = () => {
 
   return (
     <div className="h-full homeBack">
-      <div className="mx-auto md:w-3/5">
+      <div className="mx-auto ">
         <AppCarousel slides={slides} autoPlayInterval={3000} />
         <div className="flex gap-2 bg-white h-[230px] my-3">
           <AppLinkCard

@@ -163,7 +163,7 @@ const Cart = () => {
     }
   };
   return (
-    <div className="mx-auto md:w-3/5">
+    <div className="">
       <div className="flex items-center py-3">
         <p
           className="cursor-pointer"

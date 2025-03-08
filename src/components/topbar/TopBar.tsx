@@ -6,9 +6,9 @@ import AppSelect from "../../shared/AppSelect";
 // import { RxCaretDown } from "react-icons/rx";
 import { CgProfile } from "react-icons/cg";
 import { BiCart } from "react-icons/bi";
-import { IoLogOutOutline } from "react-icons/io5";
+import { IoLogOutOutline, IoCallOutline } from "react-icons/io5";
 import { FaRegCircleUser } from "react-icons/fa6";
-import { MdLogin } from "react-icons/md";
+import { MdLogin, MdOutlineEmail } from "react-icons/md";
 import { routerPath } from "../../routes/Router";
 import { useNavigate } from "react-router-dom";
 import Badge from "@mui/material/Badge";
@@ -89,8 +89,8 @@ const TopBar = () => {
     userToken ? handleFetchUserDetails() : "";
     fetchCategories();
     handleGetCompanyInformation();
-    user?.uid ? dispatch(fetchUserCart() as any) : '';
-    user?.uid ? dispatch(fetchWishListFromServer() as any): '';
+    user?.uid ? dispatch(fetchUserCart() as any) : "";
+    user?.uid ? dispatch(fetchWishListFromServer() as any) : "";
   }, [userToken]);
 
   const handleSearch = (event: { id: string; value: string }) => {
@@ -141,12 +141,24 @@ const TopBar = () => {
 
   const sellOnGugu = () => {
     window.location.href = sellOnGuguLink;
-  }
+  };
+
+  const handleCall = () => {
+    if (companyDetails?.callUseNowNumber) {
+      window.location.href = `tel:${companyDetails.callUseNowNumber}`;
+    }
+  };
+
+  const handleEmail = () => {
+    if (companyDetails?.siteDisplayEmail) {
+      window.location.href = `mailto:${companyDetails.siteDisplayEmail}`;
+    }
+  };
   return (
     <div className="text-center">
       <div className=" bg-primary-500 h-[30px]">
         {currentUser ? (
-          <p className=" text-white-primary-400">{currentUser.fullName}</p>
+          <p className=" text-primary-500">{currentUser.fullName}</p>
         ) : (
           ""
         )}
@@ -154,7 +166,12 @@ const TopBar = () => {
 
       <div className="py-3 md:py-10 bg-white-primary-400">
         <div className="items-center justify-between mx-auto md:w-3/5 md:flex">
-          <img src={GuguLogo} alt="" className="w-[130px] hidden md:flex" />
+          <img
+            onClick={() => navigate(routerPath.HOMEPAGE)}
+            src={GuguLogo}
+            alt=""
+            className="w-[130px] hidden md:flex cursor-pointer"
+          />
 
           <div className="flex items-center justify-center">
             <AppSelect
@@ -178,9 +195,20 @@ const TopBar = () => {
               className="px-4 py-2 md:h-[50px] rounded-r-full bg-primary-500 text-white-primary-400"
             />
           </div>
-          <div className="hidden text-left text-black-primary-400 md:block w-[240px]">
-            <p>Call Us Now: {companyDetails?.callUseNowNumber}</p>
-            <p>Email: {companyDetails?.siteDisplayEmail}</p>
+          <div className="hidden text-left text-black-primary-400 md:flex gap-4 w-[240px]">
+            <p
+              onClick={handleCall}
+              className="flex items-center p-1 rounded-md cursor-pointer bg-primary-400"
+            >
+              <IoCallOutline className="text-2xl text-white-primary-400" />
+            </p>
+
+            <p
+              onClick={handleEmail}
+              className="flex items-center p-1 rounded-md cursor-pointer bg-primary-400"
+            >
+              <MdOutlineEmail className="text-2xl text-white-primary-400" />
+            </p>
           </div>
         </div>
       </div>
@@ -212,10 +240,7 @@ const TopBar = () => {
               >
                 Contact
               </li>
-              <li
-                className="cursor-pointer"
-                onClick={() => sellOnGugu()}
-              >
+              <li className="cursor-pointer" onClick={() => sellOnGugu()}>
                 Sell on Gugu
               </li>
             </ul>
@@ -253,7 +278,6 @@ const TopBar = () => {
             </div>
             {user?.uid ? (
               <div className="">
-              
                 <div
                   onClick={handleMyAccount}
                   className="flex items-center p-1 rounded-md cursor-pointer bg-primary-600"
@@ -267,7 +291,7 @@ const TopBar = () => {
                         onClick={() => navigate(routerPath.MYACCOUNT)}
                         className="flex items-center justify-between py-1 cursor-pointer hover:bg-white-primary-400 hover:text-primary-500"
                       >
-                        <p>My Acount</p>
+                        <p>My Account</p>
                         <CgProfile />
                       </li>
                       <li

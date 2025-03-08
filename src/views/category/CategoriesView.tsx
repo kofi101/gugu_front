@@ -97,7 +97,7 @@ const CategoriesView = () => {
   };
 
   return (
-    <div className="px-4 mx-auto mb-2 md:w-3/5">
+    <div className="px-4 mb-2 ">
       <div className="flex items-center py-3">
         <p className="cursor-pointer">Home</p>
         <RxCaretRight />

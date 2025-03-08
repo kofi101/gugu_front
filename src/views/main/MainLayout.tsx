@@ -4,6 +4,7 @@ import MainFooter from "../../components/footer/MainFooter";
 import { MainLayoutProp } from "../../helpers/type/types";
 import { useLocation } from "react-router";
 import { routerPath } from "../../routes/Router";
+import AdHere from "../../shared/AdHere";
 
 const MainLayout: React.FC<MainLayoutProp> = ({ children }) => {
   const location = useLocation();
@@ -30,7 +31,11 @@ const MainLayout: React.FC<MainLayoutProp> = ({ children }) => {
       ) : (
         <div>
           <MainHeader />
-          <div className="h-full">{children}</div>
+          <div className="flex gap-3">
+            <AdHere />
+            <div className="w-[80%] h-full">{children}</div>
+            <AdHere />
+          </div>
           <MainFooter />
         </div>
       )}

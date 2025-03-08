@@ -9,6 +9,8 @@ import GuguLogo from "../../assets/gugu2.png";
 import API, { getCategories, getCompanyDetails } from "../../endpoint";
 import { companyDetailsProps } from "../../helpers/interface/interfaces";
 import { sellOnGuguLink } from "../../helpers/functions/constants";
+import { IoCallOutline } from "react-icons/io5";
+import { MdOutlineEmail } from "react-icons/md";
 
 const MainFooter = () => {
   const navigate = useNavigate();
@@ -52,8 +54,19 @@ const MainFooter = () => {
     navigate(`${routerPath.SEARCHPRODUCTS}${searchInput.search}`);
   };
   const sellOnGugu = () => {
-      window.location.href = sellOnGuguLink;
+    window.location.href = sellOnGuguLink;
+  };
+  const handleCall = () => {
+    if (companyDetails?.callUseNowNumber) {
+      window.location.href = `tel:${companyDetails.callUseNowNumber}`;
     }
+  };
+
+  const handleEmail = () => {
+    if (companyDetails?.siteDisplayEmail) {
+      window.location.href = `mailto:${companyDetails.siteDisplayEmail}`;
+    }
+  };
 
   useEffect(() => {
     fetchCategories();
@@ -86,9 +99,20 @@ const MainFooter = () => {
               className="px-4 py-2 md:h-[50px] rounded-r-full bg-primary-500 text-white-primary-400"
             />
           </div>
-          <div className="hidden text-left text-white-primary-400 md:block">
-            <p>Call Us Now: {companyDetails?.callUseNowNumber}</p>
-            <p>Email: {companyDetails?.siteDisplayEmail}</p>
+          <div className="hidden gap-4 text-left text-white-primary-400 md:flex">
+            <p
+              onClick={handleCall}
+              className="flex items-center p-1 rounded-md cursor-pointer bg-primary-400"
+            >
+              <IoCallOutline className="text-2xl text-white-primary-400" />
+            </p>
+
+            <p
+              onClick={handleEmail}
+              className="flex items-center p-1 rounded-md cursor-pointer bg-primary-400"
+            >
+              <MdOutlineEmail className="text-2xl text-white-primary-400" />
+            </p>
           </div>
         </div>
         <div className="py-2 bg-black md:py-6">
@@ -124,10 +148,7 @@ const MainFooter = () => {
               >
                 Contact
               </li>
-              <li
-                className="cursor-pointer"
-                onClick={() => sellOnGugu()}
-              >
+              <li className="cursor-pointer" onClick={() => sellOnGugu()}>
                 Sell on Gugu
               </li>
             </ul>

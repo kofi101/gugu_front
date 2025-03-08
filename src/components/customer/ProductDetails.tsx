@@ -238,7 +238,7 @@ const ProductDetailsPage = () => {
   }, [productDetail]);
 
   return (
-    <div className="px-4 mx-auto mb-2 md:w-3/5">
+    <div className="px-4 mx-auto mb-2 ">
       <div className="flex items-center py-3 text-primary-500">
         <p
           className="cursor-pointer"

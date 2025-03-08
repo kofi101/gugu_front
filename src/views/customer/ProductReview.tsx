@@ -1,8 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import Laptop from "../../assets/images/laptop.jpeg";
-import Camera from "../../assets/images/camera.jpg";
-import Bag from "../../assets/images/bag.jpg";
-import Supra from "../../assets/images/supra.jpg";
+
 import "../../styles/AppCustomCss.css";
 import { Rating } from "@mui/material";
 import { useEffect, useState } from "react";
@@ -20,7 +17,6 @@ import { formatMoney } from "../../helpers/functions/helperFunctions";
 
 const ProductReview = () => {
   const navigate = useNavigate();
-  const createArrayOfImages = [Laptop, Camera, Bag, Supra];
   const [ratingValue, setRatingValue] = useState<number | null>(0);
   const [descriptionValue, setDescriptionValue] = useState("");
   const [error, setError] = useState("");
@@ -116,7 +112,7 @@ const ProductReview = () => {
   }, []);
 
   return (
-    <div className="mx-auto mt-10 mb-2 md:w-3/5">
+    <div className="mt-10 mb-2">
       <div className="flex items-center p-3 px-6 font-bold bg-gray-primary-400">
         <RxCaretLeft
           className="text-xl font-bold cursor-pointer"
@@ -139,18 +135,7 @@ const ProductReview = () => {
                   className="h-[300px] w-full object-cover"
                 />
               </div>
-              <div className="flex mx-2 mb-4 space-x-2 overflow-x-auto md:ml-2 custom-scrollbar-pdp xs:">
-                {createArrayOfImages &&
-                  createArrayOfImages?.map((image) => (
-                    <div className="shrink-0 bg-white-primary-400">
-                      <img
-                        src={image}
-                        className="block object-cover w-24 h-24"
-                        alt="product small"
-                      />
-                    </div>
-                  ))}
-              </div>
+              
             </div>
             <div className="md:w-[65%]">
               <div className="flex items-center justify-between px-6 pt-6">

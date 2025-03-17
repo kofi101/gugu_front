@@ -35,7 +35,7 @@ const AppCarousel: React.FC<CarouselProps> = ({
         <img
           src={slides[currentSlide]?.image}
           alt={slides[currentSlide]?.productName}
-          className="object-cover object-center w-full h-full "
+          className="object-contain object-center w-full h-full "
         />
         <div className="absolute flex flex-col items-center justify-center text-center md:w-1/2 top-28 left-16 text-white-primary-400 carousel-caption md:top-32 md:left-[25%]">
           <p className="mb-6 font-semibold uppercase">

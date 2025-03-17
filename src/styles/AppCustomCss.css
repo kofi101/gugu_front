@@ -30,6 +30,14 @@
   background-position: center;
   background-repeat: no-repeat;
 }
+.advert{
+  background-image: url("../assets//images//adhere.webp");
+  background-position: center;
+  background-repeat: repeat;
+  background-size: contain;
+
+
+}
 .homeBack{
   /* background-image: url("../assets/images/background.jpg"); */
   object-fit: cover;

@@ -96,7 +96,7 @@ const AppCategoryCard: React.FC<categoryProductProp> = ({ category }) => {
         onClick={() => onProductClickedFromCategory(category)}
       >
         <img
-          className="h-[150px] w-full object-cover"
+          className="h-[150px] w-full object-contain"
           src={category.productImages![0]}
           alt={category.productName}
         />
@@ -109,7 +109,7 @@ const AppCategoryCard: React.FC<categoryProductProp> = ({ category }) => {
           </div>
         )}
         <div
-          className="flex gap-2 text-[14px] "
+          className="flex gap-2 text-[11px] "
           onClick={() => onProductClickedFromCategory(category)}
         >
           <div>
@@ -125,7 +125,7 @@ const AppCategoryCard: React.FC<categoryProductProp> = ({ category }) => {
         </div>
         {category.promotionPrice ? (
           <div
-            className="flex gap-4 mt-4 text-primary-500"
+            className="flex gap-4 mt-4 text-primary-500 text-[13px]"
             onClick={() => onProductClickedFromCategory(category)}
           >
             {category.promotionPrice && (
@@ -140,7 +140,7 @@ const AppCategoryCard: React.FC<categoryProductProp> = ({ category }) => {
 
         {category.salesPrice && (
           <div
-            className="font-semibold text-[18px]"
+            className="font-bold text-[20px]"
             onClick={() => onProductClickedFromCategory(category)}
           >
             {formatMoney(category.promotionPrice ? category.promotionPrice : category.salesPrice)}
@@ -153,7 +153,7 @@ const AppCategoryCard: React.FC<categoryProductProp> = ({ category }) => {
             name="simple-controlled"
             value={category.reviewStars}
           />
-          <p className="text-[14px] text-primary-500">{category.reviewStars} reviews</p>
+          <p className="text-[11px] text-primary-500">{category.reviewStars} reviews</p>
           
         </div>
         <div className="flex items-center justify-between ">
@@ -162,14 +162,14 @@ const AppCategoryCard: React.FC<categoryProductProp> = ({ category }) => {
               <AppButton
                 clickHandler={() => {}}
                 title="Add to Cart"
-                className="flex items-center justify-center w-full gap-1 px-1 py-1 uppercase rounded-lg bg-gray-primary-400 text-white-primary-400 space-between"
+                className="flex items-center justify-center w-full gap-1 px-1 py-1 uppercase rounded-[4px] bg-gray-primary-400 text-white-primary-400 space-between"
                 icon={<BsCart3 />}
               />
             ) : (
               <AppButton
                 clickHandler={() => onCategoryProductClick(category)}
                 title="Add to Cart"
-                className="flex items-center justify-center w-full gap-1 px-1 py-1 uppercase rounded-lg bg-primary-500 text-white-primary-400 hover:bg-primary-400 space-between"
+                className="flex items-center justify-center w-full gap-1 px-1 py-1 uppercase rounded-[4px] bg-primary-500 text-white-primary-400 hover:bg-primary-400 space-between"
                 icon={<BsCart3 />}
                 loading={isLoading}
               />
@@ -181,7 +181,7 @@ const AppCategoryCard: React.FC<categoryProductProp> = ({ category }) => {
                 title=""
                 clickHandler={() => {}}
                 icon={<AiOutlineHeart />}
-                className="flex items-center px-2 py-2 rounded-lg bg-gray-primary-400 text-white-primary-400 "
+                className="flex items-center px-2 py-2 rounded-[4px] bg-gray-primary-400 text-white-primary-400 "
               />
             ) : (
               <AppButton
@@ -189,7 +189,7 @@ const AppCategoryCard: React.FC<categoryProductProp> = ({ category }) => {
                 clickHandler={() => onCategoryFavoriteClick(category)}
                 icon={<AiOutlineHeart />}
                 loading={addToWishListLoading}
-                className="flex items-center px-2 py-2 rounded-lg bg-primary-500 text-white-primary-400 hover:bg-primary-400"
+                className="flex items-center px-2 py-2 rounded-[4px] bg-primary-500 text-white-primary-400 hover:bg-primary-400"
               />
             )}
           </div>

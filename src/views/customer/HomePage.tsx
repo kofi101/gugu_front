@@ -129,9 +129,9 @@ const HomePage = () => {
     <div className="h-full homeBack">
       <div className="mx-auto ">
         <AppCarousel slides={slides} autoPlayInterval={3000} />
-        <div className="flex gap-2 bg-white h-[230px] my-3">
+        <div className="flex gap-2 bg-white h-[210px] my-3">
           <AppLinkCard
-            className="absolute top-[70px] md:top-16 md:left-4"
+            className="absolute top-[70px] md:top-12 md:left-4"
             imageUrl={
               featuredProducts?.length
                 ? featuredProducts[0]?.productImages?.[0] || ""
@@ -209,15 +209,15 @@ const HomePage = () => {
             substringNumber={30}
           />
         </div>
-        <div className="p-4 bg-primary-500">
-          <div className="flex justify-between text-white-primary-400 item-center">
-            <p className="text-white-primary-400">Promos</p>
+        <div className="p-4 bg-primary-500 h-[54px] flex items-center justify-between">
+          <div className="flex items-center justify-between w-full text-white-primary-400">
+            <p className="text-white-primary-400  text-[20px]">Promos</p>
             <div
               onClick={() => navigate(routerPath.PROMOTIONS)}
-              className="flex items-center cursor-pointer"
+              className="flex items-center cursor-pointer text-[20px] ml-auto"
             >
               <p>See All</p>
-              <RxCaretRight />
+              <RxCaretRight className="!text-[20px]" />
             </div>
           </div>
         </div>
@@ -253,7 +253,6 @@ const HomePage = () => {
             )}
           </div>
         )}
-
         <div className="flex gap-2 bg-white-primary-400 h-[230px] mt-[14px] ">
           <AppLinkCard
             price={
@@ -309,7 +308,7 @@ const HomePage = () => {
           />
         </div>
         <div>
-          <p className="px-4 py-4 font-bold border bg-white-primary-400">
+          <p className=" text-[24px] pl-[24px] flex items-center font-[500] border bg-white-primary-400 h-[54px]">
             Featured Products
           </p>
           {isLoading ? (

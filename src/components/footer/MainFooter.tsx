@@ -82,7 +82,7 @@ const MainFooter = () => {
               defaultValue=""
               name=""
               options={category}
-              className="px-2 py-2 outline-none md:h-[50px] mr-1 rounded-l-full md:w-[130px] md:block w-[40px]"
+              className="px-2 py-2 outline-none md:h-[50px] mr-1 rounded-l-full md:w-[130px] md:block w-[40px] text-xs font-[500]"
             />
 
             <AppInput
@@ -91,12 +91,12 @@ const MainFooter = () => {
               type="text"
               value={searchInput.search}
               id="search"
-              placeholder="Search"
+              placeholder=""
             />
             <AppButton
               title="Search"
               clickHandler={() => goToSearch()}
-              className="px-4 py-2 md:h-[50px] rounded-r-full bg-primary-500 text-white-primary-400"
+              className="px-4 py-2 md:h-[50px] rounded-r-full bg-primary-500 text-white-primary-400 font-bold text-xs"
             />
           </div>
           <div className="hidden gap-4 text-left text-white-primary-400 md:flex">
@@ -123,27 +123,27 @@ const MainFooter = () => {
             <img src={GuguLogo} alt="" className="w-[130px]" />
           </div>
           <div>
-            <ul className="flex items-center justify-center gap-4 uppercase items text-white-primary-400">
+            <ul className="flex items-center justify-center gap-10 uppercase items text-white-primary-400 text-[12px] font-bold ">
               <li
-                className="text-xs cursor-pointer md:text-[16px]"
+                className="text-xs cursor-pointer md:text-[12px]"
                 onClick={() => navigate(routerPath.HOMEPAGE)}
               >
                 Home
               </li>
               <li
-                className="text-xs cursor-pointer md:text-[16px]"
+                className="text-xs cursor-pointer md:text-[12px]"
                 onClick={() => navigate(routerPath.PROMOTIONS)}
               >
                 Promotions
               </li>
               <li
-                className="text-xs cursor-pointer md:text-[16px]"
+                className="text-xs cursor-pointer md:text-[12px]"
                 onClick={() => navigate(routerPath.ABOUT)}
               >
                 About
               </li>
               <li
-                className="text-xs cursor-pointer md:text-[16px]"
+                className="text-xs cursor-pointer md:text-[12px]"
                 onClick={() => navigate(routerPath.CONTACT)}
               >
                 Contact

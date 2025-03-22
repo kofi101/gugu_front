@@ -10,7 +10,7 @@ export default {
         "primary-400": "#0F96C1",
         "primary-500": "#0F96C1",
         "primary-600": "#086E8E",
-        "gray-primary-400": "#e1e1e1",
+        "gray-primary-400": "#D9D9D9",
         "gray-secondary-500": "#969696",
         "gray-tertiary-600": "#646464",
         "gray-tertiary-700": "#323232",
@@ -20,12 +20,15 @@ export default {
         "blue-secondary-500": "#6346fa",
         "blue-secondary-600": "#32000af",
         "black-primary-400": "#000",
+        "black-secondary-500": "#303030",
         "white-primary-400": "#ffffff",
         "base-gray-200": "#f1f1f1",
         "shade-orange": "#CEA741",
         "blue-shade": "#5E7FF2",
         "primary-yellow": "#FBBF27",
-        "gray-shade-400": "#EEEEEE"
+        "gray-shade-400": "#EEEEEE",
+        "gray-nav-400": "#F9F9F9",
+        "gray-alt-300": "#D9D9D9"
       },
       screens: {
         xs: "480px",

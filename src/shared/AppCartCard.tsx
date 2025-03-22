@@ -112,14 +112,14 @@ const AppCartCard: React.FC<CartItemProp> = ({ item }) => {
     }
   };
   return (
-    <div className="flex w-full border">
+    <div className="flex w-full border h-[176px]">
       {isQuantityChanging && (
         <div className="fixed inset-0 z-10 flex items-center justify-center h-screen bg-black bg-opacity-50">
           <AppLoader height="40px" width="40px" />
         </div>
       )}
 
-      <div className=" w-1/4 h-[175px] md:h-[160px]">
+      <div className=" w-1/4 h-[175px] md:h-[175px]">
         <img
           src={isUserLoggedIn ? imageOne : productImages?.[0] ?? ""}
           alt={productName}
@@ -127,13 +127,13 @@ const AppCartCard: React.FC<CartItemProp> = ({ item }) => {
         />
       </div>
 
-      <div className="w-3/4 pt-2 px-4  bg-base-gray-200 md:h-[160px] h-[175px]">
-        <p className="font-medium md:mb-1 md:text-lg">
+      <div className="w-3/4 pt-2 px-4  bg-base-gray-200 md:h-[175px] h-[175px]">
+        <p className="font-[600] md:mb-1 md:text-[20px]">
           {subStringLongText(productName!, 55)}
         </p>
         <div className="flex justify-between">
           <div>
-            <div className="flex md:gap-4">
+            <div className="flex md:gap-4 text-[13px] mt-2">
               <div className="hidden md:block">
                 <p>Brand: </p>
                 <p>Product Code:</p>
@@ -147,14 +147,14 @@ const AppCartCard: React.FC<CartItemProp> = ({ item }) => {
             </div>
             <AppButton
               title="Remove"
-              className="flex items-center px-3 py-1 mt-2 rounded-md bg-primary-500 text-white-primary-400"
+              className="flex items-center px-3 py-1 mt-4 rounded-md bg-primary-500 text-white-primary-400"
               icon={<RiDeleteBin6Line />}
               clickHandler={() => handleRemove(item)}
               loading={isLoading}
             />
           </div>
           <div>
-            <p className="font-medium md:text-2xl">
+            <p className="font-bold md:text-[20px]">
               {isUserLoggedIn
                 ? formatMoney(salesPrice!)
                 : formatMoney(initialPrice)}

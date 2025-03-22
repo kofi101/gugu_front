@@ -69,13 +69,13 @@ const MyAccount = () => {
     });
   };
   return (
-    <div className="flex gap-4 mt-10 mb-10 ">
+    <div className="flex gap-4 mt-10 mb-10  w-[63%] mx-auto">
       <div className="flex flex-col justify-between w-[25%]">
         <ul className=" bg-base-gray-200">
           {menuItems.map((item) => (
             <li
               key={item.name}
-              className={`flex items-center p-3 cursor-pointer border-b ${
+              className={`flex items-center p-3 cursor-pointer border-b h-[52px] ${
                 active === item.name
                   ? "bg-gray-primary-400 font-medium"
                   : "hover:bg-gray-200"
@@ -90,12 +90,12 @@ const MyAccount = () => {
         <div className=" bg-base-gray-200">
           <AppButton
             title="Close Account"
-            className="flex justify-center w-full p-2 border-b hover:bg-gray-200"
+            className="flex justify-center w-full p-2 border-b hover:bg-gray-200 h-[52px]"
             clickHandler={() => navigate(routerPath.HOMEPAGE)}
           />
           <AppButton
             title="Logout"
-            className="flex justify-center w-full p-2 font-bold text-primary-400 hover:bg-gray-200"
+            className="flex justify-center w-full p-2 font-bold text-primary-400 hover:bg-gray-200 h-[52px]"
             clickHandler={() => handleLogout()}
           />
         </div>

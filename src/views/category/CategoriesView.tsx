@@ -97,7 +97,7 @@ const CategoriesView = () => {
   };
 
   return (
-    <div className="px-4 mb-2 ">
+    <div className=" w-[63%] mx-auto mb-5">
       <div className="flex items-center py-3">
         <p className="cursor-pointer">Home</p>
         <RxCaretRight />
@@ -154,25 +154,10 @@ const CategoriesView = () => {
               })}
             </ul>
           </div>
-          {/* <div className="bg-gray-primary-400">
-            <div className="px-2 py-2 font-bold bg-gray-secondary-500">
-              Shipped From
-            </div>
-            <ul className="p-2 border h-[100px] overflow-y-scroll custom-scrollbar">
-              {shippingOptions?.map((ship) => {
-                return (
-                  <li key={ship.id} className="py-2">
-                    <input type="checkbox" className="mr-2" />
-                    {ship.location}
-                  </li>
-                );
-              })}
-            </ul>
-          </div> */}
         </div>
         <div className="md:w-[75%]">
           <div className="w-full bg-base-gray-200">
-            <div className="px-2 py-2 font-bold bg-gray-primary-400">
+            <div className="px-2 py-2 font-bold flex items-center bg-gray-primary-400 h-[54px]">
               {categoryName ? categoryName : "All Categories"}
             </div>
             {loading ? (

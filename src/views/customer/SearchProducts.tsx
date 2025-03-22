@@ -54,7 +54,7 @@ const SearchProducts = () => {
     setCurrentData(searchResults);
   }, [searchResults]);
   return (
-    <div className="mb-2">
+    <div className="w-[63%] mx-auto mb-5">
       <div className="w-full my-6 bg-base-gray-200">
         <div className="px-2 py-2 font-bold capitalize bg-gray-primary-400">
           {searchQuery}

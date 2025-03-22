@@ -11,7 +11,7 @@ const CategorySideBar: React.FC<CategorySideBarProps> = ({
   };
   return (
     <div className="">
-      <p className="px-2 py-2 font-bold bg-gray-primary-400">Category</p>
+      <p className="px-2 py-2 font-bold bg-gray-primary-400 h-[54px] flex items-center">Category</p>
       {isLoading ? (
         <div className="flex items-center justify-center my-10">
           <CircularProgress className=" !text-gray-primary-400" />
@@ -20,7 +20,7 @@ const CategorySideBar: React.FC<CategorySideBarProps> = ({
         <ul>
           {categories?.map((category) => (
             <li
-              className="px-2 py-2 border-b-2 cursor-pointer hover:bg-gray-primary-400 hover:text-primary-500"
+              className="px-2 py-2 border-b-2 cursor-pointer hover:bg-gray-primary-400 hover:text-primary-500 font-[500] text-[15px]"
               key={category?.productCategoryId}
               onClick={() => handleClick(category)}
             >

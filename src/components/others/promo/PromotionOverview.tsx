@@ -36,7 +36,7 @@ const PromotionOverview = () => {
     </div>
   );
   return (
-    <div className="">
+    <div className="w-[63%] mx-auto mb-5">
       <div className="flex items-center py-3 text-primary-500">
         <p
           className="cursor-pointer"

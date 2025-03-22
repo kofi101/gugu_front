@@ -10,7 +10,7 @@ import { IoLogOutOutline, IoCallOutline } from "react-icons/io5";
 import { FaRegCircleUser } from "react-icons/fa6";
 import { MdLogin, MdOutlineEmail } from "react-icons/md";
 import { routerPath } from "../../routes/Router";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import Badge from "@mui/material/Badge";
 import "../../styles/AppCustomCss.css";
 import FavSvg from "../../assets/svg/gugu_favourite.svg";
@@ -47,6 +47,9 @@ import { sellOnGuguLink } from "../../helpers/functions/constants";
 type PartialUser = Partial<loggedInUser>;
 
 const TopBar = () => {
+  const location = useLocation();
+  const currentPath = location.pathname;
+  console.log("current path", currentPath);
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const user = useSelector((store: any) => store?.user?.currentUser);
@@ -179,7 +182,7 @@ const TopBar = () => {
               defaultValue=""
               name=""
               options={category}
-              className="px-2 py-2 outline-none md:h-[50px] rounded-l-full md:w-[130px] border-primary-400 border md:block w-[40px]"
+              className="px-2 py-2 outline-none md:h-[50px] rounded-l-full md:w-[130px] border-primary-400 border md:block w-[40px] text-xs font-[500]"
             />
             <AppInput
               className="p-2 outline-none md:w-72 md:h-[50px] border-primary-400 border"
@@ -187,12 +190,12 @@ const TopBar = () => {
               type="text"
               value={searchInput.search}
               id="search"
-              placeholder="Search"
+              placeholder=""
             />
             <AppButton
               title="Search"
               clickHandler={() => goToSearch()}
-              className="px-4 py-2 md:h-[50px] rounded-r-full bg-primary-500 text-white-primary-400"
+              className="px-4 py-2 md:h-[50px] rounded-r-full bg-primary-500 text-white-primary-400 font-bold text-xs"
             />
           </div>
           <div className="hidden text-left text-black-primary-400 md:flex gap-4 w-[240px]">
@@ -212,43 +215,83 @@ const TopBar = () => {
           </div>
         </div>
       </div>
-      <div className="hidden bg-primary-500 md:block">
-        <div className="flex justify-between w-3/5 py-6 mx-auto">
+      <div
+        className={`hidden  md:flex h-[63px] items-center justify-between ${
+          currentPath === routerPath.HOMEPAGE
+            ? "bg-gray-nav-400 !text-black-secondary-500"
+            : "bg-primary-500"
+        }`}
+      >
+        <div className="flex items-center justify-between w-3/5 py-6 mx-auto">
           <div>
-            <ul className="flex gap-4 uppercase text-white-primary-400">
+            <ul
+              className={`flex gap-10 font-bold uppercase  text-[12px] ${
+                currentPath === routerPath.HOMEPAGE
+                  ? "text-black-secondary-500"
+                  : "text-white-primary-400"
+              }`}
+            >
               <li
-                className="cursor-pointer"
+                className={`cursor-pointer ${
+                  currentPath === routerPath.HOMEPAGE
+                    ? "hover:text-primary-500 hover:underline"
+                    : "text-white-primary-400"
+                }`}
                 onClick={() => navigate(routerPath.HOMEPAGE)}
               >
                 Home
               </li>
               <li
-                className="cursor-pointer"
+                className={`cursor-pointer ${
+                  currentPath === routerPath.HOMEPAGE
+                    ? "hover:text-primary-500 hover:underline"
+                    : "text-white-primary-400"
+                }`}
                 onClick={() => navigate(routerPath.PROMOTIONS)}
               >
                 Promotions
               </li>
               <li
-                className="cursor-pointer"
+                className={`cursor-pointer ${
+                  currentPath === routerPath.HOMEPAGE
+                    ? "hover:text-primary-500 hover:underline"
+                    : "text-white-primary-400"
+                }`}
                 onClick={() => navigate(routerPath.ABOUT)}
               >
                 About
               </li>
               <li
-                className="cursor-pointer"
+                className={`cursor-pointer ${
+                  currentPath === routerPath.HOMEPAGE
+                    ? "hover:text-primary-500 hover:underline"
+                    : "text-white-primary-400"
+                }`}
                 onClick={() => navigate(routerPath.CONTACT)}
               >
                 Contact
               </li>
-              <li className="cursor-pointer" onClick={() => sellOnGugu()}>
+              <li
+                className={`cursor-pointer ${
+                  currentPath === routerPath.HOMEPAGE
+                    ? "hover:text-primary-500 hover:underline"
+                    : "text-white-primary-400"
+                }`}
+                onClick={() => sellOnGugu()}
+              >
                 Sell on Gugu
               </li>
             </ul>
           </div>
-          <div className="flex gap-4">
+          <div className="flex items-center gap-4">
             <div
               onClick={() => navigate(routerPath.WISHLIST)}
-              className="flex items-center p-1 rounded-md cursor-pointer bg-primary-600"
+              
+              className={`flex items-center p-1 rounded-md cursor-pointer ${
+                currentPath === routerPath.HOMEPAGE
+                  ? "bg-primary-500"
+                  : "bg-primary-600"
+              }`}
             >
               <Badge
                 badgeContent={
@@ -258,12 +301,16 @@ const TopBar = () => {
                 }
                 color="primary"
               >
-                <img src={FavSvg} alt="" className="w-[22px] h-[20px]" />
+                <img src={FavSvg} alt="" className="w-[24px] h-[24px]" />
               </Badge>
             </div>
             <div
               onClick={() => navigate(routerPath.CART)}
-              className="flex items-center p-1 rounded-md cursor-pointer bg-primary-600"
+              className={`flex items-center p-1 rounded-md cursor-pointer ${
+                currentPath === routerPath.HOMEPAGE
+                  ? "bg-primary-500"
+                  : "bg-primary-600"
+              }`}
             >
               <Badge
                 badgeContent={
@@ -273,19 +320,23 @@ const TopBar = () => {
                 }
                 color="primary"
               >
-                <img src={CartSvg} alt="" className="w-[22px] h-[20px]" />
+                <img src={CartSvg} alt="" className="w-[24px] h-[24px]" />
               </Badge>
             </div>
             {user?.uid ? (
               <div className="">
                 <div
                   onClick={handleMyAccount}
-                  className="flex items-center p-1 rounded-md cursor-pointer bg-primary-600"
+                  className={`flex items-center p-1 rounded-md cursor-pointer ${
+                    currentPath === routerPath.HOMEPAGE
+                      ? "bg-primary-500"
+                      : "bg-primary-600"
+                  }`}
                 >
-                  <FaRegCircleUser className="!font-bold text-white-primary-400 h-[20px]" />
+                  <FaRegCircleUser className="!font-bold text-white-primary-400 !h-[24px] !w-[24px]" />
                 </div>
                 {myAccount ? (
-                  <div className="absolute z-10 w-32 p-2 border rounded-lg bg-white-primary-400 top-56">
+                  <div className="absolute z-10 w-32 p-2 border rounded-[4px] bg-white-primary-400 top-56">
                     <ul>
                       <li
                         onClick={() => navigate(routerPath.MYACCOUNT)}
@@ -317,9 +368,13 @@ const TopBar = () => {
             ) : (
               <div
                 onClick={() => navigate(routerPath.LOGIN)}
-                className="flex items-center p-1 rounded-md cursor-pointer bg-primary-600"
+                className={`flex items-center p-1 rounded-md cursor-pointer ${
+                  currentPath === routerPath.HOMEPAGE
+                    ? "bg-primary-500"
+                    : "bg-primary-600"
+                }`}
               >
-                <MdLogin className="!font-bold text-white-primary-400" />
+                <MdLogin className="!font-bold text-white-primary-400 h-[24px] w-[24px]" />
               </div>
             )}
           </div>

@@ -41,12 +41,12 @@ const AppCarousel: React.FC<CarouselProps> = ({
           <p className="mb-6 font-semibold uppercase">
             {slides[currentSlide]?.promotionDescription}
           </p>
-          <p className="mb-8 text-xl font-bold uppercase">
+          <p className="mb-8 text-[26px] font-bold uppercase">
             {slides[currentSlide]?.productName}
           </p>
           <a
             onClick={() => goToShopNow(slides[currentSlide]?.productId)}
-            className="px-6 py-2 font-semibold capitalize cursor-pointer rounded-2xl bg-white-primary-400 carousel-link text-primary-500 hover:bg-white"
+            className="px-6 py-2 font-bold capitalize cursor-pointer rounded-2xl bg-white-primary-400 carousel-link text-primary-500 hover:bg-white"
           >
             Shop Now
           </a>

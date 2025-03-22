@@ -11,7 +11,7 @@ const AboutUs = () => {
   const navigate = useNavigate();
   const user = useSelector((store: any) => store?.user?.companyInfo);
   return (
-    <div className="mb-5 ">
+    <div className="mx-auto mb-5 w-[63%]">
       <div className="flex items-center py-3 text-primary-500">
         <p
           className="cursor-pointer"
@@ -31,9 +31,9 @@ const AboutUs = () => {
           />
           <div className="absolute bottom-0 bg-black-primary-400 h-[50%] w-full opacity-80 text-white-primary-400 py-10">
             <div className="flex flex-col items-center justify-center">
-              <p className="text-xl font-bold">Welcome to</p>
-              <p className="text-xl font-bold">GUGU GHANA LIMITED</p>
-              <p className="w-4/5 mt-8 h-[125px] overflow-y-auto">
+              <p className="text-2xl font-bold">Welcome to</p>
+              <p className="text-2xl font-bold">GUGU GHANA LIMITED</p>
+              <p className="w-4/5 mt-8 h-[125px] overflow-y-auto text-[15px]">
                 Ghana Unlimited (GUGU) is a groundbreaking e-commerce platform
                 committed to promoting and celebrating the best of Ghana.
                 Founded with a vision to empower local businesses and artisans,
@@ -50,8 +50,8 @@ const AboutUs = () => {
             <img src={Concentrated} alt="" className="object-cover w-full" />
             <div className="absolute bottom-0 w-full h-full pt-8 bg-black-primary-400 opacity-80 text-white-primary-400">
               <div className="flex flex-col items-center justify-center">
-                <p className="text-lg font-bold">Our Vision</p>
-                <p className="w-4/5 h-[170px] overflow-y-auto">{user?.ourVision}</p>
+                <p className="text-2xl font-bold">Our Vision</p>
+                <p className="w-4/5 h-[170px] overflow-y-auto text-[15px]">{user?.ourVision}</p>
               </div>
             </div>
           </div>
@@ -59,8 +59,8 @@ const AboutUs = () => {
             <img src={Target} alt="" className="object-cover w-full" />
             <div className="absolute bottom-0 w-full h-full pt-8 bg-black-primary-400 opacity-80 text-white-primary-400">
               <div className="flex flex-col items-center justify-center">
-                <p className="text-lg font-bold">Our Mision</p>
-                <p className="w-4/5 h-[170px] overflow-y-auto">{user?.ourMission}</p>
+                <p className="text-2xl font-bold">Our Mision</p>
+                <p className="w-4/5 h-[170px] overflow-y-auto text-[15px]">{user?.ourMission}</p>
               </div>
             </div>
           </div>

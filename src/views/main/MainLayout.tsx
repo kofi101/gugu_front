@@ -5,7 +5,7 @@ import { MainLayoutProp } from "../../helpers/type/types";
 import { useLocation } from "react-router";
 import { routerPath } from "../../routes/Router";
 
-import "../../styles/AppCustomCss.css"
+import "../../styles/AppCustomCss.css";
 
 const MainLayout: React.FC<MainLayoutProp> = ({ children }) => {
   const location = useLocation();
@@ -33,9 +33,17 @@ const MainLayout: React.FC<MainLayoutProp> = ({ children }) => {
         <div>
           <MainHeader />
           <div className="flex gap-3">
-            <div className="w-[20%] advert"></div>
-            <div className="w-[80%] h-full">{children}</div>
-            <div className="advert w-[20%]"></div>
+            <div
+              className={`w-[22%] advert ${
+                currentPath === routerPath.HOMEPAGE ? "block" : "hidden"
+              }`}
+            ></div>
+            <div className={`h-full ${currentPath === routerPath.HOMEPAGE ? 'w-[80%]' : 'w-full'}`}>{children}</div>
+            <div
+              className={`w-[22%] advert ${
+                currentPath === routerPath.HOMEPAGE ? "block" : "hidden"
+              }`}
+            ></div>
           </div>
           <MainFooter />
         </div>

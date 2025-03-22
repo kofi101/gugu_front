@@ -238,7 +238,7 @@ const ProductDetailsPage = () => {
   }, [productDetail]);
 
   return (
-    <div className="px-4 mx-auto mb-2 ">
+    <div className="px-4 w-[63%] mx-auto mb-5">
       <div className="flex items-center py-3 text-primary-500">
         <p
           className="cursor-pointer"
@@ -250,7 +250,7 @@ const ProductDetailsPage = () => {
         <p>{productDetail?.productName}</p>
       </div>
       <div className="gap-4 md:flex">
-        <div className="hidden h-[706px] overflow-y-scroll border md:block md:w-1/5 border-gray-primary-400 custom-scrollbar">
+        <div className="hidden h-[700px] overflow-y-scroll border md:block md:w-[300px] border-gray-primary-400 custom-scrollbar bg-gray-shade-400">
           <CategorySideBar
             categories={category}
             onCategoryClick={handleCategoryClick}
@@ -259,12 +259,12 @@ const ProductDetailsPage = () => {
         </div>
         <div className="md:w-4/5">
           <div className="gap-5 md:flex ">
-            <div className="md:w-[45%] flex flex-col gap-4">
-              <div className="border border-gray-primary-400 h-[300px] overflow-hidden">
+            <div className="md:w-[293px] flex flex-col gap-4">
+              <div className="border border-gray-primary-400 h-[274px] overflow-hidden shadow-sm">
                 <img
                   src={productDetail?.productImages![0]}
                   alt="product big"
-                  className="h-[300px] w-full object-cover"
+                  className="h-[274px] w-full object-contain "
                 />
               </div>
 
@@ -276,15 +276,15 @@ const ProductDetailsPage = () => {
                       <div key={index} className="shrink-0">
                         <img
                           src={image}
-                          className="block h-24 border"
+                          className="block object-contain h-24 border"
                           alt="product small"
                         />
                       </div>
                     ))}
               </div>
             </div>
-            <div className="md:w-[55%] md:bg-base-gray-200 px-3 py-2">
-              <div className="flex items-center justify-between text-lg font-bold md:mb-3">
+            <div className="md:w-[332px] md:bg-gray-shade-400 px-3 py-2">
+              <div className="flex items-center justify-between font-bold text-[20px] md:mb-3">
                 <p>
                   {subStringLongText(productDetail?.productName as string, 30)}
                 </p>
@@ -317,15 +317,15 @@ const ProductDetailsPage = () => {
                     setValue(newValue);
                   }}
                 />
-                <p>
+                <p className="text-[11px]">
                   {productReviews?.length}{" "}
                   {productReviews?.length === 1 ? "review" : "reviews"}
                 </p>
               </div>
-              <p className="text-lg font-bold md:mb-4 text-primary-500">
+              <p className="text-[20px] font-bold md:mb-4 text-primary-500">
                 {formatMoney(total!)}
               </p>
-              <div className="flex items-center gap-8">
+              <div className="flex items-center gap-8 text-[11px]">
                 <div>
                   <p className="md:mb-2">Brand:</p>
                   <p className="md:mb-2">Product Code:</p>
@@ -338,7 +338,7 @@ const ProductDetailsPage = () => {
                 </div>
               </div>
 
-              <div className="flex flex-col mb-3 ">
+              <div className="flex flex-col mb-3 text-[11px] ">
                 <p>Qty</p>
                 <div className="flex items-center">
                   <p
@@ -368,14 +368,15 @@ const ProductDetailsPage = () => {
                   </p>
                 </div>
               </div>
-              <div className="flex flex-col items-center justify-between gap-2 my-4 mt-2 md:my-0 md:w-[90%] ">
+              
+              <div className="flex flex-col items-center justify-between gap-4 mt-4 md:w-full ">
                 <div className="w-full mb-2 md:mb-0">
                   {productDetail?.availability?.toLowerCase() ===
                   "out of stock" ? (
                     <AppButton
                       clickHandler={() => {}}
                       title="Add to Cart"
-                      className="flex items-center justify-center w-full gap-10 px-6 py-2 uppercase rounded-lg bg-gray-primary-400 text-white-primary-400 space-between"
+                      className="flex items-center justify-center w-full gap-10 px-6 py-2 text-[20px] bg-gray-primary-400 text-white-primary-400 space-between"
                       icon={<BsCart3 />}
                       loading={isLoading}
                     />
@@ -385,7 +386,7 @@ const ProductDetailsPage = () => {
                         handleAddToCart(productDetail!);
                       }}
                       title="Add to Cart"
-                      className="flex items-center justify-center w-full gap-10 px-6 py-2 uppercase rounded-lg bg-primary-500 text-white-primary-400 hover:bg-primary-400 space-between"
+                      className="flex items-center justify-center w-full gap-10 px-6 py-2 text-[20px] bg-primary-500 text-white-primary-400 hover:bg-primary-400 space-between"
                       icon={<BsCart3 />}
                       loading={isLoading}
                     />
@@ -398,29 +399,31 @@ const ProductDetailsPage = () => {
                       clickHandler={() => {}}
                       title="Buy now"
                       icon={<BsCart3 />}
-                      className="flex items-center justify-center w-full gap-10 px-8 py-2 uppercase rounded-lg bg-gray-primary-400 text-white-primary-400 "
+                      className="flex items-center justify-center w-full gap-10 px-8 py-2 text-[20px] bg-gray-primary-400 text-white-primary-400 "
                     />
                   ) : (
                     <AppButton
                       clickHandler={() => {handleBuyNow(productDetail!)}}
                       title="Buy now"
                       icon={<BsCart3 />}
-                      className="flex items-center justify-center w-full gap-10 px-8 py-2 uppercase rounded-lg bg-primary-600 text-white-primary-400 hover:bg-primary-500"
+                      className="flex items-center justify-center w-full gap-10 px-8 py-2 text-[20px] bg-primary-600 text-white-primary-400 hover:bg-primary-500"
                     />
                   )}
                 </div>
               </div>
             </div>
-          </div>
-          <div className="mt-4 hidden md:block border h-[270px] border-gray-primary-400">
+          </div> 
+
+          
+          <div className="hidden mt-4 border md:block border-gray-primary-400">
             <div className="border-gray-200">
-              <ul className="flex border-b border-gray-primary-400 bg-gray-primary-400">
+              <ul className="flex items-center border-b border-gray-primary-400 bg-gray-primary-400 h-[46px]">
                 {tabs.map((tab) => (
                   <li
                     key={tab.title}
-                    className={`flex text-center p-4 cursor-pointer ${
+                    className={`flex items-center text-center p-4 cursor-pointer text-[14px] font-bold h-[46px] ${
                       activeTab === tab.title.toLowerCase()
-                        ? "border-primary-500 bg-primary-500 text-white-primary-400 font-bold"
+                        ? "border-primary-500 bg-primary-500 text-white-primary-400 "
                         : "border-transparent"
                     }`}
                     onClick={() => setActiveTab(tab.title.toLowerCase())}
@@ -429,7 +432,7 @@ const ProductDetailsPage = () => {
                   </li>
                 ))}
               </ul>
-              <div className="h-[212px] overflow-y-scroll custom-scrollbar">
+              <div className="h-[359px] overflow-y-scroll custom-scrollbar bg-gray-shade-400">
                 {activeTab === "description" && (
                   <div className="p-4 overflow-y-scroll custom-scrollbar">
                     <h2 className="text-lg font-semibold">
@@ -470,6 +473,8 @@ const ProductDetailsPage = () => {
               </div>
             </div>
           </div>
+
+          
         </div>
       </div>
       <div className="mb-4">

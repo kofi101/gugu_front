@@ -89,7 +89,7 @@ import { customerOrderDetails } from "../../helpers/interface/interfaces";
         </div>
       ) : (
         <div className=" h-[500px] overflow-y-scroll custom-scrollbar flex flex-col gap-2">
-          <div className="p-4 bg-base-gray-200 h-[250px] border-1 border-red-500">
+          <div className="p-4 bg-base-gray-200 h-[250px] ">
             <div className="flex justify-between">
               <div className="flex flex-col gap-2">
                 <p className={`${boldFont}`}>
@@ -124,7 +124,7 @@ import { customerOrderDetails } from "../../helpers/interface/interfaces";
             <div className="w-1/2">
               <div className="flex items-center p-3 font-bold bg-gray-primary-400">
                 <p>
-                  {orderDetails?.orderDetails.length === 1 ? "Item" : "items"}
+                  {orderDetails?.orderDetails.length === 1 ? "Item" : "Items"}
                 </p>
               </div>
               {orderDetails?.orderDetails?.map((detail) => (

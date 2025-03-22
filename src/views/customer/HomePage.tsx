@@ -254,6 +254,7 @@ const HomePage = () => {
           </div>
         )}
 
+
         <div className="flex gap-2 bg-white-primary-400 h-[230px] mt-[14px] ">
           <AppLinkCard
             price={

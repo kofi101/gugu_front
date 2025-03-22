@@ -109,13 +109,13 @@ const OrderCard = ({
             <div className="flex gap-2" key={order?.checkOutOrderNumber}>
               <div className="flex justify-between w-full py-2 pl-4 border-b h-[142px]">
                 <div className="flex flex-col gap-2">
-                  <p className={`${boldFont} text-xl`}>
+                  <p className={`${boldFont} text-2xl`}>
                     Order no. {order?.checkOutOrderNumber}
                   </p>
-                  <p className={`${boldFont}`}>
+                  <p className={`${boldFont} `}>
                     {order?.quantity} {order?.quantity === 1 ? "item" : "items"}
                   </p>
-                  <p className="text-sm">
+                  <p className="text-[12px]">
                     Order Date : {formatDate(order?.transactionDate)}
                   </p>
 
@@ -123,7 +123,7 @@ const OrderCard = ({
                     Total: {formatMoney(order?.checkoutTotal)}
                   </p>
                 </div>
-                <div className="flex flex-col justify-between mr-4">
+                <div className="flex flex-col justify-between mb-2 mr-4">
                   <div
                     className="flex items-center justify-end font-bold cursor-pointer text-primary-500"
                     onClick={() => onDetailsClick(order?.checkOutOrderNumber)}
@@ -132,7 +132,7 @@ const OrderCard = ({
                     <RxCaretRight className="mt-1 !text-lg !font-bold text-primary-500" />
                   </div>
                   <div
-                    className={`px-4 py-1 text-sm text-center rounded-md text-white-primary-400 ${
+                    className={`px-4 py-1 text-[12px] text-center rounded-md text-white-primary-400 ${
                       order.checkOutStatus.toLowerCase() === "order placed"
                         ? "bg-shade-orange"
                         : order.checkOutStatus.toLowerCase() === "delivered"

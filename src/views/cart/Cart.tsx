@@ -163,7 +163,7 @@ const Cart = () => {
     }
   };
   return (
-    <div className="">
+    <div className="w-[63%] mx-auto mb-5">
       <div className="flex items-center py-3">
         <p
           className="cursor-pointer"
@@ -176,7 +176,7 @@ const Cart = () => {
       </div>
       <div className="gap-4 md:flex">
         <div className="md:w-[75%] h-[500px] overflow-y-scroll custom-scrollbar">
-          <div className="px-3 py-3 bg-gray-primary-400">
+          <div className="px-3 py-3 bg-gray-primary-400 text-[20px] font-bold h-[52px]">
             {user?.uid ? (
               <div>
                 {cart?.userCart?.cartProducts?.length === 1 ||
@@ -243,16 +243,16 @@ const Cart = () => {
 
         <div className="md:w-[25%] flex flex-col gap-4 mt-8 md:mt-0">
           <div className="pb-8 font-medium">
-            <p className="px-2 py-3 bg-gray-primary-400">Summary</p>
-            <div className="flex justify-between px-2 py-2 font-medium border-b bg-base-gray-200 border-gray-primary-400">
-              <p>
+            <p className="px-2 py-3 bg-gray-primary-400 text-[20px] font-bold h-[52px]">Order Summary</p>
+            <div className="flex justify-between items-center px-2 py-2 font-medium border-b bg-base-gray-200 border-gray-primary-400 h-[52px]">
+              <p className="text-[15px] font-[600]">
                 Items Total (
                 {user?.uid
                   ? cart?.userCart?.cartProducts?.length
                   : cart?.guestUserCart?.length}
                 )
               </p>
-              <p>
+              <p className="text-[15px] font-[600]">
                 {formatMoney(
                   discountedPrice != null
                     ? discountedPrice
@@ -269,11 +269,11 @@ const Cart = () => {
                 type="text"
                 value={promoInput.code}
                 onChange={handleChange}
-                className="w-full px-4 py-2 text-center bg-white rounded-md outline-none promoCode"
+                className="w-full px-4 py-2 text-center bg-white outline-none rounded-[2px] promoCode"
               />
               <AppButton
                 title="Redeem code"
-                className="flex items-center justify-center w-full gap-6 px-4 py-1 mt-2 uppercase rounded-md space-between just bg-primary-500 text-white-primary-400"
+                className="flex items-center justify-center w-full gap-6 px-4 py-1 mt-2 uppercase rounded-[2px] space-between just bg-primary-500 text-white-primary-400"
                 icon={<IoGiftOutline />}
                 clickHandler={handleCoupon}
                 loading={isCodeLoading}
@@ -301,7 +301,7 @@ const Cart = () => {
                   }
                   title="checkout"
                   icon={<BsCart3 />}
-                  className="flex items-center justify-center w-full gap-8 px-4 py-2 mt-2 uppercase rounded-md bg-primary-500 text-white-primary-400"
+                  className="flex items-center justify-center w-full gap-8 px-4 py-2 mt-2 uppercase rounded-[2px] bg-primary-500 text-white-primary-400"
                 />
               </div>
             </div>
@@ -309,7 +309,7 @@ const Cart = () => {
         </div>
       </div>
       <div className="mb-4">
-        <p className="px-4 py-3 mt-4 font-bold bg-gray-primary-400">
+        <p className="px-8 py-3 mt-4 font-bold bg-gray-primary-400 h-[54px] flex items-center">
           Recently Viewed
         </p>
         <div

@@ -6,7 +6,7 @@ const AppLinkCard:React.FC<linkCardProp> = ({ className, imageUrl, productName, 
   return (
     <div className="relative w-full h-[210px]">
       <div className="">
-      <div className="absolute inset-0 bg-black"></div>
+      <div className="absolute inset-0"></div>
         <img className="object-contain w-full h-[210px]" src={imageUrl} alt="" />
         <div className={`${className} text-white-primary-400 flex flex-col items-center`}>
           <p className="mb-1 text-[10px] uppercase md:text-[10px]">{productTitle}</p>

@@ -273,7 +273,7 @@ const MyAccount = () => {
   };
   return (
     <div>
-      <div className="p-3 font-bold bg-gray-primary-400">Details</div>
+      <div className="p-3 font-bold bg-gray-primary-400 h-[52px]">Details</div>
       {isDetailsLoading ? (
         <div className="flex justify-center my-8">
           <CircularProgress className="circularProgress !text-gray-primary-400" />
@@ -311,12 +311,12 @@ const MyAccount = () => {
                 ></input>
               </div>
               <div className="px-3 py-2">
-                <p className="font-bold">Personal Information</p>
+                <p className="font-bold text-[12px]">Personal Information</p>
               </div>
             </div>
             <div className="flex flex-col gap-3 mt-4">
               <div>
-                <label className="px-3" htmlFor="">
+                <label className="px-3 text-[12px] font-bold" htmlFor="">
                   Name
                 </label>
                 <AppInput
@@ -328,7 +328,7 @@ const MyAccount = () => {
                 />
               </div>
               <div>
-                <label className="px-3" htmlFor="">
+                <label className="px-3 text-[12px] font-bold" htmlFor="">
                   Phone
                 </label>
                 <AppInput
@@ -340,7 +340,7 @@ const MyAccount = () => {
                 />
               </div>
               <div>
-                <label className="px-3" htmlFor="">
+                <label className="px-3 text-[12px] font-bold" htmlFor="">
                   Email
                 </label>
                 <AppInput
@@ -352,7 +352,7 @@ const MyAccount = () => {
                 />
               </div>
               <div>
-                <label className="px-3" htmlFor="">
+                <label className="px-3 text-[12px] font-bold" htmlFor="">
                   Date of Birth
                 </label>
                 {/* <AppInput
@@ -372,7 +372,7 @@ const MyAccount = () => {
                 />
               </div>
               <div>
-                <label className="px-3" htmlFor="">
+                <label className="px-3 text-[12px] font-bold" htmlFor="">
                   Gender
                 </label>
                 <div className="flex w-[60%]">
@@ -404,18 +404,18 @@ const MyAccount = () => {
           </div>
 
           <div className="w-[50%]">
-            <div className="py-1 pl-5 font-bold bg-gray-primary-400">
+            <div className="py-1 pl-5 font-bold bg-gray-primary-400 h-[33px] text-[12px] flex items-center">
               Address Book
             </div>
             <div className="px-3 pt-2 pb-4 bg-base-gray-200">
               <div className="flex items-center justify-between">
-                <p className="font-bold">Your default shipping address:</p>
+                <p className="font-bold text-[12px]">Your default shipping address:</p>
                 <div className="flex items-center p-1 rounded-full cursor-pointer justify bg-primary-500 ">
                   <MdOutlineEdit className=" text-white-primary-400" />
                 </div>
               </div>
               <div className="my-3">
-                <label className="px-3 font-medium" htmlFor="">
+                <label className="px-3 text-[12px] font-bold" htmlFor="">
                   Address
                 </label>
                 <AppInput
@@ -423,11 +423,11 @@ const MyAccount = () => {
                   onChange={handleChange}
                   type="text"
                   value={addressBook.address}
-                  className="w-full px-3 py-1 rounded-full outline-none bg-gray-primary-400"
+                  className="w-full px-3 py-1 rounded-full outline-none bg-gray-primary-400 "
                 />
               </div>
               <div className="my-3">
-                <label className="px-3 font-medium" htmlFor="">
+                <label className="px-3 text-[12px] font-bold" htmlFor="">
                   Digital Address
                 </label>
                 <AppInput
@@ -439,7 +439,7 @@ const MyAccount = () => {
                 />
               </div>
               <div className="my-3">
-                <label className="px-3 font-medium" htmlFor="">
+                <label className="px-3 text-[12px] font-bold" htmlFor="">
                   Region
                 </label>
                 <AppRegionSelect
@@ -451,7 +451,7 @@ const MyAccount = () => {
                 />
               </div>
               <div className="my-3">
-                <label className="px-3 font-medium" htmlFor="">
+                <label className="px-3 text-[12px] font-bold" htmlFor="">
                   City/Town
                 </label>
                 <AppRegionSelect
@@ -468,7 +468,7 @@ const MyAccount = () => {
                   clickHandler={() => handleSaveAddressBook()}
                   loading={isAddressLoading}
                   title="Save"
-                  className="w-[95%] bg-primary-500 text-white-primary-400 p-2 rounded-md border"
+                  className="w-[95%] bg-primary-500 text-white-primary-400 p-2 rounded-md border text-[20px]"
                 />
               </div>
             </div>

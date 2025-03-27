@@ -69,7 +69,7 @@ const MyAccount = () => {
     });
   };
   return (
-    <div className="flex gap-4 mt-10 mb-10  w-[63%] mx-auto">
+    <div className="flex gap-4 mt-10 mb-10  w-[60%] mx-auto">
       <div className="flex flex-col justify-between w-[25%]">
         <ul className=" bg-base-gray-200">
           {menuItems.map((item) => (

@@ -11,7 +11,7 @@ const AboutUs = () => {
   const navigate = useNavigate();
   const user = useSelector((store: any) => store?.user?.companyInfo);
   return (
-    <div className="mx-auto mb-5 w-[63%]">
+    <div className="mx-auto mb-5 w-[60%]">
       <div className="flex items-center py-3 text-primary-500">
         <p
           className="cursor-pointer"

@@ -100,12 +100,23 @@ const AppCategoryCard: React.FC<categoryProductProp> = ({ category }) => {
           src={category.productImages![0]}
           alt={category.productName}
         />
+        {category.promotionPrice ? (
+          <p className="text-[10px] bg-primary-yellow rounded text-white-primary-400 px-1 absolute top-1 right-2">
+            Promo
+          </p>
+        ) : (
+          <p></p>
+        )}
       </div>
 
       <div className="p-2 ">
         {category.productName && (
-          <div className="mb-2 text-lg font-semibold">
-            {subStringLongText(category.productName, 22)}
+          // <div className="mb-2 text-lg font-semibold">
+          //   {subStringLongText(category.productName, 22)}
+          // </div>
+
+          <div className="mb-2 text-lg font-semibold truncate max-w-[120px] sm:max-w-[160px] md:max-w-[200px]">
+            {category.productName}
           </div>
         )}
         <div
@@ -125,7 +136,7 @@ const AppCategoryCard: React.FC<categoryProductProp> = ({ category }) => {
         </div>
         {category.promotionPrice ? (
           <div
-            className="flex gap-4 mt-4 text-primary-500 text-[13px]"
+            className="flex items-center gap-4 mt-4 text-primary-500 text-[13px]"
             onClick={() => onProductClickedFromCategory(category)}
           >
             {category.promotionPrice && (
@@ -134,16 +145,40 @@ const AppCategoryCard: React.FC<categoryProductProp> = ({ category }) => {
               </p>
             )}
 
-            <p>{category.discountPercentage}%</p>
+            {/* <p className="text-[8px] bg-primary-yellow rounded text-white-primary-400 px-1">
+              promo
+            </p> */}
           </div>
-        ) : <div className="mt-10"></div>}
+        ) : (
+          <div className="mt-10"></div>
+        )}
 
         {category.salesPrice && (
           <div
-            className="font-bold text-[20px]"
+            className="font-bold text-[20px] flex justify-between items-center"
             onClick={() => onProductClickedFromCategory(category)}
           >
-            {formatMoney(category.promotionPrice ? category.promotionPrice : category.salesPrice)}
+            <p>
+              {formatMoney(
+                category.promotionPrice
+                  ? category.promotionPrice
+                  : category.discountPrice
+                  ? category.discountPrice
+                  : category.salesPrice
+              )}
+            </p>
+            {typeof category.discountPrice === "number" &&
+              category.discountPrice > 0 &&
+              category.discountPrice < category.salesPrice && (
+                <div className="flex items-center gap-2">
+                  <p className="text-[14px] text-primary-400">
+                    {category.discountPercentage}%
+                  </p>
+                  <p className="text-[8px] bg-primary-yellow rounded text-white-primary-400 px-1">
+                    Discounted
+                  </p>
+                </div>
+              )}
           </div>
         )}
 
@@ -153,8 +188,9 @@ const AppCategoryCard: React.FC<categoryProductProp> = ({ category }) => {
             name="simple-controlled"
             value={category.reviewStars}
           />
-          <p className="text-[11px] text-primary-500">{category.reviewStars} reviews</p>
-          
+          <p className="text-[11px] text-primary-500">
+            {category.reviewStars} reviews
+          </p>
         </div>
         <div className="flex items-center justify-between ">
           <div className="w-[78%]">

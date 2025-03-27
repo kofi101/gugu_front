@@ -250,7 +250,7 @@ const ProductDetailsPage = () => {
         <p>{productDetail?.productName}</p>
       </div>
       <div className="gap-4 md:flex">
-        <div className="hidden h-[700px] overflow-y-scroll border md:block md:w-[300px] border-gray-primary-400 custom-scrollbar bg-gray-shade-400">
+        <div className="hidden h-[817px] overflow-y-scroll border md:block md:w-[300px] border-gray-primary-400 custom-scrollbar bg-gray-shade-400">
           <CategorySideBar
             categories={category}
             onCategoryClick={handleCategoryClick}
@@ -321,6 +321,7 @@ const ProductDetailsPage = () => {
                   {productReviews?.length}{" "}
                   {productReviews?.length === 1 ? "review" : "reviews"}
                 </p>
+                <p className="text-[12px] flex ml-auto rounded-[5px] px-2 text-white-primary-400 bg-primary-500">{productDetail?.productCategory}</p>
               </div>
               <p className="text-[20px] font-bold md:mb-4 text-primary-500">
                 {formatMoney(total!)}
@@ -435,10 +436,10 @@ const ProductDetailsPage = () => {
               <div className="h-[359px] overflow-y-scroll custom-scrollbar bg-gray-shade-400">
                 {activeTab === "description" && (
                   <div className="p-4 overflow-y-scroll custom-scrollbar">
-                    <h2 className="text-lg font-semibold">
+                    <h2 className="text-[17px] font-semibold">
                       Product Description
                     </h2>
-                    <p className="mt-2 text-gray-600">
+                    <p className="mt-2 text-gray-600 text-[14px]">
                       {productDetail?.productDescription}
                     </p>
                   </div>

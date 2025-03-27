@@ -112,8 +112,7 @@ const ConfirmCheckout = () => {
 
     API.post(`${paymentStatus}`, payload)
       .then((response) => {
-        console.log(response);
-        if (response.data.status === "success") {
+        if (response.status === 200) {
           
           setIsLoading(false);
           toast.success("Order payment confirmed successfully.", {

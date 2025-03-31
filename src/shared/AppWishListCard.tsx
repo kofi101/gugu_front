@@ -71,7 +71,7 @@ const AppWishListCard: React.FC<WishListItemProp> = ({ item }) => {
         <img
           src={user ? imageOne : productImages?.[0] ?? ''}
           alt={productName}
-          className="object-cover w-full h-full"
+          className="object-contain w-full h-full"
         />
       </div>
 

@@ -18,15 +18,16 @@ import API, {
 import AppRegionSelect from "../../shared/AppRegionSelect";
 import { toast } from "react-toastify";
 import { useDispatch } from "react-redux";
-import { setCheckoutDetailsFilled, setDeliveryDestination } from "../../store/features/userSliceFeature";
-
+import {
+  setCheckoutDetailsFilled,
+  setDeliveryDestination,
+} from "../../store/features/userSliceFeature";
 
 const DeliveryDetails: React.FC<CheckoutProcessProps> = ({
   onComplete,
   isOpen,
   formComplete,
   editPayment,
- 
 }) => {
   const dispatch = useDispatch();
   const user = useSelector((store: any) => store?.user);
@@ -35,7 +36,9 @@ const DeliveryDetails: React.FC<CheckoutProcessProps> = ({
 
   const [deliveryOption, setDeliveryOption] = useState<[]>([]);
   const [selectedDelivery, setSelectedDelivery] = useState<string>("");
-  const [selectedDeliveryId, setSelectedDeliveryId] = useState<string | null>(null);
+  const [selectedDeliveryId, setSelectedDeliveryId] = useState<string | null>(
+    null
+  );
   const [selectedDestination, setSelectedDestination] = useState();
 
   const [isLoading, setIsLoading] = useState<boolean>(false);
@@ -64,7 +67,7 @@ const DeliveryDetails: React.FC<CheckoutProcessProps> = ({
 
   const handleDeliverySelection = (e: React.ChangeEvent<HTMLInputElement>) => {
     console.log(e.target);
-    const {value, id} = e.target;
+    const { value, id } = e.target;
     setSelectedDelivery(value);
     setSelectedDeliveryId(id);
   };
@@ -77,7 +80,7 @@ const DeliveryDetails: React.FC<CheckoutProcessProps> = ({
           const modifiedOptions = response.data?.map((option: any) => ({
             regionId: option.destination_id,
             regionName: option.destination_name,
-          }))
+          }));
           setDeliveryOption(modifiedOptions);
         } else {
           toast.error("Unable to fetch delivery destinations.", {
@@ -125,21 +128,20 @@ const DeliveryDetails: React.FC<CheckoutProcessProps> = ({
   }, []);
 
   useEffect(() => {
-    console.log("selected option for delivery",deliveryOption);
+    console.log("selected option for delivery", deliveryOption);
     if (selectedDelivery === "WithinAccra") {
       getWithAccra();
     } else {
       getOutsideAccra();
     }
   }, [selectedDelivery]);
-  
+
   const handleSelection = (el: any) => {
-    console.log("selected inside",el);
+    console.log("selected inside", el);
     setSelectedDestination(el);
-  }
+  };
 
   const handleSaveDelivery = () => {
-    
     setIsLoading(true);
     const payload = {
       checkOutOrderNumber: user?.orderId,
@@ -147,7 +149,7 @@ const DeliveryDetails: React.FC<CheckoutProcessProps> = ({
       destinationId: selectedDestination,
     };
 
-    if(payload.destinationId === undefined || payload.destinationId === ""){
+    if (payload.destinationId === undefined || payload.destinationId === "") {
       toast.error("Please select a delivery destination", {
         autoClose: 2000,
         position: "top-right",
@@ -155,19 +157,18 @@ const DeliveryDetails: React.FC<CheckoutProcessProps> = ({
       setIsLoading(false);
       return;
     } else {
-      
       API.post(`${saveDeliveryAddress}`, payload)
         .then((response) => {
           if (response.status === 200) {
             setIsLoading(false);
-  console.log("response from delivery",response.data)
+            console.log("response from delivery", response.data);
             toast.success("Delivery details saved.", {
               autoClose: 2000,
               position: "top-right",
             });
             onComplete();
-            dispatch(setDeliveryDestination(response.data))
-            dispatch(setCheckoutDetailsFilled(true))
+            dispatch(setDeliveryDestination(response.data));
+            dispatch(setCheckoutDetailsFilled(true));
           } else {
             setIsLoading(false);
             toast.error("Unable to save delivery details.", {
@@ -223,23 +224,22 @@ const DeliveryDetails: React.FC<CheckoutProcessProps> = ({
         <div className="px-5 py-3 bg-base-gray-200">
           <form onSubmit={handleFormSubmit}>
             <div className="flex gap-4">
-              {delivery &&
-                delivery?.map((item: any) => (
-                  <div className="flex flex-col w-[50%] gap-16 mt-4 mb-10">
-                    <AppRadioButton
-                      label={item.displayName}
-                      description=""
-                      name="delivery"
-                      id={item.id}
-                      value={item.name}
-                      onChange={handleDeliverySelection}
-                      type="delivery"
-                      checked={selectedDelivery === item.name}
-                    />
-                  </div>
-                ))}
+              {delivery && delivery[1] && (
+                <div className="flex flex-col w-[50%] gap-16 mt-4 mb-10">
+                  <AppRadioButton
+                    label="Delivery"
+                    description=""
+                    name="delivery"
+                    id={delivery[1].id.toString()}
+                    value={delivery[1].name[1]}
+                    onChange={handleDeliverySelection}
+                    type="delivery"
+                    checked={selectedDelivery === delivery[1].name[1]}
+                  />
+                </div>
+              )}
             </div>
-            
+
             <div className="flex justify-end gap-4 mb-6">
               <AppRegionSelect
                 onChange={(value: number) => handleSelection(value)}

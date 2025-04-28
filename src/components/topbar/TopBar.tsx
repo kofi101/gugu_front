@@ -49,7 +49,6 @@ type PartialUser = Partial<loggedInUser>;
 const TopBar = () => {
   const location = useLocation();
   const currentPath = location.pathname;
-  console.log("current path", currentPath);
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const user = useSelector((store: any) => store?.user?.currentUser);

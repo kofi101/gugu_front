@@ -1,10 +1,16 @@
 import { FaCaretRight } from "react-icons/fa";
 import {formatMoney, subStringLongText} from "../helpers/functions/helperFunctions";
 import { linkCardProp } from "../helpers/type/types";
+import { useNavigate } from "react-router-dom";
+import { routerPath } from "../routes/Router";
 
 const AppLinkCard:React.FC<linkCardProp> = ({ className, imageUrl, productName, productTitle, price, substringNumber }) => {
+  const navigate = useNavigate();
+  const handleRouteToCategories = () => {
+    navigate(routerPath.CATEGORIES);
+  }
   return (
-    <div className="relative w-full h-[210px]">
+    <div className="relative w-full h-[210px] cursor-pointer" onClick={handleRouteToCategories}>
       <div className="">
       <div className="absolute inset-0"></div>
         <img className="object-contain w-full h-[210px]" src={imageUrl} alt="" />
@@ -14,9 +20,9 @@ const AppLinkCard:React.FC<linkCardProp> = ({ className, imageUrl, productName, 
           <p className="flex items-center mb-4">
             <FaCaretRight /> <p className="text-xs">See More</p>
           </p>
-          <button className="px-2 py-1 font-bold rounded-2xl bg-white-primary-400 text-blue-primary-400">
+          <p className="px-2 py-1 font-bold rounded-2xl bg-white-primary-400 text-blue-primary-400">
             {formatMoney(price)}
-          </button>
+          </p>
         </div>
       </div>
     </div>

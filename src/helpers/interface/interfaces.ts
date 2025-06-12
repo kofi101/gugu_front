@@ -32,6 +32,7 @@ export interface regionInputProp {
   onChange: (value: number) => void;
   className: string;
   disabled?: boolean;
+  value?: number;
 }
 export interface RadioButtonProps {
   name: string;

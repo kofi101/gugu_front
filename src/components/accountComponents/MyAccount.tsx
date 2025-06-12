@@ -28,7 +28,7 @@ const MyAccount = () => {
     { regionId: number; regionName: string }[]
   >([]);
   const [cities, setCities] = useState<
-    { regionId: number; regionName: string }[]
+    { regionId: number; regionName: string; cityId: number }[]
   >([]);
   const [currentUser, setCurrentUser] = useState<PartialUser>();
 
@@ -118,12 +118,28 @@ const MyAccount = () => {
 
           if (userData?.region) {
             const foundRegion = regions.find(
-              (region: any) => region.regionName === userData.region
+              (region) => region.regionName === userData.region
             );
-            console.log("foundRegion", foundRegion);
-            // setRegions(foundRegion);
             if (foundRegion) {
               handleSelectRegion(foundRegion.regionId);
+              setAddressBook((prev) => ({
+                ...prev,
+                regionId: foundRegion.regionId,
+              }));
+
+              if (userData?.city) {
+                setTimeout(() => {
+                  const foundCity = cities.find(
+                    (city) => city.regionName === userData.city
+                  );
+                  if (foundCity) {
+                    setAddressBook((prev) => ({
+                      ...prev,
+                      cityId: foundCity.cityId,
+                    }));
+                  }
+                }, 500); // Wait briefly for cities to populate after selecting region
+              }
             }
           }
 
@@ -170,7 +186,7 @@ const MyAccount = () => {
 
   const transformCityData = (
     data: { regionId: number; cityId: number; cityName: string }[]
-  ): { regionId: number; regionName: string }[] => {
+  ): { regionId: number; regionName: string; cityId: number }[] => {
     return data.map((city) => ({
       regionId: city.regionId,
       regionName: city.cityName,
@@ -178,6 +194,7 @@ const MyAccount = () => {
     }));
   };
   const handleSelectRegion = (regionId: number) => {
+    setAddressBook((prev) => ({ ...prev, regionId }));
     API.get(`${getRegionCities}/${regionId}`)
       .then((response) => {
         setCities(transformCityData(response.data));
@@ -186,7 +203,9 @@ const MyAccount = () => {
         console.log(error);
       });
   };
-
+  const handleSelectCity = (cityId: number) => {
+    setAddressBook((prev) => ({ ...prev, cityId }));
+  };
   const handleGenderSelection = (e: React.ChangeEvent<HTMLInputElement>) => {
     setGender(e.target.value);
   };
@@ -409,7 +428,9 @@ const MyAccount = () => {
             </div>
             <div className="px-3 pt-2 pb-4 bg-base-gray-200">
               <div className="flex items-center justify-between">
-                <p className="font-bold text-[12px]">Your default shipping address:</p>
+                <p className="font-bold text-[12px]">
+                  Your default shipping address:
+                </p>
                 <div className="flex items-center p-1 rounded-full cursor-pointer justify bg-primary-500 ">
                   <MdOutlineEdit className=" text-white-primary-400" />
                 </div>
@@ -446,6 +467,7 @@ const MyAccount = () => {
                   onChange={(value: number) => handleSelectRegion(value)}
                   defaultValue="Greater Accra"
                   name=""
+                  value={addressBook.regionId}
                   options={regions}
                   className="outline-none w-full rounded-full bg-gray-primary-400 h-[36px] pl-4"
                 />
@@ -455,7 +477,8 @@ const MyAccount = () => {
                   City/Town
                 </label>
                 <AppRegionSelect
-                  onChange={() => {}}
+                  onChange={handleSelectCity}
+                  value={addressBook.cityId}
                   defaultValue=""
                   name=""
                   options={cities}

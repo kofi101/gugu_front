@@ -6,6 +6,7 @@ const AppRegionSelect: React.FC<regionInputProp> = ({
   onChange,
   className,
   disabled,
+  value
 }) => {
   const handleChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
     onChange(Number(event.target.value));
@@ -14,6 +15,7 @@ const AppRegionSelect: React.FC<regionInputProp> = ({
     <select
       name={name}
       defaultValue={defaultValue}
+      value={value}
       onChange={handleChange}
       className={`${className}`}
       disabled={disabled}

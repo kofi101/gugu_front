@@ -42,6 +42,7 @@ const MyAccount = () => {
     digitalAddress: "",
     regionId: 0,
     cityId: 0,
+    shippingBillingAddress: "",
   });
 
   const [dob, setDob] = useState<string>("");
@@ -99,85 +100,49 @@ const MyAccount = () => {
       });
   };
 
-  const handleFetchUserDetails = () => {
-    setIsDetailsLoading(true);
-    API.get(`${getUserDetails}${user?.uid}`)
-      .then((response) => {
-        if (response.status === 200) {
-          const userData = response?.data;
-          setCurrentUser(userData);
-          setAddressBook(userData);
+  
 
-          setDob(formatDate(userData.dateofBirth));
-
-          if (userData.gender) {
-            setGender(userData.gender);
-          }
-          // setIsAddress(userData.address);
-          // setIsDigitalAddress(userData.digitalAddress);
-
-          if (userData?.region) {
-            const foundRegion = regions.find(
-              (region) => region.regionName === userData.region
-            );
-            if (foundRegion) {
-              handleSelectRegion(foundRegion.regionId);
-              setAddressBook((prev) => ({
-                ...prev,
-                regionId: foundRegion.regionId,
-              }));
-
-              if (userData?.city) {
-                setTimeout(() => {
-                  const foundCity = cities.find(
-                    (city) => city.regionName === userData.city
-                  );
-                  if (foundCity) {
-                    setAddressBook((prev) => ({
-                      ...prev,
-                      cityId: foundCity.cityId,
-                    }));
-                  }
-                }, 500); // Wait briefly for cities to populate after selecting region
-              }
-            }
-          }
-
-          // if (userData?.city) {
-          //   setCities((prevCities) => [
-          //     ...prevCities,
-          //     { regionId: userData.region, regionName: userData.city },
-          //   ]);
-          // }
-        } else {
-          setIsDetailsLoading(false);
-          toast.error("Error fetching user details", {
-            autoClose: 2000,
-            position: "top-right",
-          });
-        }
-      })
-      .catch((error) => {
-        setIsDetailsLoading(false);
-        console.log(error);
-        toast.error("Error fetching user details", {
-          autoClose: 2000,
-          position: "top-right",
-        });
-      });
-  };
   useEffect(() => {
-    API.get(`${getRegions}`)
-      .then((response) => {
-        console.log(response.data);
-        setRegions(response.data);
-      })
-      .catch((error) => {
-        console.log(error);
-      });
-    handleFetchUserDetails();
-  }, []);
+    const fetchInitData = async () => {
+      setIsDetailsLoading(true);
+      try {
+        const [{ data: regionData }, { data: userData }] = await Promise.all([
+          API.get(getRegions),
+          API.get(`${getUserDetails}${user?.uid}`),
+        ]);
 
+        setRegions(regionData);
+        setCurrentUser(userData);
+        setAddressBook({
+          ...addressBook,
+          fullName: userData?.fullName,
+          email: userData?.email,
+          phoneNumber: userData?.phoneNumber,
+          address: userData?.address || "",
+          digitalAddress: userData?.digitalAddress || "",
+          regionId: 0,
+          cityId: 0,
+          dob: formatDate(userData.dateofBirth),
+          gender: userData?.gender || "",
+          shippingBillingAddress: userData?.shippingBillingAddress || "",
+        });
+        setDob(formatDate(userData?.dateofBirth));
+        setGender(userData?.gender || "");
+
+        const region = regionData.find((r: any) => r.regionName === userData?.region);
+        if (region) {
+          handleSelectRegion(region.regionId);
+          setAddressBook((prev) => ({ ...prev, regionId: region.regionId }));
+        }
+      } catch (error) {
+        toast.error("Error loading user details", { autoClose: 2000 });
+      } finally {
+        setIsDetailsLoading(false);
+      }
+    };
+
+    fetchInitData();
+  }, []);
   useEffect(() => {
     if (regions.length > 0) {
       setIsDetailsLoading(false);
@@ -218,7 +183,7 @@ const MyAccount = () => {
       email: addressBook.email,
       phoneNumber: addressBook.phoneNumber,
       address: currentUser?.address,
-      shipping_BillingAddress: currentUser?.shipping_BillingAddress,
+      shipping_BillingAddress: currentUser?.shippingBillingAddress,
       dateofBirth: dob,
       gender: gender,
       userImage: fileUrl,
@@ -258,7 +223,7 @@ const MyAccount = () => {
 
     const payload = {
       id: currentUser?.id,
-      shipping_BillingAddress: addressBook.address,
+      shipping_BillingAddress: addressBook.shippingBillingAddress,
       digitalAddress: addressBook.digitalAddress,
       regionId: cities[0]?.regionId,
       cityId: cities[0]?.regionId,
@@ -440,10 +405,10 @@ const MyAccount = () => {
                   Address
                 </label>
                 <AppInput
-                  id="address"
+                  id="shippingBillingAddress"
                   onChange={handleChange}
                   type="text"
-                  value={addressBook.address}
+                  value={addressBook.shippingBillingAddress}
                   className="w-full px-3 py-1 rounded-full outline-none bg-gray-primary-400 "
                 />
               </div>

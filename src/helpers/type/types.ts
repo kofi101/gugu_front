@@ -70,7 +70,7 @@ export type loggedInUser = {
   businessDocument: string;
   email: string;
   phoneNumber: string;
-  shipping_BillingAddress: string;
+  shippingBillingAddress: string;
   id: string;
   fullName: string;
   city?: string;

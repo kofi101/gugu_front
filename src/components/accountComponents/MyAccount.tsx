@@ -42,7 +42,7 @@ const MyAccount = () => {
     digitalAddress: "",
     regionId: 0,
     cityId: 0,
-    shippingBillingAddress: "",
+    shipping_BillingAddress: "",
   });
 
   const [dob, setDob] = useState<string>("");
@@ -124,7 +124,7 @@ const MyAccount = () => {
           cityId: 0,
           dob: formatDate(userData.dateofBirth),
           gender: userData?.gender || "",
-          shippingBillingAddress: userData?.shippingBillingAddress || "",
+          shipping_BillingAddress: userData?.shipping_BillingAddress || "",
         });
         setDob(formatDate(userData?.dateofBirth));
         setGender(userData?.gender || "");
@@ -183,7 +183,7 @@ const MyAccount = () => {
       email: addressBook.email,
       phoneNumber: addressBook.phoneNumber,
       address: currentUser?.address,
-      shipping_BillingAddress: currentUser?.shippingBillingAddress,
+      shipping_BillingAddress: currentUser?.shipping_BillingAddress,
       dateofBirth: dob,
       gender: gender,
       userImage: fileUrl,
@@ -223,7 +223,7 @@ const MyAccount = () => {
 
     const payload = {
       id: currentUser?.id,
-      shipping_BillingAddress: addressBook.shippingBillingAddress,
+      shipping_BillingAddress: addressBook.shipping_BillingAddress,
       digitalAddress: addressBook.digitalAddress,
       regionId: cities[0]?.regionId,
       cityId: cities[0]?.regionId,
@@ -405,10 +405,10 @@ const MyAccount = () => {
                   Address
                 </label>
                 <AppInput
-                  id="shippingBillingAddress"
+                  id="shipping_BillingAddress"
                   onChange={handleChange}
                   type="text"
-                  value={addressBook.shippingBillingAddress}
+                  value={addressBook.shipping_BillingAddress}
                   className="w-full px-3 py-1 rounded-full outline-none bg-gray-primary-400 "
                 />
               </div>

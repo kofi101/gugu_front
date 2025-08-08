@@ -320,13 +320,13 @@ const AuthLogin = () => {
             className="w-full py-1 text-3xl font-bold rounded-md bg-red-primary-400 text-white-primary-400"
           />
         </div>
-        <div className="w-full">
+        {/* <div className="w-full">
           <AppButton
             title="f"
             clickHandler={() => console.log("clicked")}
             className="w-full py-1 text-3xl font-bold rounded-md bg-blue-secondary-500 text-white-primary-400"
           />
-        </div>
+        </div> */}
       </div>
       <div className="mt-12 font-bold text-center">
         <p>

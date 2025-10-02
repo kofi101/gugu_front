@@ -81,6 +81,7 @@ const CategoriesView = () => {
         setCategoryProducts(responsedata);
       }
     });
+    setCurrentPage(1);
   }, [categoryId, brandsId, priceChange.firstPrice, priceChange.secondPrice]);
 
   const handlePriceChange = (event: { id: string; value: string }) => {
@@ -93,7 +94,7 @@ const CategoriesView = () => {
 
   const handleBrandSelection = (brandId: number) => {
     setBrandsId(brandId);
-    console.log(brandsId);
+    // console.log(brandsId);
   };
 
   return (
@@ -184,16 +185,12 @@ const CategoriesView = () => {
               </div>
             )}
           </div>
-          {currentItems.length > 6 ? (
-            <div>
-              <AppPagination
-                currentData={currentData}
-                itemsPerPage={itemsPerPage}
-                onPageChange={handlePageChange}
-              />
-            </div>
-          ) : (
-            ""
+          {currentData.length > itemsPerPage && (
+            <AppPagination
+              currentData={currentData}
+              itemsPerPage={itemsPerPage}
+              onPageChange={handlePageChange}
+            />
           )}
         </div>
       </div>

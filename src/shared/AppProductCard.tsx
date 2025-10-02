@@ -20,7 +20,7 @@ const AppProductCard: React.FC<productCardProp> = ({ product }) => {
   };
 
   return (
-    <div className="text-center bg-white cursor-pointer border border-gray-primary-400 h-[274px]">
+    <div className="text-center bg-white cursor-pointer border border-gray-primary-400 h-[285px]">
       <div className="relative">
         {(product.productImages?.length ?? 0) > 0 && (
           <img
@@ -34,7 +34,7 @@ const AppProductCard: React.FC<productCardProp> = ({ product }) => {
       </div>
 
       <div
-        className="py-2 pt-2 font-semibold"
+        className="py-2 pt-2 overflow-hidden font-semibold"
         onClick={() => onProductClick(product)}
       >
         {product.productName && (

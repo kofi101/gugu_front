@@ -223,7 +223,7 @@ export default function OrderDetail() {
                   <p className="mt-2 text-sm text-text-muted">
                     Original total <s className="tabular">{formatMoney(o.orderTotal)}</s>
                   </p>
-                  <p className="text-xs font-semibold text-text-muted">Amount due on delivery</p>
+                  <p className="text-xs font-semibold text-text-muted">{o.paymentStatus === "paid" ? "Amount paid on delivery" : "Amount due on delivery"}</p>
                   <p className="type-display tabular text-3xl text-ink-950">{formatMoney(due)}</p>
                 </>
               )}
@@ -315,7 +315,7 @@ export default function OrderDetail() {
                 <dd className="tabular">−{formatMoney(o.cancelledAmount)}</dd>
               </div>
               <div className="flex justify-between border-t border-paper-line pt-2 text-base font-bold">
-                <dt>Amount due on delivery</dt>
+                <dt>{o.paymentStatus === "paid" ? "Amount paid on delivery" : "Amount due on delivery"}</dt>
                 <dd className="tabular">{formatMoney(due)}</dd>
               </div>
             </>

@@ -72,11 +72,11 @@ export default function Orders() {
                         <s>{formatMoney(o.orderTotal)}</s>
                       </p>
                       <p className="type-title tabular">
-                        <span className="sr-only">Amount due on delivery </span>
+                        <span className="sr-only">{o.paymentStatus === "paid" ? "Amount paid on delivery " : "Amount due on delivery "}</span>
                         {formatMoney(amountDueOnDelivery(o) as number)}
                       </p>
                       <p className="text-xs text-text-muted" aria-hidden>
-                        due on delivery
+                        {o.paymentStatus === "paid" ? "paid on delivery" : "due on delivery"}
                       </p>
                     </>
                   )}

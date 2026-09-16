@@ -35,7 +35,7 @@ export default function Contact() {
               </li>
             )}
           </ul>
-          <p className="text-sm text-text-muted">When you contact us about an order, include the order number (for example GG-240918-7K3Q).</p>
+          <p className="text-sm text-text-muted">When you contact us about an order, include the order number (for example GG-260918-7K3Q9A).</p>
         </>
       )}
     </InfoPage>

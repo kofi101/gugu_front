@@ -24,9 +24,10 @@ export default function CheckoutConfirm() {
     setOutcome({ kind: "checking" });
     try {
       const res = await confirmExpressPayPayment(orderId);
+      // ExpressPay result 1 = paid, 2 = failed, 3/4 = still pending (the server maps these).
       if (res.paymentStatus === "paid") setOutcome({ kind: "paid" });
-      else if (res.paymentStatus === "failed" || res.status === "payment_failed" || res.status === "cancelled")
-        setOutcome({ kind: "failed", canRetry: res.status === "awaiting_payment" });
+      else if (res.status === "payment_failed" || res.status === "cancelled") setOutcome({ kind: "failed", canRetry: false });
+      else if (res.paymentStatus === "failed") setOutcome({ kind: "failed", canRetry: res.status === "awaiting_payment" });
       else setOutcome({ kind: "pending" });
     } catch (err) {
       setOutcome({ kind: "error", message: errorMessage(err, "We couldn't check your payment. Try again.") });
@@ -98,7 +99,7 @@ export default function CheckoutConfirm() {
               <LuClock aria-hidden className="mx-auto h-14 w-14 text-thread-700" />
               <h1 className="type-title mt-3 text-2xl text-ink-950">Payment not confirmed yet</h1>
               <p className="mt-2 text-text-muted">
-                ExpressPay hasn't confirmed this payment. If you approved it on your phone, it can take a minute. Don't pay twice.
+                ExpressPay hasn't confirmed this payment yet. If you approved it on your phone, it can take a few minutes. Don't pay twice: unpaid orders close automatically after about an hour.
               </p>
               <div className="mt-6 flex flex-wrap justify-center gap-3">
                 <button type="button" className="btn btn-primary" onClick={check}>
@@ -114,12 +115,21 @@ export default function CheckoutConfirm() {
             <>
               <LuCircleX aria-hidden className="mx-auto h-14 w-14 text-serial" />
               <h1 className="type-title mt-3 text-2xl text-ink-950">Payment didn't go through</h1>
-              <p className="mt-2 text-text-muted">You haven't been charged for this order.</p>
+              <p className="mt-2 text-text-muted">
+                {outcome.canRetry
+                  ? "You haven't been charged. You can try paying again."
+                  : "This order was closed without payment, and you haven't been charged. Add the items to your cart again to place a new order."}
+              </p>
               <div className="mt-6 flex flex-wrap justify-center gap-3">
                 {outcome.canRetry && (
                   <button type="button" className="btn btn-primary" onClick={payAgain} disabled={retrying}>
                     {retrying ? "Opening ExpressPay…" : "Try paying again"}
                   </button>
+                )}
+                {!outcome.canRetry && (
+                  <Link to="/" className="btn btn-primary">
+                    Continue shopping
+                  </Link>
                 )}
                 <Link to={orderLink} className="btn btn-secondary">
                   View order

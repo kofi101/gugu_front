@@ -7,7 +7,7 @@ import { getProductsByIds, getShippingOptions } from "../../data/catalog";
 import { useAuth } from "../../context/auth";
 import { lineCap, useCart } from "../../context/cart";
 import { useAsync } from "../../hooks/useAsync";
-import { errorMessage } from "../../lib/errors";
+import { callableCode, callableDetails, errorMessage } from "../../lib/errors";
 import { formatMoney, PAYMENT_METHOD_LABEL, plural } from "../../lib/format";
 import { displayPrice, isInStock } from "../../lib/parse";
 import type { PaymentMethod, ShippingAddress } from "../../lib/types";
@@ -175,7 +175,24 @@ export default function Checkout() {
       }
       navigate(`/account/orders/${result.orderId}?placed=1`, { replace: true });
     } catch (err) {
-      toast.error(errorMessage(err, "We couldn't place your order. Nothing was charged. Try again."), { autoClose: 8000 });
+      const code = callableCode(err);
+      if (code === "OUT_OF_STOCK" || code === "PRODUCT_UNAVAILABLE" || code === "PRODUCT_NOT_FOUND") {
+        const productId = callableDetails<{ productId?: string; available?: number }>(err)?.productId;
+        const line = cart.lines.find((l) => l.productId === productId);
+        const available = callableDetails<{ available?: number }>(err)?.available;
+        const msg = line
+          ? code === "OUT_OF_STOCK" && available != null
+            ? `Only ${available} of “${line.name}” left. Update your cart and try again.`
+            : `“${line.name}” is no longer available. Remove it from your cart and try again.`
+          : errorMessage(err);
+        toast.error(msg, { autoClose: 10000 });
+        live.reload();
+      } else if (code === "PAYMENT_INIT_FAILED") {
+        // The order was recorded as payment_failed and the cart kept: the customer can simply try again.
+        toast.error(errorMessage(err), { autoClose: 10000 });
+      } else {
+        toast.error(errorMessage(err, "We couldn't place your order. Nothing was charged. Try again."), { autoClose: 8000 });
+      }
       inFlight.current = false;
       setPlacing(false);
     }

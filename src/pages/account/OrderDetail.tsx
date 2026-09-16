@@ -17,7 +17,19 @@ function Actions({ order }: { order: Order }) {
   const [busy, setBusy] = useState(false);
   const canCancel = order.status === "awaiting_payment" || order.status === "placed";
   const canPay = order.paymentMethod === "expresspay" && order.status === "awaiting_payment";
-  if (!canCancel && !canPay) return null;
+  if (!canCancel && !canPay) {
+    if (order.status === "payment_failed") {
+      return (
+        <p className="pt-4 text-sm text-text-muted">
+          This order closed because the ExpressPay payment wasn't completed. You weren't charged.{" "}
+          <Link to="/" className="link">
+            Shop again
+          </Link>
+        </p>
+      );
+    }
+    return null;
+  }
 
   async function pay() {
     setBusy(true);

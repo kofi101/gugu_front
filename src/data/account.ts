@@ -36,14 +36,16 @@ const PROFILE_EDITABLE = [
 
 export type ProfilePatch = Partial<Record<(typeof PROFILE_EDITABLE)[number], string>>;
 
-/** Creates the profile on first sign-in; afterwards only touches lastLoginAt. Never writes role except on create. */
+/**
+ * Creates the profile on first sign-in; afterwards only touches lastLoginAt.
+ * Never writes `role`: Functions own the role mirror (contract).
+ */
 export async function ensureProfile(user: User) {
   const refDoc = doc(db, "users", user.uid);
   const snap = await getDoc(refDoc);
   if (!snap.exists()) {
     const data: Record<string, unknown> = {
       uid: user.uid,
-      role: "customer",
       isAnonymous: user.isAnonymous,
       createdAt: serverTimestamp(),
       updatedAt: serverTimestamp(),

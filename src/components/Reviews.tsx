@@ -4,7 +4,7 @@ import { toast } from "react-toastify";
 import { deleteReview, getReview, listReviews, REVIEW_MAX_CHARS, saveReview } from "../data/reviews";
 import { useAuth } from "../context/auth";
 import { useAsync } from "../hooks/useAsync";
-import { errorMessage } from "../lib/errors";
+import { errorMessage, isCode } from "../lib/errors";
 import { formatDate, plural } from "../lib/format";
 import type { Product, Rating } from "../lib/types";
 import { ErrorState } from "./States";
@@ -31,7 +31,11 @@ function ReviewForm({ product, existing, onSaved }: { product: Product; existing
       toast.success(existing ? "Review updated" : "Review posted. Thanks for sharing.");
       onSaved();
     } catch (err) {
-      toast.error(errorMessage(err, "Couldn't save your review. Try again."));
+      toast.error(
+        isCode(err, "permission-denied")
+          ? "Only customers who have ordered this product can review it."
+          : errorMessage(err, "Couldn't save your review. Try again."),
+      );
     } finally {
       setBusy(false);
     }

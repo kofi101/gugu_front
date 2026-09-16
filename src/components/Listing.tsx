@@ -122,6 +122,7 @@ export function ProductListing({
         )}
       </div>
 
+      <h2 className="sr-only">Products</h2>
       <div aria-live="polite" aria-busy={page.loading}>
         {page.error ? (
           <ErrorState error={page.error} onRetry={page.reload} title="Products didn't load" />

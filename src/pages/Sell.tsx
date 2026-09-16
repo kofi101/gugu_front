@@ -46,7 +46,7 @@ function ApplicationStatus({ app }: { app: MerchantApplication }) {
           )}
         </dl>
         {app.note && <p className="mt-4 rounded-md bg-paper p-3 text-sm">{app.note}</p>}
-        <Link to="/contact" className="link mt-4 inline-block text-sm">
+        <Link to="/contact" className="link mt-3 inline-block py-1.5 text-sm">
           Contact GUGU
         </Link>
       </div>

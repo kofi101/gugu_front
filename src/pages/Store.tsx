@@ -68,7 +68,6 @@ export default function Store() {
         </div>
       </div>
       <div className="shell pt-6">
-        <h2 className="sr-only">Products from {m.name}</h2>
         <ProductListing merchantId={m.id} heading={m.name} />
       </div>
     </div>

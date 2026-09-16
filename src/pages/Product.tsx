@@ -239,7 +239,7 @@ export default function ProductPage() {
         <Gallery product={p} />
         <div>
           {merchant && (
-            <Link to={`/store/${merchant.id}`} className="inline-flex items-center gap-1.5 text-sm font-semibold text-ink-700 hover:underline">
+            <Link to={`/store/${merchant.id}`} className="inline-flex min-h-[32px] items-center gap-1.5 text-sm font-semibold text-ink-700 hover:underline">
               <LuStore aria-hidden className="h-4 w-4" /> {merchant.name}
             </Link>
           )}

@@ -44,7 +44,7 @@ function Section({ id, title, action, children }: { id: string; title: string; a
 
 function MoreLink({ to, children }: { to: string; children: ReactNode }) {
   return (
-    <Link to={to} className="inline-flex shrink-0 items-center gap-1 text-sm font-semibold text-ink-700 hover:text-ink-900 hover:underline">
+    <Link to={to} className="inline-flex min-h-[32px] shrink-0 items-center gap-1 text-sm font-semibold text-ink-700 hover:text-ink-900 hover:underline">
       {children}
       <LuChevronRight aria-hidden className="h-4 w-4" />
     </Link>

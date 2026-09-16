@@ -83,9 +83,9 @@ function Hero({ merchants }: { merchants: Merchant[] }) {
       <div className="underprint-dark on-dark relative isolate overflow-hidden rounded-xl text-white">
         <p aria-hidden className="microprint absolute inset-x-0 top-0 border-b border-white/10 px-3 py-1.5 text-ink-300">{microLine}</p>
         <p aria-hidden className="microprint absolute inset-x-0 bottom-0 border-t border-white/10 px-3 py-1.5 text-ink-300">{microLine}</p>
-        <div className="grid items-center gap-2 px-5 pb-10 pt-12 sm:px-10 md:grid-cols-[1.25fr_1fr] md:py-16 lg:px-14">
+        <div className="grid items-center gap-2 px-5 pb-10 pt-10 sm:px-10 md:grid-cols-[1.3fr_1fr] md:py-12 lg:px-14">
           <div className="relative z-10">
-            <h1 id="hero-title" className="type-display max-w-[14ch] text-[2.5rem] sm:text-6xl lg:text-7xl">
+            <h1 id="hero-title" className="type-display max-w-[15ch] text-[2.125rem] sm:text-5xl lg:text-6xl">
               Shops from across Ghana. Pay when it arrives.
             </h1>
             <p className="mt-5 max-w-[46ch] text-base leading-relaxed text-ink-100 sm:text-lg">
@@ -100,10 +100,10 @@ function Hero({ merchants }: { merchants: Merchant[] }) {
               </Link>
             </div>
           </div>
-          <div aria-hidden className="pointer-events-none absolute -right-24 top-1/2 -z-0 w-[26rem] -translate-y-1/2 text-ink-400 opacity-60 md:relative md:right-auto md:top-auto md:w-full md:translate-y-0 md:opacity-100">
-            <div className="relative mx-auto aspect-square max-w-[26rem]">
+          <div aria-hidden className="pointer-events-none absolute -right-28 top-8 -z-0 w-[22rem] text-ink-400 opacity-30 md:relative md:right-auto md:top-auto md:w-full md:opacity-100">
+            <div className="relative mx-auto aspect-square max-w-[22rem]">
               <Guilloche className="absolute inset-0 h-full w-full" />
-              <span className="type-display absolute inset-0 grid place-items-center text-6xl text-thread-300 sm:text-7xl">GH₵</span>
+              <span className="type-display absolute inset-0 hidden place-items-center text-6xl text-thread-300 md:grid lg:text-7xl">GH₵</span>
             </div>
           </div>
         </div>

@@ -130,7 +130,8 @@ export default function Checkout() {
     const errs = validateAddress(address!);
     setAddressErrors(errs);
     if (Object.keys(errs).length) {
-      const first = Object.keys(errs)[0];
+      const order = ["fullName", "phone", "line1", "line2", "city", "region", "postalCode"];
+      const first = order.find((k) => k in errs);
       document.getElementById(`checkout-${first}`)?.focus();
       return;
     }

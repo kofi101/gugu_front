@@ -39,9 +39,9 @@ export function Layout() {
         </Suspense>
       </main>
       <SiteFooter />
-      {/* Inside the router so toasts can contain <Link>s. Errors stay up for at least 6 s. */}
+      {/* Inside the router so toasts can contain <Link>s. Top placement keeps the mobile checkout bar clear. Errors stay up for at least 6 s. */}
       <ToastContainer
-        position="bottom-center"
+        position="top-center"
         autoClose={6000}
         newestOnTop
         closeOnClick={false}

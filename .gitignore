@@ -21,3 +21,17 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Build output
+dist/
+
+# Environment (commit only .env.example)
+.env
+.env.*
+!.env.example
+
+# Firebase emulator / debug logs
+firebase-debug.log*
+firestore-debug.log*
+ui-debug.log*
+.firebase/

@@ -1,8 +1,16 @@
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import { Link, useNavigate } from "react-router";
 import { toast } from "react-toastify";
-import { LuBanknote, LuCreditCard, LuLock, LuShoppingBag, LuSmartphone } from "react-icons/lu";
-import { getProfile, placeOrder, safeCheckoutUrl, updateProfile } from "../../data/account";
+import { LuBanknote, LuCreditCard, LuLock, LuMail, LuShoppingBag, LuSmartphone } from "react-icons/lu";
+import {
+  getProfile,
+  isOnDelivery,
+  newClientRequestId,
+  ON_DELIVERY_MAX_LINE_QTY,
+  placeOrder,
+  safeCheckoutUrl,
+  updateProfile,
+} from "../../data/account";
 import { getProductsByIds, getShippingOptions } from "../../data/catalog";
 import { useAuth } from "../../context/auth";
 import { lineCap, useCart } from "../../context/cart";
@@ -18,6 +26,78 @@ import { Seo } from "../../components/Seo";
 import { EmptyState, ErrorState, PageLoader } from "../../components/States";
 
 type Step = 1 | 2 | 3;
+
+/** Pay-on-delivery needs a verified email (or phone sign-in). Resend the link, then reload the user and refresh the ID token. */
+function VerifyEmailStep({ onSwitchToExpressPay, onVerified }: { onSwitchToExpressPay: () => void; onVerified: () => void }) {
+  const { user, resendVerification, refreshUser } = useAuth();
+  const [busy, setBusy] = useState<"send" | "check" | null>(null);
+  const [note, setNote] = useState<string | null>(null);
+  if (!user) return null;
+  return (
+    <div role="region" aria-labelledby="verify-title" className="mb-4 rounded-lg border border-thread-500 bg-thread-300/25 p-4">
+      <div className="flex items-start gap-3">
+        <LuMail aria-hidden className="mt-0.5 h-6 w-6 shrink-0 text-thread-700" />
+        <div className="min-w-0">
+          <h3 id="verify-title" className="font-bold text-ink-950">
+            Verify your email to pay on delivery
+          </h3>
+          <p className="mt-1 text-sm text-text">
+            Open the link we sent to <strong className="break-all">{user.email}</strong>, then come back and choose “I've verified”.
+          </p>
+          <div className="mt-3 flex flex-wrap gap-2">
+            <button
+              type="button"
+              className="btn btn-primary btn-sm"
+              disabled={busy !== null}
+              onClick={async () => {
+                setBusy("check");
+                setNote(null);
+                try {
+                  await refreshUser();
+                  if (user.emailVerified) onVerified();
+                  else setNote("We couldn't see the confirmation yet. Open the link in the email, then try again.");
+                } catch (err) {
+                  setNote(errorMessage(err, "Couldn't check your email status. Try again."));
+                } finally {
+                  setBusy(null);
+                }
+              }}
+            >
+              {busy === "check" ? "Checking…" : "I've verified"}
+            </button>
+            <button
+              type="button"
+              className="btn btn-secondary btn-sm"
+              disabled={busy !== null}
+              onClick={async () => {
+                setBusy("send");
+                setNote(null);
+                try {
+                  await resendVerification();
+                  setNote(`We sent a new link to ${user.email}. Check your spam folder too.`);
+                } catch (err) {
+                  setNote(errorMessage(err, "Couldn't send the email. Wait a minute and try again."));
+                } finally {
+                  setBusy(null);
+                }
+              }}
+            >
+              {busy === "send" ? "Sending…" : "Resend verification email"}
+            </button>
+            <button type="button" className="btn btn-ghost btn-sm" onClick={onSwitchToExpressPay} disabled={busy !== null}>
+              Pay online instead
+            </button>
+          </div>
+          {note && (
+            <p role="status" className="mt-2 text-sm font-medium text-text">
+              {note}
+            </p>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
 
 const METHODS: { id: PaymentMethod; icon: typeof LuBanknote; detail: string }[] = [
   { id: "cash_on_delivery", icon: LuBanknote, detail: "Pay the rider in cash when your order arrives." },
@@ -83,9 +163,12 @@ export default function Checkout() {
   const [shippingOptionId, setShippingOptionId] = useState<string | undefined>();
   const [placing, setPlacing] = useState(false);
   const inFlight = useRef(false);
+  // One id per distinct checkout attempt; retries of the same attempt reuse it so the server returns the same order.
+  const request = useRef<{ signature: string; id: string } | null>(null);
+  const [serverWantsVerification, setServerWantsVerification] = useState(false);
 
   const profile = useAsync(() => getProfile(user!.uid), [user?.uid]);
-  const shippingOptions = useAsync(() => getShippingOptions().catch(() => []), []);
+  const shippingOptions = useAsync(getShippingOptions, []);
   const ids = cart.lines.map((l) => l.productId).sort().join(",");
   const live = useAsync(async () => new Map((await getProductsByIds(ids ? ids.split(",") : [])).map((p) => [p.id, p])), [ids]);
 
@@ -119,12 +202,18 @@ export default function Checkout() {
   const subtotal = cart.lines.reduce((s, l) => s + priceOf(l.productId, l.unitPrice) * l.quantity, 0);
   const option = options.find((o) => o.id === shippingOptionId);
   const estimate = subtotal + (option?.fee ?? 0);
-  const problems = live.data
-    ? cart.lines.filter((l) => {
-        const p = live.data!.get(l.productId);
-        return !p || !isInStock(p) || l.quantity > lineCap(p.stockQuantity);
-      })
-    : [];
+  const onDelivery = isOnDelivery(method);
+  const needsVerification = onDelivery && Boolean(user) && ((!user!.emailVerified && !user!.phoneNumber) || serverWantsVerification);
+  const optionMissing = options.length > 0 && !option;
+  const problems: { productId: string; text: string }[] = [];
+  for (const l of cart.lines) {
+    const p = live.data?.get(l.productId);
+    if (live.data && (!p || !isInStock(p))) problems.push({ productId: l.productId, text: `${l.name}: no longer available` });
+    else if (p && l.quantity > lineCap(p.stockQuantity)) problems.push({ productId: l.productId, text: `${l.name}: only ${lineCap(p.stockQuantity)} in stock` });
+    else if (onDelivery && l.quantity > ON_DELIVERY_MAX_LINE_QTY)
+      problems.push({ productId: l.productId, text: `${l.name}: pay on delivery allows up to ${ON_DELIVERY_MAX_LINE_QTY} per item` });
+  }
+  const blocked = placing || problems.length > 0 || live.loading || needsVerification || optionMissing || shippingOptions.loading;
 
   function continueFromAddress() {
     const errs = validateAddress(address!);
@@ -135,13 +224,19 @@ export default function Checkout() {
       document.getElementById(`checkout-${first}`)?.focus();
       return;
     }
+    if (options.length > 0 && !option) {
+      toast.error("Choose a delivery option.");
+      return;
+    }
     setStep(2);
   }
 
   async function place() {
-    if (inFlight.current || !user || !address) return;
+    if (inFlight.current || !user || !address || blocked) return;
     inFlight.current = true;
     setPlacing(true);
+    const signature = JSON.stringify([method, shippingOptionId, address, cart.lines.map((l) => [l.productId, l.quantity])]);
+    if (!request.current || request.current.signature !== signature) request.current = { signature, id: newClientRequestId() };
     try {
       if (saveAddress) {
         await updateProfile(user.uid, {
@@ -165,7 +260,9 @@ export default function Checkout() {
           phone: address.phone.trim(),
         },
         shippingOptionId,
+        clientRequestId: request.current.id,
       });
+      request.current = null;
       if (method === "expresspay") {
         const url = safeCheckoutUrl(result.checkoutUrl);
         if (url) {
@@ -188,6 +285,14 @@ export default function Checkout() {
           : errorMessage(err);
         toast.error(msg, { autoClose: 10000 });
         live.reload();
+      } else if (code === "VERIFICATION_REQUIRED") {
+        setServerWantsVerification(true);
+        toast.error(errorMessage(err), { autoClose: 10000 });
+      } else if (code === "QUANTITY_LIMIT") {
+        const max = callableDetails<{ max?: number }>(err)?.max ?? ON_DELIVERY_MAX_LINE_QTY;
+        toast.error(`Pay-on-delivery orders are limited to ${max} of each item. Lower the quantity in your cart, or pay online with ExpressPay.`, {
+          autoClose: 10000,
+        });
       } else if (code === "PAYMENT_INIT_FAILED") {
         // The order was recorded as payment_failed and the cart kept: the customer can simply try again.
         toast.error(errorMessage(err), { autoClose: 10000 });
@@ -226,7 +331,11 @@ export default function Checkout() {
             }
           >
             <AddressFields idPrefix="checkout" value={address} onChange={setAddress} errors={addressErrors} />
-            {options.length > 0 && (
+            {shippingOptions.error ? (
+              <div className="mt-6">
+                <ErrorState error={shippingOptions.error} onRetry={shippingOptions.reload} title="Delivery options didn't load" />
+              </div>
+            ) : options.length > 0 && (
               <fieldset className="mt-6">
                 <legend className="field-label">Delivery option</legend>
                 <div className="space-y-2">
@@ -237,7 +346,7 @@ export default function Checkout() {
                         <span className="block font-semibold">{o.name}</span>
                         {o.description && <span className="block text-sm text-text-muted">{o.description}</span>}
                       </span>
-                      {o.fee != null && <span className="tabular text-sm font-semibold">{o.fee > 0 ? `about ${formatMoney(o.fee)}` : "Free"}</span>}
+                      {o.fee != null && <span className="tabular text-sm font-semibold">{o.fee > 0 ? formatMoney(o.fee) : "Free"}</span>}
                     </label>
                   ))}
                 </div>
@@ -247,7 +356,12 @@ export default function Checkout() {
               <input type="checkbox" checked={saveAddress} onChange={(e) => setSaveAddress(e.target.checked)} className="h-4 w-4 accent-ink-700" />
               Save this address to my account
             </label>
-            <button type="button" className="btn btn-primary mt-5 w-full sm:w-auto" onClick={continueFromAddress}>
+            <button
+              type="button"
+              className="btn btn-primary mt-5 w-full sm:w-auto"
+              onClick={continueFromAddress}
+              disabled={shippingOptions.loading || Boolean(shippingOptions.error)}
+            >
               Continue to payment
             </button>
           </StepSection>
@@ -258,7 +372,17 @@ export default function Checkout() {
               <div className="space-y-2">
                 {METHODS.map(({ id, icon: Icon, detail }) => (
                   <label key={id} className="flex cursor-pointer items-start gap-3 rounded-md border border-paper-line p-3 has-[:checked]:border-ink-700 has-[:checked]:bg-ink-50">
-                    <input type="radio" name="payment" value={id} checked={method === id} onChange={() => setMethod(id)} className="mt-1 h-4 w-4 accent-ink-700" />
+                    <input
+                      type="radio"
+                      name="payment"
+                      value={id}
+                      checked={method === id}
+                      onChange={() => {
+                        setMethod(id);
+                        setServerWantsVerification(false);
+                      }}
+                      className="mt-1 h-4 w-4 accent-ink-700"
+                    />
                     <Icon aria-hidden className="mt-0.5 h-5 w-5 shrink-0 text-ink-700" />
                     <span>
                       <span className="block font-semibold">{PAYMENT_METHOD_LABEL[id]}</span>
@@ -268,6 +392,11 @@ export default function Checkout() {
                 ))}
               </div>
             </fieldset>
+            {onDelivery && (
+              <p className="mt-3 text-sm text-text-muted">
+                Pay on delivery needs a verified email and allows up to {ON_DELIVERY_MAX_LINE_QTY} of each item and 3 open orders.
+              </p>
+            )}
             <button type="button" className="btn btn-primary mt-5 w-full sm:w-auto" onClick={() => setStep(3)}>
               Review order
             </button>
@@ -277,12 +406,21 @@ export default function Checkout() {
             {live.error ? (
               <ErrorState error={live.error} onRetry={live.reload} title="We couldn't check prices and stock" />
             ) : null}
+            {needsVerification && (
+              <VerifyEmailStep
+                onVerified={() => setServerWantsVerification(false)}
+                onSwitchToExpressPay={() => {
+                  setMethod("expresspay");
+                  setServerWantsVerification(false);
+                }}
+              />
+            )}
             {problems.length > 0 && (
               <div role="alert" className="mb-4 rounded-md bg-serial-soft p-3 text-sm text-serial">
                 <p className="font-semibold">Some items can't be ordered as they are:</p>
                 <ul className="mt-1 list-disc pl-5">
-                  {problems.map((l) => (
-                    <li key={l.productId}>{l.name}</li>
+                  {problems.map((pr) => (
+                    <li key={pr.productId}>{pr.text}</li>
                   ))}
                 </ul>
                 <Link to="/cart" className="mt-2 inline-block font-semibold underline">
@@ -315,7 +453,7 @@ export default function Checkout() {
               type="button"
               className="btn btn-primary mt-4 hidden h-12 w-full text-base lg:flex"
               onClick={place}
-              disabled={placing || problems.length > 0 || live.loading}
+              disabled={blocked}
               aria-describedby="estimate-note"
             >
               {placing ? "Placing order…" : method === "expresspay" ? "Place order and pay" : "Place order"}
@@ -337,7 +475,7 @@ export default function Checkout() {
                 </div>
                 <div className="flex justify-between">
                   <dt className="text-text-muted">Delivery</dt>
-                  <dd className="tabular">{option?.fee != null ? formatMoney(option.fee) : "Confirmed with order"}</dd>
+                  <dd className="tabular">{option ? (option.fee ? formatMoney(option.fee) : "Free") : options.length ? "Choose an option" : "Confirmed with order"}</dd>
                 </div>
               </dl>
               <div className="mt-3 flex items-baseline justify-between border-t border-paper-line pt-3">
@@ -359,7 +497,7 @@ export default function Checkout() {
               <p className="text-xs text-text-muted">Estimated total</p>
               <p className="type-title tabular text-lg">{formatMoney(estimate)}</p>
             </div>
-            <button type="button" className="btn btn-primary h-12 flex-1" onClick={place} disabled={placing || problems.length > 0 || live.loading}>
+            <button type="button" className="btn btn-primary h-12 flex-1" onClick={place} disabled={blocked}>
               {placing ? "Placing order…" : method === "expresspay" ? "Place order and pay" : "Place order"}
             </button>
           </div>

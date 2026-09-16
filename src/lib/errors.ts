@@ -52,6 +52,11 @@ const CALLABLE: Record<string, string> = {
   NOT_EXPRESSPAY_ORDER: "This order isn't paid with ExpressPay.",
   ORDER_NOT_FOUND: "We couldn't find that order.",
   PRODUCT_NOT_FOUND: "An item in your cart is no longer listed. Remove it and try again.",
+  SHIPPING_OPTION_REQUIRED: "Choose a delivery option.",
+  VERIFICATION_REQUIRED: "Confirm your email address before paying on delivery, or pay online with ExpressPay.",
+  QUANTITY_LIMIT: "Pay-on-delivery orders are limited to 20 of each item. Lower the quantity or pay online with ExpressPay.",
+  TOO_MANY_OPEN_ORDERS:
+    "You already have 3 pay-on-delivery orders on the way. Wait for one to arrive, or pay online with ExpressPay.",
   TOO_MANY_UNPAID_ORDERS:
     "You already have 3 orders waiting for ExpressPay payment. Pay or cancel one of them in your orders, or choose pay on delivery.",
   TOO_MANY_CHECKOUT_ATTEMPTS: "Too many payment attempts. Wait a few minutes and try again.",

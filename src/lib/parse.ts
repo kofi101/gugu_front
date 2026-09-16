@@ -104,7 +104,7 @@ export function toCategory(id: string, d: Data): Category {
     id: str(d.id) ?? id,
     name: str(d.name) ?? id,
     sortOrder: num(d.sortOrder) ?? 9999,
-    imageUrl: str(d.imageUrl) ?? str(d.iconUrl),
+    imageUrl: str(d.imageUrl),
   };
 }
 

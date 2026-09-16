@@ -14,7 +14,6 @@ import { useAsync } from "../hooks/useAsync";
 import { errorMessage } from "../lib/errors";
 import { formatDate } from "../lib/format";
 import type { MerchantApplication } from "../lib/types";
-import { GHANA_REGIONS } from "../lib/address";
 import { Guilloche } from "../components/Guilloche";
 import { Seo } from "../components/Seo";
 import { ErrorState, PageLoader } from "../components/States";
@@ -57,9 +56,9 @@ function ApplicationStatus({ app }: { app: MerchantApplication }) {
 function ApplicationForm({ onSubmitted }: { onSubmitted: () => void }) {
   const { user } = useAuth();
   const regions = useAsync(getRegions, []);
-  const regionOptions = regions.data?.length ? regions.data : GHANA_REGIONS.map((name) => ({ id: name, name }));
+  const regionOptions = regions.data ?? [];
   const [regionId, setRegionId] = useState("");
-  const cities = useAsync(async () => (regionId && regions.data?.length ? getCities(regionId) : []), [regionId, regions.data?.length]);
+  const cities = useAsync(async () => (regionId ? getCities(regionId) : []), [regionId]);
   const [files, setFiles] = useState<File[]>([]);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [busy, setBusy] = useState(false);
@@ -91,7 +90,7 @@ function ApplicationForm({ onSubmitted }: { onSubmitted: () => void }) {
     if (v("phone").replace(/\D/g, "").length < 9) errs.phone = "Enter a phone number we can call.";
     if (!/^\S+@\S+\.\S+$/.test(v("email"))) errs.email = "Enter a valid email address.";
     if (!regionId) errs.regionId = "Choose your region.";
-    if (!v("cityId")) errs.cityId = "Enter your town or city.";
+    if (!v("cityId")) errs.cityId = "Choose your town or city.";
     if (v("description").length < 20) errs.description = "Tell us what you sell in at least 20 characters.";
     if (!files.length) errs.documents = "Attach at least one document, such as your business registration or Ghana Card.";
     if (!fd.get("consent")) errs.consent = "Confirm the details are correct.";
@@ -152,7 +151,7 @@ function ApplicationForm({ onSubmitted }: { onSubmitted: () => void }) {
         </div>
         <div>
           <label htmlFor="regionId" className="field-label">Region</label>
-          <select className="input" value={regionId} onChange={(e) => setRegionId(e.target.value)} {...a11y("regionId")}>
+          <select className="input" value={regionId} onChange={(e) => setRegionId(e.target.value)} {...a11y("regionId")} disabled={busy || regions.loading}>
             <option value="">Choose a region</option>
             {regionOptions.map((r) => (
               <option key={r.id} value={r.id}>{r.name}</option>
@@ -162,16 +161,12 @@ function ApplicationForm({ onSubmitted }: { onSubmitted: () => void }) {
         </div>
         <div>
           <label htmlFor="cityId" className="field-label">Town or city</label>
-          {cities.data && cities.data.length > 0 ? (
-            <select className="input" {...a11y("cityId")}>
-              <option value="">Choose a town</option>
-              {cities.data.map((c) => (
-                <option key={c.id} value={c.id}>{c.name}</option>
-              ))}
-            </select>
-          ) : (
-            <input className="input" autoComplete="address-level2" {...a11y("cityId")} />
-          )}
+          <select className="input" {...a11y("cityId")} disabled={busy || !regionId || cities.loading}>
+            <option value="">{regionId ? "Choose a town" : "Choose a region first"}</option>
+            {(cities.data ?? []).map((c) => (
+              <option key={c.id} value={c.id}>{c.name}</option>
+            ))}
+          </select>
           {err("cityId")}
         </div>
         <div className="sm:col-span-2">
@@ -183,7 +178,7 @@ function ApplicationForm({ onSubmitted }: { onSubmitted: () => void }) {
 
       <fieldset>
         <legend className="field-label">Documents</legend>
-        <p className="field-hint mt-0">Business registration, Ghana Card or similar. Images or PDF, up to 10 MB each, {APPLICATION_MAX_FILES} files max.</p>
+        <p className="field-hint mt-0">Business registration, Ghana Card or similar. JPG, PNG, WebP or PDF, up to 10 MB each, {APPLICATION_MAX_FILES} files max.</p>
         <div className="mt-2">
           <label
             htmlFor="documents"
@@ -195,7 +190,7 @@ function ApplicationForm({ onSubmitted }: { onSubmitted: () => void }) {
               ref={fileInput}
               type="file"
               multiple
-              accept="image/*,application/pdf"
+              accept="image/jpeg,image/png,image/webp,application/pdf"
               className="sr-only"
               onChange={(e) => addFiles(e.target.files)}
               {...a11y("documents")}

@@ -11,6 +11,7 @@ interface ImportMetaEnv {
   readonly VITE_SITE_URL?: string;
   readonly VITE_USE_EMULATORS?: string;
   readonly VITE_EMULATOR_HOST?: string;
+  readonly VITE_EMULATOR_PORTS?: string;
   readonly VITE_SUPPORT_EMAIL?: string;
   readonly VITE_SUPPORT_PHONE?: string;
 }

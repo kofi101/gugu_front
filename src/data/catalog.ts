@@ -241,15 +241,16 @@ export async function search(q: string): Promise<SearchResult> {
 }
 
 export async function getShippingOptions(): Promise<ShippingOption[]> {
+  // Only active options are offered; placeOrder requires one whenever any is active.
   const snap = await getDocs(query(collection(db, "shipping_options"), limit(20)));
   return snap.docs
     .map((d) => {
       const data = d.data();
       return {
         id: d.id,
-        name: str(data.name) ?? str(data.title) ?? d.id,
+        name: str(data.name) ?? d.id,
         description: str(data.description),
-        fee: num(data.fee) ?? num(data.price) ?? num(data.amount),
+        fee: num(data.fee),
         isActive: data.isActive !== false,
         sortOrder: num(data.sortOrder) ?? 0,
       };
@@ -261,7 +262,10 @@ export async function getShippingOptions(): Promise<ShippingOption[]> {
 
 export async function getRegions(): Promise<NamedRef[]> {
   const snap = await getDocs(query(collection(db, "regions"), limit(50)));
-  return snap.docs.map((d) => ({ id: d.id, name: str(d.data().name) ?? d.id })).sort((a, b) => a.name.localeCompare(b.name));
+  return snap.docs
+    .map((d) => ({ id: d.id, name: str(d.data().name) ?? d.id, sortOrder: num(d.data().sortOrder) ?? 999 }))
+    .sort((a, b) => a.sortOrder - b.sortOrder || a.name.localeCompare(b.name))
+    .map(({ id, name }) => ({ id, name }));
 }
 
 export async function getCities(regionId: string): Promise<NamedRef[]> {

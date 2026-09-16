@@ -46,6 +46,8 @@ The backend lives in `../gugu_2.0`. firebase-tools 15 needs Java 21 for the emul
 # terminal 1 (gugu_2.0)
 cd ../gugu_2.0
 npx firebase-tools@13 emulators:start --project demo-gugu
+# (if other emulators already use the default ports: --config firebase.test.json, and set
+#  VITE_EMULATOR_PORTS=auth:29099,firestore:28080,functions:25001,storage:29199 in gugu_front/.env.local)
 
 # terminal 2 (gugu_2.0) — idempotent seed
 node functions/scripts/seed-emulator.js
@@ -55,8 +57,8 @@ printf 'VITE_USE_EMULATORS=true\nVITE_SITE_URL=http://localhost:5173\n' > .env.l
 npm run dev
 ```
 
-Seeded accounts (password `password123`): `customer@gugu.test`, `merchant@gugu.test`, `admin@gugu.test`,
-`applicant@gugu.test`. Verification and password-reset emails appear in the Auth emulator UI
+Seeded accounts (password `password123`, emails verified): `customer@gugu.test` (has a delivered order, so it can
+review `p_th_4`), `merchant@gugu.test`, `admin@gugu.test`, `applicant@gugu.test`. New sign-ups are unverified. Verification and password-reset emails appear in the Auth emulator UI
 (http://127.0.0.1:4000/auth).
 
 ## How it works
@@ -81,12 +83,20 @@ Seeded accounts (password `password123`): `customer@gugu.test`, `merchant@gugu.t
 
 ### Firestore indexes
 
-The emulator does not enforce composite indexes, production does. The storefront's product queries need
-the indexes in [`docs/firestore.indexes.storefront.json`](docs/firestore.indexes.storefront.json)
-(popular, price drops, and category / subcategory / store listings sorted by price, newest or rating).
-Merge them into `gugu_2.0/firestore.indexes.json` and deploy with
-`firebase deploy --only firestore:indexes`. Search uses the existing `isActive + advanceSearchableValues`
-index.
+The emulator does not enforce composite indexes; production does. All indexes the storefront's queries need
+(listings by category/subcategory/store sorted by price, newest or rating; popular; price drops; search) are
+defined in the backend repo: [`gugu_2.0/firestore.indexes.json`](../gugu_2.0/firestore.indexes.json). Deploy them
+with `firebase deploy --only firestore:indexes` from `gugu_2.0` (runbook step 1). Add any new storefront query's
+index there.
+
+### Checkout rules the UI enforces (see the contract's "Changes after security review")
+
+- A delivery option is required whenever active `shipping_options` exist; its fee is included in the estimate.
+- Each checkout attempt sends a `clientRequestId` (UUID) that is reused on retries, so a retried call returns the
+  same order instead of creating a duplicate.
+- Pay on delivery needs a verified email (or phone sign-in): the review step offers "Resend verification email"
+  and "I've verified" (reloads the user and refreshes the ID token). Limits: 20 per line, 3 open orders.
+- Reviews are offered only for products with a delivered purchase (`users/{uid}/purchased/{productId}`).
 
 ## SEO
 

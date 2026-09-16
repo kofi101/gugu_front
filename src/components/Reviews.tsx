@@ -1,6 +1,7 @@
 import { useState, type FormEvent } from "react";
 import { Link, useLocation } from "react-router";
 import { toast } from "react-toastify";
+import { hasDeliveredPurchase } from "../data/account";
 import { deleteReview, getReview, listReviews, REVIEW_MAX_CHARS, saveReview } from "../data/reviews";
 import { useAuth } from "../context/auth";
 import { useAsync } from "../hooks/useAsync";
@@ -33,7 +34,7 @@ function ReviewForm({ product, existing, onSaved }: { product: Product; existing
     } catch (err) {
       toast.error(
         isCode(err, "permission-denied")
-          ? "Only customers who have ordered this product can review it."
+          ? "Only customers who have received this product can review it."
           : errorMessage(err, "Couldn't save your review. Try again."),
       );
     } finally {
@@ -102,6 +103,13 @@ export function Reviews({ product }: { product: Product }) {
   const location = useLocation();
   const list = useAsync(() => listReviews(product.id), [product.id]);
   const mine = useAsync(async () => (user ? getReview(product.id, user.uid) : null), [product.id, user?.uid]);
+  // Rules allow a review only after a delivered purchase (server marker), and never on your own store's product.
+  const eligibility = useAsync(async () => {
+    if (!user) return { canReview: false, ownProduct: false };
+    const [purchased, token] = await Promise.all([hasDeliveredPurchase(user.uid, product.id), user.getIdTokenResult()]);
+    const ownProduct = token.claims.merchantId === product.merchantId;
+    return { canReview: purchased && !ownProduct, ownProduct };
+  }, [product.id, product.merchantId, user?.uid]);
   const reloadAll = () => {
     list.reload();
     mine.reload();
@@ -144,20 +152,29 @@ export function Reviews({ product }: { product: Product }) {
               </ul>
             </>
           ) : (
-            <p className="rounded-lg border border-dashed border-paper-line bg-white p-5 text-text-muted">No reviews yet. Bought this? Be the first to review it.</p>
+            <p className="rounded-lg border border-dashed border-paper-line bg-white p-5 text-text-muted">No reviews yet.</p>
           )}
         </div>
         <div>
           {user ? (
-            mine.loading ? (
+            mine.loading || eligibility.loading ? (
               <div className="skeleton h-48" aria-hidden />
-            ) : (
+            ) : eligibility.data?.canReview || mine.data ? (
               <ReviewForm key={mine.data?.updatedAt?.getTime() ?? "new"} product={product} existing={mine.data ?? null} onSaved={reloadAll} />
+            ) : (
+              <div className="panel p-5">
+                <h3 className="font-bold text-ink-950">Reviews come from buyers</h3>
+                <p className="mt-1 text-sm text-text-muted">
+                  {eligibility.data?.ownProduct
+                    ? "You can't review products from your own store."
+                    : "You can review this product after an order with it has been delivered to you."}
+                </p>
+              </div>
             )
           ) : (
             <div className="panel p-5">
               <h3 className="font-bold text-ink-950">Share your experience</h3>
-              <p className="mt-1 text-sm text-text-muted">Sign in to rate and review this product.</p>
+              <p className="mt-1 text-sm text-text-muted">Bought this? Sign in to rate and review it.</p>
               <Link to={`/signin?next=${encodeURIComponent(`${location.pathname}#reviews`)}`} className="btn btn-secondary mt-4">
                 Sign in to review
               </Link>

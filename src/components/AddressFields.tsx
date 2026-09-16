@@ -1,7 +1,7 @@
-import { getRegions } from "../data/catalog";
+import { getCities, getRegions } from "../data/catalog";
 import { useAsync } from "../hooks/useAsync";
 import type { ShippingAddress } from "../lib/types";
-import { GHANA_REGIONS, type AddressErrors } from "../lib/address";
+import type { AddressErrors } from "../lib/address";
 
 export function AddressFields({
   value,
@@ -16,9 +16,13 @@ export function AddressFields({
   disabled?: boolean;
   idPrefix?: string;
 }) {
+  // Regions and cities are admin-managed collections; the profile/order stores the region *name*.
   const regions = useAsync(getRegions, []);
-  const regionNames = regions.data && regions.data.length ? regions.data.map((r) => r.name) : GHANA_REGIONS;
+  const regionNames = (regions.data ?? []).map((r) => r.name);
   const options = value.region && !regionNames.includes(value.region) ? [value.region, ...regionNames] : regionNames;
+  const regionId = regions.data?.find((r) => r.name === value.region)?.id;
+  const cities = useAsync(async () => (regionId ? getCities(regionId) : []), [regionId]);
+  const cityListId = `${idPrefix}-city-options`;
 
   const set = (k: keyof ShippingAddress) => (e: { target: { value: string } }) => onChange({ ...value, [k]: e.target.value });
   const a11y = (k: keyof ShippingAddress, hint?: string) => ({
@@ -64,18 +68,18 @@ export function AddressFields({
         <input className="input" autoComplete="address-line2" value={value.line2} onChange={set("line2")} {...a11y("line2")} />
       </div>
       <div>
-        <label htmlFor={`${idPrefix}-city`} className="field-label">
-          Town or city
-        </label>
-        <input className="input" autoComplete="address-level2" value={value.city} onChange={set("city")} {...a11y("city")} />
-        {err("city")}
-      </div>
-      <div>
         <label htmlFor={`${idPrefix}-region`} className="field-label">
           Region
         </label>
-        <select className="input" autoComplete="address-level1" value={value.region} onChange={set("region")} {...a11y("region")}>
-          <option value="">Choose a region</option>
+        <select
+          className="input"
+          autoComplete="address-level1"
+          value={value.region}
+          onChange={set("region")}
+          {...a11y("region")}
+          disabled={disabled || (regions.loading && !regions.data)}
+        >
+          <option value="">{regions.error ? "Regions didn't load" : "Choose a region"}</option>
           {options.map((r) => (
             <option key={r} value={r}>
               {r}
@@ -83,6 +87,18 @@ export function AddressFields({
           ))}
         </select>
         {err("region")}
+      </div>
+      <div>
+        <label htmlFor={`${idPrefix}-city`} className="field-label">
+          Town or city
+        </label>
+        <input className="input" autoComplete="address-level2" list={cityListId} value={value.city} onChange={set("city")} {...a11y("city")} />
+        <datalist id={cityListId}>
+          {(cities.data ?? []).map((c) => (
+            <option key={c.id} value={c.name} />
+          ))}
+        </datalist>
+        {err("city")}
       </div>
       <div>
         <label htmlFor={`${idPrefix}-postalCode`} className="field-label">

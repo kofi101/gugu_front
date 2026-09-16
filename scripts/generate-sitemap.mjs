@@ -49,7 +49,10 @@ async function readCatalogue() {
   const fs = await import("firebase/firestore");
   const app = initializeApp({ apiKey, projectId, appId: env.VITE_FIREBASE_APP_ID }, "sitemap");
   const db = fs.getFirestore(app);
-  if (useEmulators) fs.connectFirestoreEmulator(db, env.VITE_EMULATOR_HOST || "127.0.0.1", 8080);
+  if (useEmulators) {
+    const port = Number((env.VITE_EMULATOR_PORTS || "").match(/firestore:(\d+)/)?.[1] || 8080);
+    fs.connectFirestoreEmulator(db, env.VITE_EMULATOR_HOST || "127.0.0.1", port);
+  }
 
   async function all(col, ...constraints) {
     const out = [];

@@ -72,6 +72,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       async refreshUser() {
         if (auth.currentUser) {
           await auth.currentUser.reload();
+          // Refresh the ID token so callables see the new email_verified claim.
+          await auth.currentUser.getIdToken(true);
           setUser(auth.currentUser);
           setVersion((v) => v + 1);
         }

@@ -1,6 +1,6 @@
 import { Link } from "react-router";
 import { LuMessageSquare } from "react-icons/lu";
-import { listOrders } from "../../data/account";
+import { listOrders, listPurchasedProductIds } from "../../data/account";
 import { getReview } from "../../data/reviews";
 import { useAuth } from "../../context/auth";
 import { useAsync } from "../../hooks/useAsync";
@@ -11,22 +11,16 @@ import { EmptyState, ErrorState } from "../../components/States";
 import { Stars } from "../../components/Stars";
 
 /**
- * Reviews are stored at products/{productId}/ratings/{uid}. Instead of a collection-group query
- * (which would need extra rules and an index), we check the products from the customer's orders.
+ * Reviews live at products/{productId}/ratings/{uid} and require a delivered purchase, which the server
+ * records at users/{uid}/purchased/{productId}. Names and images come from the customer's orders.
  */
 export default function MyReviews() {
   const { user } = useAuth();
   const data = useAsync(async () => {
-    const orders = await listOrders(user!.uid, 50);
-    const products = new Map<string, { name: string; imageUrl?: string; delivered: boolean }>();
-    for (const o of orders) {
-      if (o.status === "cancelled" || o.status === "payment_failed") continue;
-      for (const l of o.lines) {
-        const prev = products.get(l.productId);
-        products.set(l.productId, { name: l.name, imageUrl: l.imageUrl, delivered: Boolean(prev?.delivered) || o.status === "delivered" });
-      }
-    }
-    const entries = [...products.entries()].slice(0, 40);
+    const [purchased, orders] = await Promise.all([listPurchasedProductIds(user!.uid), listOrders(user!.uid, 50)]);
+    const info = new Map<string, { name: string; imageUrl?: string }>();
+    for (const o of orders) for (const l of o.lines) if (!info.has(l.productId)) info.set(l.productId, { name: l.name, imageUrl: l.imageUrl });
+    const entries = purchased.slice(0, 40).map((id) => [id, info.get(id) ?? { name: "Product" }] as const);
     const reviews = await Promise.all(entries.map(([id]) => getReview(id, user!.uid).catch(() => null)));
     return entries.map(([id, p], i) => ({ productId: id, ...p, review: reviews[i] }));
   }, [user?.uid]);
@@ -41,7 +35,7 @@ export default function MyReviews() {
   if (!items.length) {
     return (
       <EmptyState icon={<LuMessageSquare />} title="Nothing to review yet">
-        After you order, you can rate the products you bought.
+        When an order is delivered, you can rate the products in it here.
         <Seo title="Your reviews" noindex />
       </EmptyState>
     );

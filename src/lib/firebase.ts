@@ -36,8 +36,14 @@ export const storage = getStorage(app);
 
 if (usingEmulators) {
   const host = env.VITE_EMULATOR_HOST || "127.0.0.1";
-  connectAuthEmulator(auth, `http://${host}:9099`, { disableWarnings: true });
-  connectFirestoreEmulator(db, host, 8080);
-  connectFunctionsEmulator(functions, host, 5001);
-  connectStorageEmulator(storage, host, 9199);
+  // Defaults match gugu_2.0/firebase.json; override e.g. "auth:29099,firestore:28080,functions:25001,storage:29199".
+  const ports: Record<string, number> = { auth: 9099, firestore: 8080, functions: 5001, storage: 9199 };
+  for (const pair of (env.VITE_EMULATOR_PORTS ?? "").split(",")) {
+    const [name, port] = pair.split(":").map((x) => x.trim());
+    if (name in ports && Number(port) > 0) ports[name] = Number(port);
+  }
+  connectAuthEmulator(auth, `http://${host}:${ports.auth}`, { disableWarnings: true });
+  connectFirestoreEmulator(db, host, ports.firestore);
+  connectFunctionsEmulator(functions, host, ports.functions);
+  connectStorageEmulator(storage, host, ports.storage);
 }

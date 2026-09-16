@@ -97,6 +97,19 @@ export interface PlaceOrderInput {
   paymentMethod: PaymentMethod;
   shipping: ShippingAddress;
   shippingOptionId?: string;
+  /** Same value for retries of one checkout attempt: the server returns the existing order instead of a duplicate. */
+  clientRequestId: string;
+}
+
+/** Max quantity per line for pay-on-delivery orders (contract, QUANTITY_LIMIT). */
+export const ON_DELIVERY_MAX_LINE_QTY = 20;
+
+export const isOnDelivery = (m: PaymentMethod) => m === "cash_on_delivery" || m === "mobile_money_on_delivery";
+
+export function newClientRequestId() {
+  return typeof crypto !== "undefined" && "randomUUID" in crypto
+    ? crypto.randomUUID()
+    : `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 14)}`;
 }
 
 export interface PlaceOrderResult {
@@ -110,7 +123,7 @@ export interface PlaceOrderResult {
 /** Server prices, checks stock and clears users/{uid}/cart. Lines are omitted so the server cart is used. */
 export async function placeOrder(input: PlaceOrderInput): Promise<PlaceOrderResult> {
   const call = httpsCallable<PlaceOrderInput, PlaceOrderResult>(functions, "placeOrder");
-  const payload: PlaceOrderInput = { paymentMethod: input.paymentMethod, shipping: input.shipping };
+  const payload: PlaceOrderInput = { paymentMethod: input.paymentMethod, shipping: input.shipping, clientRequestId: input.clientRequestId };
   if (input.shippingOptionId) payload.shippingOptionId = input.shippingOptionId;
   return (await call(payload)).data;
 }
@@ -139,6 +152,18 @@ export function safeCheckoutUrl(url: string | undefined): string | null {
   } catch {
     return null;
   }
+}
+
+/* ---------- Purchases (review eligibility) ---------- */
+
+/** Server-written marker users/{uid}/purchased/{productId}, created when an order line is delivered. */
+export async function hasDeliveredPurchase(uid: string, productId: string) {
+  return (await getDoc(doc(db, "users", uid, "purchased", productId))).exists();
+}
+
+export async function listPurchasedProductIds(uid: string, max = 100): Promise<string[]> {
+  const snap = await getDocs(query(collection(db, "users", uid, "purchased"), limit(max)));
+  return snap.docs.map((d) => d.id);
 }
 
 /* ---------- Wishlist ---------- */
@@ -221,8 +246,10 @@ export async function getMerchantApplication(uid: string): Promise<MerchantAppli
   };
 }
 
+export const APPLICATION_FILE_TYPES = ["image/jpeg", "image/png", "image/webp", "application/pdf"];
+
 export function validateApplicationFile(f: File): string | null {
-  if (!(f.type.startsWith("image/") || f.type === "application/pdf")) return `${f.name}: only images or PDF files are accepted.`;
+  if (!APPLICATION_FILE_TYPES.includes(f.type)) return `${f.name}: use a JPG, PNG, WebP or PDF file.`;
   if (f.size > APPLICATION_MAX_FILE_BYTES) return `${f.name}: files must be 10 MB or smaller.`;
   return null;
 }

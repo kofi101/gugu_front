@@ -1,24 +1,5 @@
 import type { ShippingAddress, UserProfile } from "./types";
 
-export const GHANA_REGIONS = [
-  "Ahafo",
-  "Ashanti",
-  "Bono",
-  "Bono East",
-  "Central",
-  "Eastern",
-  "Greater Accra",
-  "North East",
-  "Northern",
-  "Oti",
-  "Savannah",
-  "Upper East",
-  "Upper West",
-  "Volta",
-  "Western",
-  "Western North",
-];
-
 export type AddressErrors = Partial<Record<keyof ShippingAddress, string>>;
 
 export function validateAddress(a: ShippingAddress): AddressErrors {

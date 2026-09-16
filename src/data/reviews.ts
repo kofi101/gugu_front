@@ -1,4 +1,4 @@
-import { collection, deleteDoc, doc, getDoc, getDocs, limit, orderBy, query, serverTimestamp, setDoc } from "firebase/firestore";
+import { collection, deleteDoc, doc, getDoc, getDocs, limit, orderBy, query, serverTimestamp, setDoc, updateDoc } from "firebase/firestore";
 import { db } from "../lib/firebase";
 import { toRating } from "../lib/parse";
 import type { Rating } from "../lib/types";
@@ -15,7 +15,10 @@ export async function getReview(productId: string, uid: string): Promise<Rating 
   return snap.exists() ? toRating(snap.id, snap.data()) : null;
 }
 
-/** Doc id = author uid (contract). createdAt is kept on edit; aggregates are updated by onRatingWrite. */
+/**
+ * Doc id = author uid (contract). Create sets createdAt once; edits use update() so createdAt never changes.
+ * Rules require a delivered purchase (users/{uid}/purchased/{productId}); aggregates come from onRatingWrite.
+ */
 export async function saveReview(
   productId: string,
   author: { uid: string; displayName?: string | null },
@@ -31,8 +34,12 @@ export async function saveReview(
     updatedAt: serverTimestamp(),
   };
   if (author.displayName) payload.displayName = author.displayName.slice(0, 80);
-  if (!isEdit) payload.createdAt = serverTimestamp();
-  await setDoc(doc(db, "products", productId, "ratings", author.uid), payload, { merge: true });
+  const ref = doc(db, "products", productId, "ratings", author.uid);
+  if (isEdit) {
+    await updateDoc(ref, payload);
+  } else {
+    await setDoc(ref, { ...payload, createdAt: serverTimestamp() });
+  }
 }
 
 export async function deleteReview(productId: string, uid: string) {

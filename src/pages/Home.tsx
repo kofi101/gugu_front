@@ -124,6 +124,14 @@ export default function Home() {
   const deals = useAsync(() => getDiscountedProducts(8), []);
   const popular = useAsync(() => getPopularProducts(8), []);
 
+  const organizationLd = {
+    "@context": "https://schema.org",
+    "@type": "Organization",
+    name: "GUGU Ghana Limited",
+    alternateName: "GUGU",
+    url: SITE_URL,
+    logo: `${SITE_URL}/favicon.svg`,
+  };
   const jsonLd = {
     "@context": "https://schema.org",
     "@type": "WebSite",
@@ -138,7 +146,7 @@ export default function Home() {
 
   return (
     <>
-      <Seo title="GUGU" canonicalPath="/" jsonLd={jsonLd} />
+      <Seo title="GUGU" canonicalPath="/" jsonLd={[jsonLd, organizationLd]} />
       <Hero merchants={merchants.data ?? []} />
 
       {banners.data && banners.data.length > 0 && (

@@ -36,6 +36,10 @@ export default function Category() {
         title={title}
         description={`Shop ${title.toLowerCase()} from independent stores across Ghana on GUGU. Prices in cedis, pay on delivery.`}
         canonicalPath={`/c/${category.id}${activeSub ? `?sub=${encodeURIComponent(activeSub.id)}` : ""}`}
+        breadcrumbs={[
+          { name: "Home", path: "/" },
+          { name: category.name, path: `/c/${category.id}` },
+        ]}
       />
       <Breadcrumbs items={[{ label: "Home", to: "/" }, { label: category.name, to: `/c/${category.id}` }, ...(activeSub ? [{ label: activeSub.name }] : [])]} />
       <h1 className="type-display mb-5 mt-3 text-3xl text-ink-950 sm:text-5xl">{activeSub ? activeSub.name : category.name}</h1>

@@ -226,6 +226,11 @@ export default function ProductPage() {
         type="product"
         canonicalPath={`/p/${p.id}`}
         jsonLd={jsonLd}
+        breadcrumbs={[
+          { name: "Home", path: "/" },
+          ...(category ? [{ name: category.name, path: `/c/${category.id}` }] : []),
+          { name: p.name, path: `/p/${p.id}` },
+        ]}
       />
       <Breadcrumbs
         items={[

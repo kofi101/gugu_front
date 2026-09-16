@@ -1,5 +1,6 @@
 import { Suspense, useEffect } from "react";
 import { Outlet, useLocation } from "react-router";
+import { Slide, ToastContainer } from "react-toastify";
 import { firebaseConfigured, usingEmulators } from "../../lib/firebase";
 import { PageLoader } from "../States";
 import { SiteFooter } from "./SiteFooter";
@@ -38,6 +39,17 @@ export function Layout() {
         </Suspense>
       </main>
       <SiteFooter />
+      {/* Inside the router so toasts can contain <Link>s. Errors stay up for at least 6 s. */}
+      <ToastContainer
+        position="bottom-center"
+        autoClose={6000}
+        newestOnTop
+        closeOnClick={false}
+        pauseOnFocusLoss
+        pauseOnHover
+        transition={Slide}
+        theme="light"
+      />
     </div>
   );
 }

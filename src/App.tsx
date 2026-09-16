@@ -1,12 +1,12 @@
 import { lazy } from "react";
 import { HelmetProvider } from "react-helmet-async";
 import { createBrowserRouter, RouterProvider } from "react-router";
-import { Slide, ToastContainer } from "react-toastify";
 import { Layout } from "./components/layout/Layout";
 import { RequireAuth } from "./components/Common";
 import { AuthProvider } from "./context/AuthProvider";
 import { CartProvider } from "./context/CartProvider";
 import Home from "./pages/Home";
+import { RouteError } from "./components/RouteError";
 
 const Category = lazy(() => import("./pages/Category"));
 const Search = lazy(() => import("./pages/Search"));
@@ -35,6 +35,7 @@ const NotFound = lazy(() => import("./pages/NotFound"));
 const router = createBrowserRouter([
   {
     element: <Layout />,
+    errorElement: <RouteError />,
     children: [
       { index: true, element: <Home /> },
       { path: "c/:categoryId", element: <Category /> },
@@ -93,16 +94,6 @@ export function App() {
       <AuthProvider>
         <CartProvider>
           <RouterProvider router={router} />
-          <ToastContainer
-            position="bottom-center"
-            autoClose={6000}
-            newestOnTop
-            closeOnClick={false}
-            pauseOnFocusLoss
-            pauseOnHover
-            transition={Slide}
-            theme="light"
-          />
         </CartProvider>
       </AuthProvider>
     </HelmetProvider>

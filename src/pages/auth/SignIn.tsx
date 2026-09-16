@@ -38,6 +38,7 @@ export default function SignIn() {
 
   const q = params.get("next") ? `?next=${encodeURIComponent(next)}` : "";
 
+
   return (
     <AuthShell
       title="Sign in"
@@ -51,6 +52,11 @@ export default function SignIn() {
       }
     >
       <Seo title="Sign in" description="Sign in to your GUGU account to check out, track orders and write reviews." />
+      {params.get("reauth") === "1" && (
+        <p role="status" className="mb-4 rounded-md bg-thread-300/30 px-3 py-2 text-sm font-medium text-text">
+          Your account access changed. Sign in again to continue.
+        </p>
+      )}
       <GoogleButton onDone={() => navigate(next, { replace: true })} />
       <Divider />
       <form onSubmit={submit} noValidate className="space-y-4">

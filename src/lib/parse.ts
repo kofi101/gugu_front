@@ -191,6 +191,15 @@ export function toOrder(id: string, d: Data): Order {
     createdAt: date(d.createdAt),
     updatedAt: date(d.updatedAt),
     checkoutUrl: str(expresspay.checkoutUrl),
+    fulfilment: Object.fromEntries(
+      Object.entries((d.fulfilment && typeof d.fulfilment === "object" ? d.fulfilment : {}) as Record<string, Data>).map(([m, f]) => [
+        m,
+        { status: (str(f?.status) ?? "placed") as Order["fulfilment"][string]["status"], deliveredAt: date(f?.deliveredAt) },
+      ]),
+    ),
+    cancelledMerchantIds: strList(d.cancelledMerchantIds),
+    refundRequired: d.refundRequired === true,
+    refundAmount: num(d.refundAmount) ?? 0,
     statusHistory: Array.isArray(d.statusHistory)
       ? (d.statusHistory as Data[]).map((e) => ({ status: str(e.status) ?? "", at: date(e.at), by: str(e.by) }))
       : [],

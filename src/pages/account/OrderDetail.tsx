@@ -2,12 +2,14 @@ import { useEffect, useState } from "react";
 import { Link, useParams, useSearchParams } from "react-router";
 import { toast } from "react-toastify";
 import { LuArrowLeft, LuCircleCheck } from "react-icons/lu";
-import { cancelOrder, safeCheckoutUrl, startExpressPayCheckout, watchOrder } from "../../data/account";
+import { cancelOrder, customerCancelState, safeCheckoutUrl, startExpressPayCheckout, watchOrder } from "../../data/account";
+import { getMerchantsByIds } from "../../data/catalog";
+import { useAsync } from "../../hooks/useAsync";
 import { useAuth } from "../../context/auth";
 import { errorMessage } from "../../lib/errors";
 import { formatDateTime, formatMoney, ORDER_STATUS_LABEL, PAYMENT_METHOD_LABEL } from "../../lib/format";
 import type { Order } from "../../lib/types";
-import { PaymentBadge, StatusBadge } from "../../components/OrderBits";
+import { FulfilmentBadge, PaymentBadge, StatusBadge } from "../../components/OrderBits";
 import { ProductImage } from "../../components/ProductCard";
 import { Seo } from "../../components/Seo";
 import { ErrorState } from "../../components/States";
@@ -15,9 +17,11 @@ import { ErrorState } from "../../components/States";
 function Actions({ order }: { order: Order }) {
   const [confirming, setConfirming] = useState(false);
   const [busy, setBusy] = useState(false);
-  const canCancel = order.status === "awaiting_payment" || order.status === "placed";
+  const cancelState = customerCancelState(order);
+  const canCancel = cancelState.allowed;
   const canPay = order.paymentMethod === "expresspay" && order.status === "awaiting_payment";
   if (!canCancel && !canPay) {
+    if (cancelState.reason) return <p className="pt-4 text-sm text-text-muted">{cancelState.reason}</p>;
     if (order.status === "payment_failed") {
       return (
         <p className="pt-4 text-sm text-text-muted">
@@ -81,6 +85,52 @@ function Actions({ order }: { order: Order }) {
           </button>
         ))}
     </div>
+  );
+}
+
+/** Per-store progress. Multi-store orders move separately; parts can be cancelled while others are delivered. */
+function Fulfilment({ order }: { order: Order }) {
+  const merchantIds = Object.keys(order.fulfilment);
+  const names = useAsync(() => getMerchantsByIds(merchantIds), [[...merchantIds].sort().join(",")]);
+  if (merchantIds.length === 0) return null;
+  const partlyCancelled = order.status === "delivered" && merchantIds.some((m) => order.fulfilment[m].status === "cancelled");
+  return (
+    <section aria-labelledby="fulfilment-title" className="panel p-5 sm:p-6">
+      <h3 id="fulfilment-title" className="text-lg font-bold text-ink-950">
+        {merchantIds.length > 1 ? "Delivery by store" : "Delivery"}
+      </h3>
+      {partlyCancelled && (
+        <p className="mt-2 rounded-md bg-thread-300/25 p-3 text-sm text-text">
+          Part of this order was cancelled. You received the items from the stores marked Delivered.
+        </p>
+      )}
+      {order.refundRequired && order.refundAmount > 0 && (
+        <p className="mt-2 rounded-md bg-leaf-soft p-3 text-sm text-leaf">
+          A refund of <strong className="tabular">{formatMoney(order.refundAmount)}</strong> is due for the cancelled items. GUGU will return it
+          to the account you paid from.
+        </p>
+      )}
+      <ul className="mt-3 divide-y divide-paper-line">
+        {merchantIds.map((m) => {
+          const f = order.fulfilment[m];
+          const lines = order.lines.filter((l) => l.merchantId === m);
+          return (
+            <li key={m} className="py-3">
+              <div className="flex flex-wrap items-center justify-between gap-2">
+                <Link to={`/store/${m}`} className="font-semibold hover:underline">
+                  {names.data?.get(m)?.name ?? "Store"}
+                </Link>
+                <FulfilmentBadge status={f.status} />
+              </div>
+              <p className="mt-1 text-sm text-text-muted">
+                {lines.map((l) => `${l.quantity} × ${l.name}`).join(", ")}
+                {f.status === "delivered" && f.deliveredAt && ` · delivered ${formatDateTime(f.deliveredAt)}`}
+              </p>
+            </li>
+          );
+        })}
+      </ul>
+    </section>
   );
 }
 
@@ -203,6 +253,8 @@ export default function OrderDetail() {
           <Actions order={o} />
         </div>
       </div>
+
+      <Fulfilment order={o} />
 
       <section aria-labelledby="items-title" className="panel p-5 sm:p-6">
         <h3 id="items-title" className="text-lg font-bold text-ink-950">

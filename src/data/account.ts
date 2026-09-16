@@ -14,8 +14,10 @@ import {
   updateDoc,
 } from "firebase/firestore";
 import { httpsCallable } from "firebase/functions";
+import { signOut } from "firebase/auth";
+import { callableCode } from "../lib/errors";
 import { getDownloadURL, ref, uploadBytes } from "firebase/storage";
-import { db, functions, storage } from "../lib/firebase";
+import { auth, db, functions, storage } from "../lib/firebase";
 import { date, str, strList, toOrder, toProfile } from "../lib/parse";
 import type { MerchantApplication, Order, PaymentMethod, Product, ShippingAddress, UserProfile } from "../lib/types";
 import { displayPrice } from "../lib/parse";
@@ -93,6 +95,23 @@ export function watchOrder(
   );
 }
 
+/**
+ * Calls a callable; on unauthenticated/REAUTH_REQUIRED (claims changed after this token was issued)
+ * signs the user out and sends them to sign in again, returning to the current page.
+ */
+async function call<I, O>(name: string, input: I): Promise<O> {
+  try {
+    return (await httpsCallable<I, O>(functions, name)(input)).data;
+  } catch (err) {
+    if (callableCode(err) === "REAUTH_REQUIRED") {
+      const next = `${window.location.pathname}${window.location.search}`;
+      await signOut(auth).catch(() => undefined);
+      window.location.assign(`/signin?reauth=1&next=${encodeURIComponent(next)}`);
+    }
+    throw err;
+  }
+}
+
 export interface PlaceOrderInput {
   paymentMethod: PaymentMethod;
   shipping: ShippingAddress;
@@ -122,25 +141,34 @@ export interface PlaceOrderResult {
 
 /** Server prices, checks stock and clears users/{uid}/cart. Lines are omitted so the server cart is used. */
 export async function placeOrder(input: PlaceOrderInput): Promise<PlaceOrderResult> {
-  const call = httpsCallable<PlaceOrderInput, PlaceOrderResult>(functions, "placeOrder");
   const payload: PlaceOrderInput = { paymentMethod: input.paymentMethod, shipping: input.shipping, clientRequestId: input.clientRequestId };
   if (input.shippingOptionId) payload.shippingOptionId = input.shippingOptionId;
-  return (await call(payload)).data;
+  return call<PlaceOrderInput, PlaceOrderResult>("placeOrder", payload);
 }
 
 export async function confirmExpressPayPayment(orderId: string) {
-  const call = httpsCallable<{ orderId: string }, { status: string; paymentStatus: string }>(functions, "confirmExpressPayPayment");
-  return (await call({ orderId })).data;
+  return call<{ orderId: string }, { status: string; paymentStatus: string }>("confirmExpressPayPayment", { orderId });
 }
 
 export async function startExpressPayCheckout(orderId: string) {
-  const call = httpsCallable<{ orderId: string }, { checkoutUrl: string }>(functions, "startExpressPayCheckout");
-  return (await call({ orderId })).data;
+  return call<{ orderId: string }, { checkoutUrl: string }>("startExpressPayCheckout", { orderId });
+}
+
+/** Customers may cancel only before fulfilment starts (contract round 2). */
+export function customerCancelState(o: Order): { allowed: boolean; reason?: string } {
+  if (o.status === "awaiting_payment") return { allowed: true };
+  if (o.status === "placed") {
+    const entries = Object.values(o.fulfilment);
+    if (entries.every((f) => f.status === "placed")) return { allowed: true };
+    return { allowed: false, reason: "A store has started preparing this order, so it can't be cancelled here. Contact us if you need help." };
+  }
+  if (o.status === "processing" || o.status === "shipped")
+    return { allowed: false, reason: "This order is already being prepared or on the way, so it can't be cancelled here. Contact us if you need help." };
+  return { allowed: false };
 }
 
 export async function cancelOrder(orderId: string, reason?: string) {
-  const call = httpsCallable<{ orderId: string; reason?: string }, { status: string }>(functions, "cancelOrder");
-  return (await call(reason ? { orderId, reason } : { orderId })).data;
+  return call<{ orderId: string; reason?: string }, { status: string }>("cancelOrder", reason ? { orderId, reason } : { orderId });
 }
 
 /** Only follow ExpressPay redirects to an https URL. */

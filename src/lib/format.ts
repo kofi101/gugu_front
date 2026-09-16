@@ -27,6 +27,14 @@ export const ORDER_STATUS_LABEL: Record<string, string> = {
   payment_failed: "Payment failed",
 };
 
+export const FULFILMENT_STATUS_LABEL: Record<string, string> = {
+  placed: "Waiting for the store",
+  processing: "Being prepared",
+  shipped: "On the way",
+  delivered: "Delivered",
+  cancelled: "Cancelled",
+};
+
 export const PAYMENT_METHOD_LABEL: Record<string, string> = {
   cash_on_delivery: "Cash on delivery",
   mobile_money_on_delivery: "Mobile money on delivery",

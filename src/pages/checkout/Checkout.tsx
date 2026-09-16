@@ -274,7 +274,16 @@ export default function Checkout() {
       navigate(`/account/orders/${result.orderId}?placed=1`, { replace: true });
     } catch (err) {
       const code = callableCode(err);
-      if (code === "OUT_OF_STOCK" || code === "PRODUCT_UNAVAILABLE" || code === "PRODUCT_NOT_FOUND") {
+      const details = callableDetails<{ productId?: string; reason?: string }>(err);
+      if (code === "PRODUCT_UNAVAILABLE" && details?.reason === "own_product") {
+        const line = cart.lines.find((l) => l.productId === details.productId);
+        toast.error(
+          line
+            ? `You can't buy from your own store. Remove “${line.name}” from your cart to continue.`
+            : errorMessage(err),
+          { autoClose: 10000 },
+        );
+      } else if (code === "OUT_OF_STOCK" || code === "PRODUCT_UNAVAILABLE" || code === "PRODUCT_NOT_FOUND") {
         const productId = callableDetails<{ productId?: string; available?: number }>(err)?.productId;
         const line = cart.lines.find((l) => l.productId === productId);
         const available = callableDetails<{ available?: number }>(err)?.available;

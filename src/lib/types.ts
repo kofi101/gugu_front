@@ -117,6 +117,13 @@ export interface StatusEvent {
   by?: string;
 }
 
+export type FulfilmentStatus = "placed" | "processing" | "shipped" | "delivered" | "cancelled";
+
+export interface MerchantFulfilment {
+  status: FulfilmentStatus;
+  deliveredAt?: Date;
+}
+
 export interface Order {
   id: string;
   orderNumber: string;
@@ -135,6 +142,11 @@ export interface Order {
   updatedAt?: Date;
   checkoutUrl?: string;
   statusHistory: StatusEvent[];
+  /** Per-merchant fulfilment, keyed by merchantId (server-written). */
+  fulfilment: Record<string, MerchantFulfilment>;
+  cancelledMerchantIds: string[];
+  refundRequired: boolean;
+  refundAmount: number;
 }
 
 export interface Rating {

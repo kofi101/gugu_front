@@ -57,6 +57,7 @@ const CALLABLE: Record<string, string> = {
   QUANTITY_LIMIT: "Pay-on-delivery orders are limited to 20 of each item. Lower the quantity or pay online with ExpressPay.",
   TOO_MANY_OPEN_ORDERS:
     "You already have 3 pay-on-delivery orders on the way. Wait for one to arrive, or pay online with ExpressPay.",
+  REAUTH_REQUIRED: "Your account access changed. Sign in again to continue.",
   TOO_MANY_UNPAID_ORDERS:
     "You already have 3 orders waiting for ExpressPay payment. Pay or cancel one of them in your orders, or choose pay on delivery.",
   TOO_MANY_CHECKOUT_ATTEMPTS: "Too many payment attempts. Wait a few minutes and try again.",
@@ -82,6 +83,9 @@ export function errorMessage(err: unknown, fallback = "Something went wrong. Try
     const code = err.code.replace(/^functions\//, "").replace(/^firestore\//, "");
     const contractCode = callableCode(err);
     if (contractCode) {
+      if (contractCode === "PRODUCT_UNAVAILABLE" && callableDetails<{ reason?: string }>(err)?.reason === "own_product") {
+        return "You can't buy from your own store. Remove your store's products from the cart to continue.";
+      }
       if (CALLABLE[contractCode]) return CALLABLE[contractCode];
       if (/^SHIPPING_[A-Z0-9]+_REQUIRED$/.test(contractCode)) return "Complete the delivery address.";
       if (contractCode.endsWith("_INVALID")) return "Some details aren't valid. Check the form and try again.";

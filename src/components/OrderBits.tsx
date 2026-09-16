@@ -1,4 +1,4 @@
-import { ORDER_STATUS_LABEL, PAYMENT_STATUS_LABEL } from "../lib/format";
+import { FULFILMENT_STATUS_LABEL, ORDER_STATUS_LABEL, PAYMENT_STATUS_LABEL } from "../lib/format";
 
 const STATUS_STYLE: Record<string, string> = {
   awaiting_payment: "bg-thread-300/40 text-thread-700 ring-thread-500/50",
@@ -28,4 +28,12 @@ export function PaymentBadge({ status }: { status: string }) {
           ? "text-thread-700"
           : "text-text-muted";
   return <span className={`text-sm font-semibold ${style}`}>{PAYMENT_STATUS_LABEL[status] ?? status}</span>;
+}
+
+export function FulfilmentBadge({ status }: { status: string }) {
+  return (
+    <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-bold ring-1 ring-inset ${STATUS_STYLE[status] ?? STATUS_STYLE.placed}`}>
+      {FULFILMENT_STATUS_LABEL[status] ?? status}
+    </span>
+  );
 }

@@ -171,6 +171,14 @@ export function watchWishlist(uid: string, onData: (items: WishlistItem[]) => vo
   );
 }
 
+export function watchWishlistItem(uid: string, productId: string, onData: (saved: boolean) => void) {
+  return onSnapshot(
+    doc(db, "users", uid, "wishlist", productId),
+    (snap) => onData(snap.exists()),
+    () => onData(false),
+  );
+}
+
 export async function addToWishlist(uid: string, p: Product) {
   const data: Record<string, unknown> = {
     productId: p.id,

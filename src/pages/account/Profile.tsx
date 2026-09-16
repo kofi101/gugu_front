@@ -5,19 +5,10 @@ import { useAuth } from "../../context/auth";
 import { useAsync } from "../../hooks/useAsync";
 import { errorMessage } from "../../lib/errors";
 import type { ShippingAddress, UserProfile } from "../../lib/types";
-import { AddressFields, validateAddress, type AddressErrors } from "../../components/AddressFields";
+import { AddressFields } from "../../components/AddressFields";
+import { profileToAddress, validateAddress, type AddressErrors } from "../../lib/address";
 import { Seo } from "../../components/Seo";
 import { ErrorState } from "../../components/States";
-
-export const profileToAddress = (p: UserProfile | null | undefined, fallbackName = ""): ShippingAddress => ({
-  fullName: p?.displayName ?? fallbackName,
-  line1: p?.shippingLine1 ?? "",
-  line2: p?.shippingLine2 ?? "",
-  city: p?.shippingCity ?? "",
-  region: p?.shippingRegion ?? "",
-  postalCode: p?.shippingPostalCode ?? "",
-  phone: p?.shippingPhone ?? p?.phone ?? "",
-});
 
 function ProfileForm({ profile }: { profile: UserProfile | null }) {
   const { user, refreshUser } = useAuth();

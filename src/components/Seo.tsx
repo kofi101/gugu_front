@@ -1,10 +1,7 @@
 import { Helmet } from "react-helmet-async";
 import { useLocation } from "react-router";
 
-export const SITE_NAME = "GUGU";
-export const SITE_URL = (import.meta.env.VITE_SITE_URL || "https://gugu-shop.web.app").replace(/\/$/, "");
-export const DEFAULT_DESCRIPTION =
-  "Shop from independent stores across Ghana on GUGU. Prices in cedis, pay cash or mobile money on delivery, or pay online with ExpressPay.";
+import { DEFAULT_DESCRIPTION, SITE_NAME, SITE_URL } from "../lib/site";
 
 interface SeoProps {
   title: string;

@@ -69,9 +69,9 @@ export function CartProvider({ children }: { children: ReactNode }) {
   const { user, initializing } = useAuth();
   const uid = user?.uid ?? null;
   const [guestLines, setGuestLines] = useState<CartLine[]>(readGuest);
-  const [accountLines, setAccountLines] = useState<CartLine[]>([]);
-  const [accountLoading, setAccountLoading] = useState(false);
-  const [merging, setMerging] = useState(false);
+  // Snapshot tagged with the uid it belongs to, so a stale cart is never shown after switching users.
+  const [account, setAccount] = useState<{ uid: string; lines: CartLine[] } | null>(null);
+  const [mergeFailedFor, setMergeFailedFor] = useState<string | null>(null);
   const mergedFor = useRef<string | null>(null);
 
   // Keep guest carts in sync across tabs.
@@ -85,23 +85,21 @@ export function CartProvider({ children }: { children: ReactNode }) {
 
   // Account cart: live subscription.
   useEffect(() => {
-    if (!uid) {
-      setAccountLines([]);
-      return;
-    }
-    setAccountLoading(true);
+    if (!uid) return;
     return onSnapshot(
       collection(db, "users", uid, "cart"),
-      (snap) => {
-        setAccountLines(snap.docs.map((d) => toLine(d.id, d.data())).sort((a, b) => a.name.localeCompare(b.name)));
-        setAccountLoading(false);
-      },
+      (snap) =>
+        setAccount({ uid, lines: snap.docs.map((d) => toLine(d.id, d.data())).sort((a, b) => a.name.localeCompare(b.name)) }),
       (err) => {
         console.warn("[gugu] cart subscription failed", err);
-        setAccountLoading(false);
+        setAccount({ uid, lines: [] });
       },
     );
   }, [uid]);
+  const accountLines = useMemo(() => (uid && account?.uid === uid ? account.lines : []), [uid, account]);
+  const accountLoading = Boolean(uid) && account?.uid !== uid;
+  // Merging while signed in with a guest cart still waiting to be moved (unless that merge failed).
+  const merging = Boolean(uid) && guestLines.length > 0 && mergeFailedFor !== uid;
 
   // Merge the guest cart into the account cart once per sign-in. Uses max(existing, guest)
   // so a retried or repeated merge can never inflate quantities.
@@ -110,7 +108,6 @@ export function CartProvider({ children }: { children: ReactNode }) {
     const guest = readGuest();
     mergedFor.current = uid;
     if (!guest.length) return;
-    setMerging(true);
     runTransaction(db, async (tx) => {
       const refs = guest.map((l) => doc(db, "users", uid, "cart", l.productId));
       const snaps = await Promise.all(refs.map((r) => tx.get(r)));
@@ -126,10 +123,9 @@ export function CartProvider({ children }: { children: ReactNode }) {
         setGuestLines([]);
       })
       .catch((err) => {
-        console.warn("[gugu] cart merge failed; guest cart kept for retry", err);
-        mergedFor.current = null;
-      })
-      .finally(() => setMerging(false));
+        console.warn("[gugu] cart merge failed; guest cart kept for the next sign-in", err);
+        setMergeFailedFor(uid);
+      });
   }, [uid]);
 
   useEffect(() => {

@@ -7,36 +7,55 @@ export interface AsyncState<T> {
   reload: () => void;
 }
 
-/** Runs `fn` when deps change; ignores stale results; exposes reload for retry buttons. */
+interface Settled<T> {
+  key: readonly unknown[];
+  data: T | undefined;
+  error: unknown;
+}
+
+const sameKey = (a: readonly unknown[] | undefined, b: readonly unknown[]) =>
+  Boolean(a) && a!.length === b.length && a!.every((v, i) => Object.is(v, b[i]));
+
+/**
+ * Runs `fn` whenever deps change and exposes reload() for retry buttons.
+ * `loading` is derived (settled result belongs to other deps), so no state is set synchronously in the effect.
+ * While reloading, the previous data stays available to avoid layout flashes.
+ */
 export function useAsync<T>(fn: () => Promise<T>, deps: DependencyList): AsyncState<T> {
-  const [state, setState] = useState<{ data: T | undefined; error: unknown; loading: boolean }>({
-    data: undefined,
-    error: undefined,
-    loading: true,
-  });
   const [attempt, setAttempt] = useState(0);
+  const [settled, setSettled] = useState<Settled<T> | null>(null);
   const fnRef = useRef(fn);
   useEffect(() => {
     fnRef.current = fn;
   });
 
+  const key = [...deps, attempt];
+
   useEffect(() => {
     let active = true;
-    setState((s) => ({ data: s.data, error: undefined, loading: true }));
+    const runKey = key;
     fnRef
       .current()
-      .then((data) => active && setState({ data, error: undefined, loading: false }))
+      .then((data) => {
+        if (active) setSettled({ key: runKey, data, error: undefined });
+      })
       .catch((error: unknown) => {
         if (!active) return;
         console.error(error);
-        setState({ data: undefined, error, loading: false });
+        setSettled({ key: runKey, data: undefined, error });
       });
     return () => {
       active = false;
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [...deps, attempt]);
+  }, key);
 
   const reload = useCallback(() => setAttempt((a) => a + 1), []);
-  return { ...state, reload };
+  const current = sameKey(settled?.key, key);
+  return {
+    data: settled?.data,
+    error: current ? settled?.error : undefined,
+    loading: !current,
+    reload,
+  };
 }

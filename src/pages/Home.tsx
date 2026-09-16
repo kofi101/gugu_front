@@ -8,7 +8,8 @@ import type { Banner, Merchant } from "../lib/types";
 import { MerchantList } from "../components/MerchantList";
 import { Guilloche } from "../components/Guilloche";
 import { ProductGrid, ProductGridSkeleton, ProductRail } from "../components/ProductCard";
-import { Seo, SITE_URL } from "../components/Seo";
+import { Seo } from "../components/Seo";
+import { SITE_URL } from "../lib/site";
 import { ErrorState } from "../components/States";
 
 function contrast(a: string, b: string) {

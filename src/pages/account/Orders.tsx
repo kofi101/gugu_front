@@ -3,7 +3,7 @@ import { LuChevronRight, LuPackage } from "react-icons/lu";
 import { listOrders } from "../../data/account";
 import { useAuth } from "../../context/auth";
 import { useAsync } from "../../hooks/useAsync";
-import { formatDate, formatMoney, plural } from "../../lib/format";
+import { amountDueOnDelivery, formatDate, formatMoney, plural } from "../../lib/format";
 import { PaymentBadge, StatusBadge } from "../../components/OrderBits";
 import { Seo } from "../../components/Seo";
 import { EmptyState, ErrorState } from "../../components/States";
@@ -64,7 +64,22 @@ export default function Orders() {
                   <PaymentBadge status={o.paymentStatus} />
                 </div>
                 <div className="text-right">
-                  <p className="type-title tabular">{formatMoney(o.orderTotal)}</p>
+                  {amountDueOnDelivery(o) == null ? (
+                    <p className="type-title tabular">{formatMoney(o.orderTotal)}</p>
+                  ) : (
+                    <>
+                      <p className="tabular text-xs text-text-muted">
+                        <s>{formatMoney(o.orderTotal)}</s>
+                      </p>
+                      <p className="type-title tabular">
+                        <span className="sr-only">Amount due on delivery </span>
+                        {formatMoney(amountDueOnDelivery(o) as number)}
+                      </p>
+                      <p className="text-xs text-text-muted" aria-hidden>
+                        due on delivery
+                      </p>
+                    </>
+                  )}
                   <LuChevronRight aria-hidden className="ml-auto mt-1 h-5 w-5 text-text-muted group-hover:text-ink-700" />
                 </div>
               </Link>

@@ -7,7 +7,7 @@ import { getMerchantsByIds } from "../../data/catalog";
 import { useAsync } from "../../hooks/useAsync";
 import { useAuth } from "../../context/auth";
 import { errorMessage } from "../../lib/errors";
-import { formatDateTime, formatMoney, PAYMENT_METHOD_LABEL, statusLabel } from "../../lib/format";
+import { amountDueOnDelivery, formatDateTime, formatMoney, PAYMENT_METHOD_LABEL, statusLabel } from "../../lib/format";
 import type { Order } from "../../lib/types";
 import { FulfilmentBadge, PaymentBadge, StatusBadge } from "../../components/OrderBits";
 import { ProductImage } from "../../components/ProductCard";
@@ -179,6 +179,7 @@ export default function OrderDetail() {
   }
 
   const o = order;
+  const due = amountDueOnDelivery(o);
   const history = [...o.statusHistory].sort((a, b) => (a.at?.getTime() ?? 0) - (b.at?.getTime() ?? 0));
 
   return (
@@ -215,7 +216,17 @@ export default function OrderDetail() {
             </div>
             <div className="text-right">
               <StatusBadge status={o.status} />
-              <p className="type-display tabular mt-2 text-3xl text-ink-950">{formatMoney(o.orderTotal)}</p>
+              {due == null ? (
+                <p className="type-display tabular mt-2 text-3xl text-ink-950">{formatMoney(o.orderTotal)}</p>
+              ) : (
+                <>
+                  <p className="mt-2 text-sm text-text-muted">
+                    Original total <s className="tabular">{formatMoney(o.orderTotal)}</s>
+                  </p>
+                  <p className="text-xs font-semibold text-text-muted">Amount due on delivery</p>
+                  <p className="type-display tabular text-3xl text-ink-950">{formatMoney(due)}</p>
+                </>
+              )}
             </div>
           </div>
         </div>
@@ -297,6 +308,18 @@ export default function OrderDetail() {
             <dt>Total</dt>
             <dd className="tabular">{formatMoney(o.orderTotal)}</dd>
           </div>
+          {due != null && (
+            <>
+              <div className="flex justify-between text-text-muted">
+                <dt>Cancelled items</dt>
+                <dd className="tabular">−{formatMoney(o.cancelledAmount)}</dd>
+              </div>
+              <div className="flex justify-between border-t border-paper-line pt-2 text-base font-bold">
+                <dt>Amount due on delivery</dt>
+                <dd className="tabular">{formatMoney(due)}</dd>
+              </div>
+            </>
+          )}
         </dl>
       </section>
 

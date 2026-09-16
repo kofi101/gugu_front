@@ -200,6 +200,7 @@ export function toOrder(id: string, d: Data): Order {
     cancelledMerchantIds: strList(d.cancelledMerchantIds),
     refundRequired: d.refundRequired === true,
     refundAmount: num(d.refundAmount) ?? 0,
+    cancelledAmount: num(d.cancelledAmount) ?? 0,
     statusHistory: Array.isArray(d.statusHistory)
       ? (d.statusHistory as Data[]).map((e) => ({ status: str(e.status) ?? "", at: date(e.at), by: str(e.by) }))
       : [],

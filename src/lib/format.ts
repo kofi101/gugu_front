@@ -52,3 +52,10 @@ export const PAYMENT_STATUS_LABEL: Record<string, string> = {
   paid: "Paid",
   failed: "Payment failed",
 };
+
+/** For pay-on-delivery orders with cancelled parts: what the customer still pays at the door. */
+export function amountDueOnDelivery(o: { paymentMethod: string; orderTotal: number; cancelledAmount: number }): number | null {
+  const onDelivery = o.paymentMethod === "cash_on_delivery" || o.paymentMethod === "mobile_money_on_delivery";
+  if (!onDelivery || !(o.cancelledAmount > 0)) return null;
+  return Math.max(0, Math.round((o.orderTotal - o.cancelledAmount) * 100) / 100);
+}

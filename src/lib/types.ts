@@ -147,6 +147,8 @@ export interface Order {
   cancelledMerchantIds: string[];
   refundRequired: boolean;
   refundAmount: number;
+  /** GHS of cancelled lines (plus shipping when nothing was delivered), any payment method. */
+  cancelledAmount: number;
 }
 
 export interface Rating {

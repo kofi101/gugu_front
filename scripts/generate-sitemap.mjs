@@ -23,7 +23,7 @@ const dist = path.join(root, "dist");
 const mode = process.env.MODE || process.env.NODE_ENV || "production";
 const env = { ...loadEnv(mode, root, "VITE_"), ...Object.fromEntries(Object.entries(process.env).filter(([k]) => k.startsWith("VITE_"))) };
 
-const SITE_URL = (env.VITE_SITE_URL || "https://gugu-shop.web.app").replace(/\/$/, "");
+const SITE_URL = (env.VITE_SITE_URL || "https://gugumarket.web.app").replace(/\/$/, "");
 const TIMEOUT_MS = Number(process.env.SITEMAP_TIMEOUT_MS || 30000);
 const PAGE = 500;
 

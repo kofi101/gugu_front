@@ -10,4 +10,4 @@ Disallow: /signup
 Disallow: /forgot-password
 Disallow: /search
 
-Sitemap: https://gugu-shop.web.app/sitemap.xml
+Sitemap: https://gugumarket.web.app/sitemap.xml

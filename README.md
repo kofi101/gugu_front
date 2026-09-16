@@ -33,7 +33,7 @@ Only `.env.example` is committed.
 | Variable | Required | Notes |
 | --- | --- | --- |
 | `VITE_FIREBASE_API_KEY`, `VITE_FIREBASE_AUTH_DOMAIN`, `VITE_FIREBASE_PROJECT_ID`, `VITE_FIREBASE_STORAGE_BUCKET`, `VITE_FIREBASE_MESSAGING_SENDER_ID`, `VITE_FIREBASE_APP_ID` | yes (prod) | From the **web app** registered in `gugu2-36268` (Project settings → Your apps → Add app → Web). Not registered yet. |
-| `VITE_SITE_URL` | yes (prod) | Public origin, e.g. `https://gugu-shop.web.app`. Used for canonical URLs, Open Graph, JSON-LD and the sitemap. |
+| `VITE_SITE_URL` | yes (prod) | Public origin, e.g. `https://gugumarket.web.app`. Used for canonical URLs, Open Graph, JSON-LD and the sitemap. |
 | `VITE_USE_EMULATORS` | dev only | `true` connects to the Emulator Suite (auth 9099, firestore 8080, functions 5001, storage 9199); project id defaults to `demo-gugu`. |
 | `VITE_EMULATOR_HOST` | no | Defaults to `127.0.0.1`. |
 | `VITE_SUPPORT_EMAIL`, `VITE_SUPPORT_PHONE` | recommended | Shown on `/contact` only when set. |

@@ -25,7 +25,12 @@ export const ORDER_STATUS_LABEL: Record<string, string> = {
   delivered: "Delivered",
   cancelled: "Cancelled",
   payment_failed: "Payment failed",
+  partially_cancelled: "Part of the order cancelled",
 };
+
+/** Label for any order/fulfilment status, including server-only history entries. */
+export const statusLabel = (status: string) =>
+  ORDER_STATUS_LABEL[status] ?? (status ? status.charAt(0).toUpperCase() + status.slice(1).replace(/_/g, " ") : "");
 
 export const FULFILMENT_STATUS_LABEL: Record<string, string> = {
   placed: "Waiting for the store",

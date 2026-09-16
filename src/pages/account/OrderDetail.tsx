@@ -7,7 +7,7 @@ import { getMerchantsByIds } from "../../data/catalog";
 import { useAsync } from "../../hooks/useAsync";
 import { useAuth } from "../../context/auth";
 import { errorMessage } from "../../lib/errors";
-import { formatDateTime, formatMoney, ORDER_STATUS_LABEL, PAYMENT_METHOD_LABEL } from "../../lib/format";
+import { formatDateTime, formatMoney, PAYMENT_METHOD_LABEL, statusLabel } from "../../lib/format";
 import type { Order } from "../../lib/types";
 import { FulfilmentBadge, PaymentBadge, StatusBadge } from "../../components/OrderBits";
 import { ProductImage } from "../../components/ProductCard";
@@ -312,7 +312,7 @@ export default function OrderDetail() {
                   aria-hidden
                   className={`absolute -left-[1.6rem] top-1 h-3 w-3 rounded-full ring-4 ring-white ${i === history.length - 1 ? "bg-ink-700" : "bg-paper-line"}`}
                 />
-                <p className="font-semibold">{ORDER_STATUS_LABEL[h.status] ?? h.status}</p>
+                <p className="font-semibold">{statusLabel(h.status)}</p>
                 <p className="text-sm text-text-muted">{formatDateTime(h.at)}</p>
               </li>
             ))}

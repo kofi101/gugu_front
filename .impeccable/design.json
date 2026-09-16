@@ -1,0 +1,616 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-09-16T19:43:23.241850+00:00",
+  "title": "Design System: GUGU",
+  "extensions": {
+    "colorMeta": {
+      "ink-50": {
+        "role": "primary",
+        "displayName": "Ink Wash",
+        "canonical": "#EEF8FB",
+        "oklch": "oklch(97.3% 0.011 217.5)",
+        "tonalRamp": [
+          "#062532",
+          "#0B3F52",
+          "#0D526B",
+          "#0A6A8A",
+          "#0F96C1",
+          "#56BCDD",
+          "#B0DEEC",
+          "#EEF8FB"
+        ]
+      },
+      "ink-100": {
+        "role": "primary",
+        "displayName": "Pale Ink",
+        "canonical": "#D8EFF6",
+        "oklch": "oklch(93.7% 0.026 217.9)",
+        "tonalRamp": [
+          "#062532",
+          "#0B3F52",
+          "#0D526B",
+          "#0A6A8A",
+          "#0F96C1",
+          "#56BCDD",
+          "#B0DEEC",
+          "#EEF8FB"
+        ]
+      },
+      "ink-200": {
+        "role": "primary",
+        "displayName": "Soft Ink",
+        "canonical": "#B0DEEC",
+        "oklch": "oklch(87.3% 0.051 218.3)",
+        "tonalRamp": [
+          "#062532",
+          "#0B3F52",
+          "#0D526B",
+          "#0A6A8A",
+          "#0F96C1",
+          "#56BCDD",
+          "#B0DEEC",
+          "#EEF8FB"
+        ]
+      },
+      "ink-300": {
+        "role": "primary",
+        "displayName": "Microprint Ink",
+        "canonical": "#7CC8E0",
+        "oklch": "oklch(79.2% 0.083 220.1)",
+        "tonalRamp": [
+          "#062532",
+          "#0B3F52",
+          "#0D526B",
+          "#0A6A8A",
+          "#0F96C1",
+          "#56BCDD",
+          "#B0DEEC",
+          "#EEF8FB"
+        ]
+      },
+      "ink-400": {
+        "role": "primary",
+        "displayName": "Rosette Ink",
+        "canonical": "#56BCDD",
+        "oklch": "oklch(74.8% 0.105 222.2)",
+        "tonalRamp": [
+          "#062532",
+          "#0B3F52",
+          "#0D526B",
+          "#0A6A8A",
+          "#0F96C1",
+          "#56BCDD",
+          "#B0DEEC",
+          "#EEF8FB"
+        ]
+      },
+      "ink-500": {
+        "role": "primary",
+        "displayName": "Brand Blue",
+        "canonical": "#0F96C1",
+        "oklch": "oklch(62.9% 0.120 227.7)",
+        "tonalRamp": [
+          "#062532",
+          "#0B3F52",
+          "#0D526B",
+          "#0A6A8A",
+          "#0F96C1",
+          "#56BCDD",
+          "#B0DEEC",
+          "#EEF8FB"
+        ]
+      },
+      "ink-700": {
+        "role": "primary",
+        "displayName": "Intaglio Ink",
+        "canonical": "#0A6A8A",
+        "oklch": "oklch(49.0% 0.093 228.3)",
+        "tonalRamp": [
+          "#062532",
+          "#0B3F52",
+          "#0D526B",
+          "#0A6A8A",
+          "#0F96C1",
+          "#56BCDD",
+          "#B0DEEC",
+          "#EEF8FB"
+        ]
+      },
+      "ink-800": {
+        "role": "primary",
+        "displayName": "Engraved Ink",
+        "canonical": "#0D526B",
+        "oklch": "oklch(41.1% 0.076 228.6)",
+        "tonalRamp": [
+          "#062532",
+          "#0B3F52",
+          "#0D526B",
+          "#0A6A8A",
+          "#0F96C1",
+          "#56BCDD",
+          "#B0DEEC",
+          "#EEF8FB"
+        ]
+      },
+      "ink-900": {
+        "role": "primary",
+        "displayName": "Note Ground",
+        "canonical": "#0B3F52",
+        "oklch": "oklch(34.5% 0.061 228.0)",
+        "tonalRamp": [
+          "#062532",
+          "#0B3F52",
+          "#0D526B",
+          "#0A6A8A",
+          "#0F96C1",
+          "#56BCDD",
+          "#B0DEEC",
+          "#EEF8FB"
+        ]
+      },
+      "ink-950": {
+        "role": "primary",
+        "displayName": "Deep Ink",
+        "canonical": "#062532",
+        "oklch": "oklch(24.9% 0.043 230.0)",
+        "tonalRamp": [
+          "#062532",
+          "#0B3F52",
+          "#0D526B",
+          "#0A6A8A",
+          "#0F96C1",
+          "#56BCDD",
+          "#B0DEEC",
+          "#EEF8FB"
+        ]
+      },
+      "security-paper": {
+        "role": "neutral",
+        "displayName": "Security Paper",
+        "canonical": "#F2F6F5",
+        "oklch": "oklch(97.0% 0.004 179.7)",
+        "tonalRamp": [
+          "#090C0B",
+          "#222524",
+          "#3D4040",
+          "#5B5E5E",
+          "#7B7E7D",
+          "#9C9F9E",
+          "#C4C8C7",
+          "#EBEFEE"
+        ]
+      },
+      "paper-deep": {
+        "role": "neutral",
+        "displayName": "Paper Deep",
+        "canonical": "#E4ECEB",
+        "oklch": "oklch(93.7% 0.009 188.1)",
+        "tonalRamp": [
+          "#070C0C",
+          "#1F2525",
+          "#3B4140",
+          "#585F5E",
+          "#787F7E",
+          "#99A09F",
+          "#C1C9C8",
+          "#E8F0EF"
+        ]
+      },
+      "paper-line": {
+        "role": "neutral",
+        "displayName": "Paper Line",
+        "canonical": "#C9D8DC",
+        "oklch": "oklch(87.2% 0.017 215.5)",
+        "tonalRamp": [
+          "#040D10",
+          "#1B2629",
+          "#364245",
+          "#536064",
+          "#728084",
+          "#93A1A5",
+          "#BCCACE",
+          "#E2F2F6"
+        ]
+      },
+      "note-white": {
+        "role": "neutral",
+        "displayName": "Note White",
+        "canonical": "#FFFFFF",
+        "oklch": "oklch(100.0% 0.000 89.9)",
+        "tonalRamp": [
+          "#0B0B0B",
+          "#242424",
+          "#404040",
+          "#5D5D5D",
+          "#7D7D7D",
+          "#9E9E9E",
+          "#C7C7C7",
+          "#EEEEEE"
+        ]
+      },
+      "text": {
+        "role": "neutral",
+        "displayName": "Ink Text",
+        "canonical": "#10222B",
+        "oklch": "oklch(24.1% 0.029 231.5)",
+        "tonalRamp": [
+          "#000D15",
+          "#152730",
+          "#30434D",
+          "#4D616B",
+          "#6C818C",
+          "#8DA2AE",
+          "#B5CBD7",
+          "#DCF3FF"
+        ]
+      },
+      "text-muted": {
+        "role": "neutral",
+        "displayName": "Muted Text",
+        "canonical": "#4A5F68",
+        "oklch": "oklch(47.2% 0.029 225.9)",
+        "tonalRamp": [
+          "#000D14",
+          "#14272F",
+          "#2F434C",
+          "#4C616A",
+          "#6B818B",
+          "#8CA3AD",
+          "#B4CCD6",
+          "#DBF3FE"
+        ]
+      },
+      "thread-gold": {
+        "role": "secondary",
+        "displayName": "Security Thread Gold",
+        "canonical": "#F5C04A",
+        "oklch": "oklch(83.5% 0.144 84.0)",
+        "tonalRamp": [
+          "#140900",
+          "#312100",
+          "#533B00",
+          "#77580A",
+          "#9E7610",
+          "#C4962B",
+          "#F3BE48",
+          "#FFECC9"
+        ]
+      },
+      "thread-gold-deep": {
+        "role": "secondary",
+        "displayName": "Thread Gold Deep",
+        "canonical": "#D69E1B",
+        "oklch": "oklch(73.3% 0.145 81.9)",
+        "tonalRamp": [
+          "#140800",
+          "#312100",
+          "#543B00",
+          "#78570A",
+          "#A0750F",
+          "#C7952A",
+          "#F6BD48",
+          "#FEECCD"
+        ]
+      },
+      "thread-text": {
+        "role": "secondary",
+        "displayName": "Thread Text",
+        "canonical": "#8A5B00",
+        "oklch": "oklch(51.0% 0.108 74.2)",
+        "tonalRamp": [
+          "#160700",
+          "#341F00",
+          "#583800",
+          "#7E540B",
+          "#A37327",
+          "#C6944C",
+          "#F1BD75",
+          "#FEEBD3"
+        ]
+      },
+      "serial-red": {
+        "role": "tertiary",
+        "displayName": "Serial Red",
+        "canonical": "#B3261E",
+        "oklch": "oklch(50.1% 0.178 28.7)",
+        "tonalRamp": [
+          "#210000",
+          "#4B0101",
+          "#7A0907",
+          "#AC1D17",
+          "#D2463A",
+          "#F96A5B",
+          "#FFB0A4",
+          "#FEE9E5"
+        ]
+      },
+      "serial-soft": {
+        "role": "tertiary",
+        "displayName": "Serial Soft",
+        "canonical": "#FBE9E7",
+        "oklch": "oklch(94.8% 0.020 25.2)",
+        "tonalRamp": [
+          "#130807",
+          "#2D201F",
+          "#4A3C3A",
+          "#695A58",
+          "#897977",
+          "#AB9A98",
+          "#D4C3C1",
+          "#FCEAE8"
+        ]
+      },
+      "leaf": {
+        "role": "tertiary",
+        "displayName": "Leaf",
+        "canonical": "#1E6B3A",
+        "oklch": "oklch(46.9% 0.108 151.5)",
+        "tonalRamp": [
+          "#001102",
+          "#002D11",
+          "#024E24",
+          "#226E3D",
+          "#468F5C",
+          "#68B27C",
+          "#91DCA4",
+          "#C8FED4"
+        ]
+      },
+      "leaf-soft": {
+        "role": "tertiary",
+        "displayName": "Leaf Soft",
+        "canonical": "#E3F1E7",
+        "oklch": "oklch(94.5% 0.020 154.9)",
+        "tonalRamp": [
+          "#050E08",
+          "#1C2720",
+          "#38433B",
+          "#556159",
+          "#748178",
+          "#95A299",
+          "#BECBC2",
+          "#E5F3E9"
+        ]
+      }
+    },
+    "typographyMeta": {
+      "display": {
+        "displayName": "Display (expanded 125%)",
+        "purpose": "Hero headline, receipt order total, GH₵ denomination."
+      },
+      "title": {
+        "displayName": "Title (expanded 115%)",
+        "purpose": "Section and page headings, all prices and estimated totals."
+      },
+      "body": {
+        "displayName": "Body",
+        "purpose": "Reading text at normal width."
+      },
+      "label": {
+        "displayName": "Label",
+        "purpose": "Field labels, panel subheads, nav links; sentence case."
+      },
+      "microprint": {
+        "displayName": "Microprint (condensed 75%)",
+        "purpose": "Decorative aria-hidden merchant names along note edges."
+      }
+    },
+    "shadows": [
+      {
+        "name": "lift",
+        "value": "0 1px 2px rgba(11,63,82,.08), 0 8px 24px -12px rgba(11,63,82,.25)",
+        "purpose": "Product card hover only."
+      },
+      {
+        "name": "sheet",
+        "value": "0 -8px 32px -8px rgba(6,37,50,.35)",
+        "purpose": "Mobile menu bottom sheet and sticky mobile checkout bar."
+      },
+      {
+        "name": "dialog-backdrop",
+        "value": "rgb(6 37 50 / 0.55)",
+        "purpose": "Scrim behind native dialogs."
+      }
+    ],
+    "motion": [
+      {
+        "name": "guilloche-draw",
+        "value": "2.4s cubic-bezier(.16,1,.3,1) forwards, 180ms layer stagger",
+        "purpose": "Single expressive moment: hero rosette draws once."
+      },
+      {
+        "name": "sheet-up",
+        "value": ".32s cubic-bezier(.16,1,.3,1)",
+        "purpose": "Mobile menu sheet entrance."
+      },
+      {
+        "name": "fade-in",
+        "value": ".2s ease-out",
+        "purpose": "Dialog backdrop."
+      },
+      {
+        "name": "shimmer",
+        "value": "1.6s linear infinite",
+        "purpose": "Skeleton loading sweep."
+      },
+      {
+        "name": "color-transition",
+        "value": "150ms",
+        "purpose": "Button and link state changes."
+      },
+      {
+        "name": "reduced-motion",
+        "value": "animation and transition durations 0.01ms; rosette rendered fully drawn",
+        "purpose": "prefers-reduced-motion: reduce."
+      }
+    ],
+    "breakpoints": [
+      {
+        "name": "sm",
+        "value": "640px"
+      },
+      {
+        "name": "md",
+        "value": "768px"
+      },
+      {
+        "name": "lg",
+        "value": "1024px"
+      },
+      {
+        "name": "xl",
+        "value": "1280px"
+      }
+    ],
+    "thread": {
+      "value": "repeating-linear-gradient(90deg, #D69E1B 0 6px, #F5C04A 6px 12px)",
+      "height": "4px",
+      "purpose": "Note edges and money panels."
+    },
+    "focus": {
+      "light": "3px solid #0A6A8A, offset 2px",
+      "dark": "3px solid #F5C04A, offset 2px"
+    },
+    "toasts": {
+      "position": "top-center",
+      "autoCloseMs": 6000,
+      "pauseOnHover": true,
+      "closeHitArea": "44px"
+    }
+  },
+  "components": [
+    {
+      "name": "Primary Button",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "Default action: ink-700 fill, white text.",
+      "html": "<button class=\"ds-btn-primary\">Place order</button>",
+      "css": ".ds-btn-primary{font-family:'Archivo Variable',Archivo,system-ui,sans-serif;display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:44px;padding:0 20px;border:0;border-radius:6px;font-size:15px;font-weight:600;cursor:pointer;transition:background-color 150ms,color 150ms;background:#0A6A8A;color:#fff;} .ds-btn-primary:hover{background:#0B3F52;} .ds-btn-primary:active{background:#062532;} .ds-btn-primary:focus-visible{outline:3px solid #0A6A8A;outline-offset:2px;} .ds-btn-primary:disabled{opacity:.6;cursor:not-allowed;}"
+    },
+    {
+      "name": "Thread Button",
+      "kind": "button",
+      "refersTo": "button-thread",
+      "description": "Lead call to action on a dark note panel.",
+      "html": "<div class=\"ds-note\"><button class=\"ds-btn-thread\">Browse categories</button></div>",
+      "css": ".ds-note{background:#0B3F52;padding:24px;border-radius:12px;} .ds-btn-thread{font-family:'Archivo Variable',Archivo,system-ui,sans-serif;display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:44px;padding:0 20px;border:0;border-radius:6px;font-size:15px;font-weight:600;cursor:pointer;transition:background-color 150ms,color 150ms;background:#F5C04A;color:#062532;} .ds-btn-thread:hover{background:#D69E1B;} .ds-btn-thread:focus-visible{outline:3px solid #F5C04A;outline-offset:2px;}"
+    },
+    {
+      "name": "Secondary Button",
+      "kind": "button",
+      "refersTo": "button-secondary",
+      "description": "White with inset paper-line ring.",
+      "html": "<button class=\"ds-btn-secondary\">View order</button>",
+      "css": ".ds-btn-secondary{font-family:'Archivo Variable',Archivo,system-ui,sans-serif;display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:44px;padding:0 20px;border:0;border-radius:6px;font-size:15px;font-weight:600;cursor:pointer;transition:background-color 150ms,color 150ms;background:#fff;color:#0B3F52;box-shadow:inset 0 0 0 1px #C9D8DC;} .ds-btn-secondary:hover{background:#EEF8FB;} .ds-btn-secondary:focus-visible{outline:3px solid #0A6A8A;outline-offset:2px;}"
+    },
+    {
+      "name": "Danger Button",
+      "kind": "button",
+      "refersTo": "button-danger",
+      "description": "Destructive action, serial red on white.",
+      "html": "<button class=\"ds-btn-danger\">Cancel order</button>",
+      "css": ".ds-btn-danger{font-family:'Archivo Variable',Archivo,system-ui,sans-serif;display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:44px;padding:0 20px;border:0;border-radius:6px;font-size:15px;font-weight:600;cursor:pointer;transition:background-color 150ms,color 150ms;background:#fff;color:#B3261E;box-shadow:inset 0 0 0 1px rgba(179,38,30,.4);} .ds-btn-danger:hover{background:#FBE9E7;} .ds-btn-danger:focus-visible{outline:3px solid #0A6A8A;outline-offset:2px;}"
+    },
+    {
+      "name": "Text Input",
+      "kind": "input",
+      "refersTo": "input",
+      "description": "44px field with ink focus ring and serial error border.",
+      "html": "<label class=\"ds-label\" for=\"ds-phone\">Phone number</label><input id=\"ds-phone\" class=\"ds-input\" placeholder=\"024 000 0000\">",
+      "css": ".ds-label{font-family:'Archivo Variable',Archivo,system-ui,sans-serif;display:block;margin-bottom:6px;font-size:14px;font-weight:600;color:#10222B;} .ds-input{font-family:'Archivo Variable',Archivo,system-ui,sans-serif;display:block;width:100%;min-height:44px;padding:0 12px;border:1px solid #C9D8DC;border-radius:6px;background:#fff;font-size:16px;color:#10222B;} .ds-input::placeholder{color:rgba(74,95,104,.8);} .ds-input:focus{outline:none;border-color:#0A6A8A;box-shadow:0 0 0 2px rgba(10,106,138,.3);} .ds-input[aria-invalid=true]{border-color:#B3261E;}"
+    },
+    {
+      "name": "Site Header",
+      "kind": "nav",
+      "refersTo": "site-header",
+      "description": "Ink-900 bar under the gold thread, cart counter in gold.",
+      "html": "<header class=\"ds-header\"><div class=\"ds-thread\"></div><div class=\"ds-header-bar\"><strong class=\"ds-logo\">GUGU</strong><a class=\"ds-nav-link\" href=\"#\">Sign in</a><a class=\"ds-nav-link\" href=\"#\">Cart <span class=\"ds-count\">3</span></a></div></header>",
+      "css": ".ds-header{font-family:'Archivo Variable',Archivo,system-ui,sans-serif;background:#0B3F52;color:#fff;} .ds-thread{height:4px;background:repeating-linear-gradient(90deg,#D69E1B 0 6px,#F5C04A 6px 12px);} .ds-header-bar{display:flex;align-items:center;gap:8px;height:56px;padding:0 16px;} .ds-logo{font-stretch:125%;font-weight:800;margin-right:auto;} .ds-nav-link{color:#fff;text-decoration:none;font-size:14px;font-weight:600;padding:8px 10px;border-radius:6px;display:inline-flex;gap:6px;align-items:center;} .ds-nav-link:hover{background:rgba(255,255,255,.1);} .ds-nav-link:focus-visible{outline:3px solid #F5C04A;outline-offset:2px;} .ds-count{background:#F5C04A;color:#062532;border-radius:9999px;min-width:20px;padding:0 4px;font-size:12px;font-weight:700;line-height:20px;text-align:center;font-variant-numeric:tabular-nums;}"
+    },
+    {
+      "name": "Product Card",
+      "kind": "card",
+      "refersTo": "product-card",
+      "description": "Flat white card, square image, denomination price, lift on hover.",
+      "html": "<article class=\"ds-card\"><div class=\"ds-card-img\"></div><div class=\"ds-card-body\"><h3 class=\"ds-card-name\">Linen shirt, navy</h3><div class=\"ds-price\"><span class=\"ds-price-now\">GH₵ 180.00</span><s class=\"ds-price-was\">GH₵ 220.00</s><span class=\"ds-discount\">−18%</span></div></div></article>",
+      "css": ".ds-card{font-family:'Archivo Variable',Archivo,system-ui,sans-serif;width:220px;background:#fff;border:1px solid #C9D8DC;border-radius:8px;overflow:hidden;transition:box-shadow 150ms;} .ds-card:hover{box-shadow:0 1px 2px rgba(11,63,82,.08),0 8px 24px -12px rgba(11,63,82,.25);} .ds-card-img{aspect-ratio:1;background:#E4ECEB;} .ds-card-body{padding:12px;} .ds-card-name{margin:0 0 6px;font-size:15px;font-weight:500;line-height:1.375;color:#10222B;} .ds-price{display:flex;flex-wrap:wrap;align-items:baseline;gap:2px 8px;} .ds-price-now{font-stretch:115%;font-weight:750;letter-spacing:-.01em;font-size:16px;color:#062532;font-variant-numeric:tabular-nums;} .ds-price-was{font-size:14px;color:#4A5F68;font-variant-numeric:tabular-nums;} .ds-discount{background:#B3261E;color:#fff;border-radius:2px;padding:2px 6px;font-size:12px;font-weight:700;}"
+    },
+    {
+      "name": "Status Badge",
+      "kind": "chip",
+      "refersTo": "status-badge",
+      "description": "Order status pills; color by lifecycle stage.",
+      "html": "<span class=\"ds-badge ds-badge-await\">Awaiting payment</span> <span class=\"ds-badge ds-badge-placed\">Placed</span> <span class=\"ds-badge ds-badge-shipped\">Shipped</span> <span class=\"ds-badge ds-badge-delivered\">Delivered</span> <span class=\"ds-badge ds-badge-failed\">Payment failed</span>",
+      "css": ".ds-badge{font-family:'Archivo Variable',Archivo,system-ui,sans-serif;display:inline-flex;align-items:center;border-radius:9999px;padding:2px 10px;font-size:12px;font-weight:700;} .ds-badge-await{background:rgba(245,192,74,.4);color:#8A5B00;box-shadow:inset 0 0 0 1px rgba(214,158,27,.5);} .ds-badge-placed{background:#D8EFF6;color:#0B3F52;box-shadow:inset 0 0 0 1px #7CC8E0;} .ds-badge-shipped{background:#0A6A8A;color:#fff;box-shadow:inset 0 0 0 1px #0A6A8A;} .ds-badge-delivered{background:#E3F1E7;color:#1E6B3A;box-shadow:inset 0 0 0 1px rgba(30,107,58,.4);} .ds-badge-failed{background:#FBE9E7;color:#B3261E;box-shadow:inset 0 0 0 1px rgba(179,38,30,.4);}"
+    },
+    {
+      "name": "Order Receipt Header",
+      "kind": "custom",
+      "refersTo": "panel",
+      "description": "Signature receipt: thread, underprint, serial-red order number, display total.",
+      "html": "<div class=\"ds-receipt\"><div class=\"ds-receipt-head\"><div class=\"ds-thread-abs\"></div><div><p class=\"ds-muted\">Order number</p><h2 class=\"ds-serial\">GG-24817</h2></div><div class=\"ds-right\"><span class=\"ds-rbadge\">Shipped</span><p class=\"ds-total\">GH₵ 412.50</p></div></div></div>",
+      "css": ".ds-receipt{font-family:'Archivo Variable',Archivo,system-ui,sans-serif;background:#fff;border:1px solid #C9D8DC;border-radius:8px;overflow:hidden;max-width:520px;} .ds-receipt-head{position:relative;display:flex;justify-content:space-between;gap:12px;padding:20px;border-bottom:1px solid #C9D8DC;background-color:#EEF8FB;background-image:url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='16' viewBox='0 0 120 16'%3E%3Cpath d='M0 8 Q15 0 30 8 T60 8 T90 8 T120 8' fill='none' stroke='%230F96C1' stroke-opacity='.16' stroke-width='1'/%3E%3C/svg%3E\");background-size:120px 16px;} .ds-thread-abs{position:absolute;left:0;right:0;top:0;height:4px;background:repeating-linear-gradient(90deg,#D69E1B 0 6px,#F5C04A 6px 12px);} .ds-muted{margin:0;font-size:12px;font-weight:600;color:#4A5F68;} .ds-serial{margin:0;font-stretch:115%;font-weight:750;font-size:24px;letter-spacing:.025em;color:#B3261E;font-variant-numeric:tabular-nums;} .ds-right{text-align:right;} .ds-rbadge{display:inline-flex;border-radius:9999px;padding:2px 10px;font-size:12px;font-weight:700;background:#0A6A8A;color:#fff;} .ds-total{margin:8px 0 0;font-stretch:125%;font-weight:800;letter-spacing:-.02em;line-height:1.02;font-size:30px;color:#062532;font-variant-numeric:tabular-nums;}"
+    }
+  ],
+  "narrative": {
+    "northStar": "The Cedi Note",
+    "overview": "**Creative North Star: \"The Cedi Note\"**\n\nGUGU is printed like Ghana's currency. The ground is deep intaglio ink and cool security paper; money moments carry a gold security thread; order numbers and discounts are stamped in serial red. The engraved vocabulary of banknotes (guilloche rosettes, microprint edges, fine wave underprint) is the only ornament, and it is always decorative, `aria-hidden`, and quiet enough that product photos and cedi prices stay the loudest thing on screen.\n\nDensity is retail-practical: two-column product grids on phones, four on desktop, 44px minimum touch targets everywhere. Type does the brand work through Archivo's width axis: denominations and titles are expanded, reading text stays at normal width. Totals are always tabular and treated like denominations, because the product's promise is that the number you see is the number GUGU confirms.\n\nThe system rejects the orange-and-white mega-grid of generic e-commerce and the kente-pattern costume. Ghana is expressed through the note, the cedi sign, and the stores themselves, not through borrowed textile motifs.",
+    "keyCharacteristics": [
+      "Intaglio blue ink scale derived from brand blue #0F96C1; light security-paper ground.",
+      "Archivo variable with width axis: 125% for display, 115% for titles, 100% for reading, 75% for microprint.",
+      "Gold thread stripe marks note edges (header, footer) and money surfaces (summaries, receipts, confirmations).",
+      "Engraved ornament only: guilloche, microprint, wave underprint. Always aria-hidden.",
+      "Flat panels with hairline paper-line borders; shadow only for hover lift and bottom sheets.",
+      "One motion moment: the hero rosette draws itself once."
+    ],
+    "rules": [
+      {
+        "name": "The Seven-Hundred Rule",
+        "body": "White text sits only on ink-700 or darker (ink-800, ink-900, ink-950), serial-red, or leaf. Never on ink-500 or lighter; on gold, text is ink-950.",
+        "section": "colors"
+      },
+      {
+        "name": "The Thread Rule",
+        "body": "The gold thread stripe (4px tall, 6px alternating thread-gold-deep / thread-gold) marks the top edge of a note: header, footer, error page, and the top of money panels (cart and checkout summary, payment confirmation, order receipt). It is never a divider inside content or a generic accent bar.",
+        "section": "colors"
+      },
+      {
+        "name": "The Serial Rule",
+        "body": "Serial red identifies and warns: order numbers, discounts, errors. It is never a primary action color.",
+        "section": "colors"
+      },
+      {
+        "name": "The Denomination Rule",
+        "body": "Every cedi amount is set in title or display width with tabular numerals. Struck-through old prices and line totals stay at body width but remain tabular.",
+        "section": "typography"
+      },
+      {
+        "name": "The Width-Not-Case Rule",
+        "body": "Hierarchy comes from the width axis and weight, not uppercase or letter-spacing. The only uppercase text is aria-hidden microprint.",
+        "section": "typography"
+      },
+      {
+        "name": "The Flat Note Rule",
+        "body": "Panels and cards rest flat with a 1px paper-line border. Shadows appear only on hover lift or on surfaces that sit above the page from the bottom edge.",
+        "section": "elevation"
+      }
+    ],
+    "dos": [
+      "Do put white text only on ink-700 or darker, serial-red or leaf; use ink-950 text on thread-gold.",
+      "Do set every cedi amount in title or display width with tabular numerals.",
+      "Do mark note edges and money panels with the 4px thread stripe.",
+      "Do keep engraved ornament (guilloche, underprint, microprint) decorative and aria-hidden.",
+      "Do keep touch targets at 44px minimum (48px for sheet rows) and inputs at 16px text.",
+      "Do place toasts top-center with at least 6s on screen.",
+      "Do give every data surface a skeleton, an empty state, and an error state with retry."
+    ],
+    "donts": [
+      "Don't use ink-500 (#0F96C1) or lighter as a text color or as a background under white text.",
+      "Don't use the orange-and-white mega-grid of generic e-commerce or kente pattern as decoration.",
+      "Don't use serial red for primary actions; it identifies and warns.",
+      "Don't create hierarchy with uppercase or wide tracking outside aria-hidden microprint.",
+      "Don't add shadows to resting panels or cards.",
+      "Don't add looping or scroll-triggered motion; the rosette draw is the single expressive animation."
+    ]
+  }
+}

@@ -121,7 +121,9 @@ export async function listProducts(p: ProductListParams): Promise<ProductPage> {
   if (p.minPrice != null) constraints.push(where("price", ">=", p.minPrice));
   if (p.maxPrice != null) constraints.push(where("price", "<=", p.maxPrice));
 
-  switch (p.sort) {
+  // With a price range only price ordering is used, so each scope needs one composite index per sort.
+  const sort = hasRange && (p.sort === "newest" || p.sort === "top-rated") ? "price-asc" : p.sort;
+  switch (sort) {
     case "price-asc":
       constraints.push(orderBy("price", "asc"));
       break;

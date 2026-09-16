@@ -74,10 +74,10 @@ export function ProductListing({
           <select
             id="sort"
             className="input h-10 min-h-[40px] w-auto py-0 pr-9 text-sm"
-            value={sort}
+            value={(min != null || max != null) && (sort === "newest" || sort === "top-rated") ? "price-asc" : sort}
             onChange={(e) => setParams(new URLSearchParams(withParams(params, { sort: e.target.value === "recommended" ? undefined : e.target.value }).slice(1)))}
           >
-            {SORTS.map((s) => (
+            {SORTS.filter((s) => !(min != null || max != null) || s === "recommended" || s.startsWith("price")).map((s) => (
               <option key={s} value={s}>
                 {SORT_LABELS[s]}
               </option>

@@ -23,7 +23,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [initializing, setInitializing] = useState(true);
   // Bumped after reload() so consumers see emailVerified changes on the same User object.
-  const [, setVersion] = useState(0);
+  const [version, setVersion] = useState(0);
 
   useEffect(
     () =>
@@ -82,7 +82,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         await fbSignOut(auth);
       },
     }),
-    [user, initializing],
+    // `version` changes after reload()/profile updates so consumers re-read fields like emailVerified.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [user, initializing, version],
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

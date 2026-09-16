@@ -65,8 +65,10 @@ const CALLABLE: Record<string, string> = {
 
 /** The contract code carried in a callable error's message, e.g. "OUT_OF_STOCK". */
 export function callableCode(err: unknown): string | null {
-  if (err instanceof FirebaseError && err.code.startsWith("functions/") && /^[A-Z][A-Z0-9_]+$/.test(err.message)) return err.message;
-  return null;
+  if (!(err instanceof FirebaseError) || !err.code.startsWith("functions/")) return null;
+  // Some SDK/emulator versions append the HTTP status, e.g. "OUT_OF_STOCK [400]".
+  const m = err.message.trim().match(/^([A-Z][A-Z0-9_]+)(?:\s*\[\d{3}\])?$/);
+  return m ? m[1] : null;
 }
 
 export function callableDetails<T = Record<string, unknown>>(err: unknown): T | undefined {

@@ -25,6 +25,7 @@ const OrderDetail = lazy(() => import("./pages/account/OrderDetail"));
 const MyReviews = lazy(() => import("./pages/account/MyReviews"));
 const Checkout = lazy(() => import("./pages/checkout/Checkout"));
 const CheckoutConfirm = lazy(() => import("./pages/checkout/CheckoutConfirm"));
+const AppReturn = lazy(() => import("./pages/checkout/AppReturn"));
 const Sell = lazy(() => import("./pages/Sell"));
 const About = lazy(() => import("./pages/info/About"));
 const Contact = lazy(() => import("./pages/info/Contact"));
@@ -78,6 +79,8 @@ const router = createBrowserRouter([
           </RequireAuth>
         ),
       },
+      // Public on purpose: ExpressPay returns mobile-app payers here (see AppReturn).
+      { path: "app-return/checkout", element: <AppReturn /> },
       { path: "sell", element: <Sell /> },
       { path: "about", element: <About /> },
       { path: "contact", element: <Contact /> },

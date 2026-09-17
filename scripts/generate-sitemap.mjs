@@ -132,7 +132,7 @@ async function main() {
   const robots = [
     "User-agent: *",
     "Allow: /",
-    ...["/account", "/cart", "/checkout", "/wishlist", "/signin", "/signup", "/forgot-password", "/search"].map((p) => `Disallow: ${p}`),
+    ...["/account", "/cart", "/checkout", "/app-return", "/wishlist", "/signin", "/signup", "/forgot-password", "/search"].map((p) => `Disallow: ${p}`),
     "",
     `Sitemap: ${SITE_URL}/sitemap.xml`,
     "",

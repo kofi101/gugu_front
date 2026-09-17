@@ -4,6 +4,7 @@ Allow: /
 Disallow: /account
 Disallow: /cart
 Disallow: /checkout
+Disallow: /app-return
 Disallow: /wishlist
 Disallow: /signin
 Disallow: /signup

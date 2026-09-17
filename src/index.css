@@ -1,20 +1,169 @@
-@import 'tailwindcss/base';
-@import 'tailwindcss/components';
-@import 'tailwindcss/utilities';
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
-/* @font-face {
-  font-family: 'Nexa';
-  font-style: normal;
-  font-weight: normal;
-  font-display: swap;
-  color: red;
-  src: url('./assets//font/NexaText-Trial-Regular.ttf') format('truetype');
-} */
-html, body, #root, .app {
-  height: 100%;
-  width: 100%;
-  margin: 0;
-  padding: 0;
-  /* font-family: 'Nexa', sans-serif; */
-  font-size: 16px;
+@layer base {
+  html {
+    -webkit-text-size-adjust: 100%;
+    scroll-padding-top: 7rem;
+  }
+  body {
+    @apply bg-paper font-sans text-text antialiased;
+    font-optical-sizing: auto;
+  }
+  h1,
+  h2,
+  h3 {
+    text-wrap: balance;
+  }
+  p {
+    text-wrap: pretty;
+  }
+  :focus-visible {
+    outline: 3px solid theme("colors.ink.700");
+    outline-offset: 2px;
+  }
+  .on-dark :focus-visible {
+    outline-color: theme("colors.thread.300");
+  }
+  [hidden] {
+    display: none !important;
+  }
+  dialog::backdrop {
+    background: rgb(6 37 50 / 0.55);
+  }
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+}
+
+/* react-toastify's close button is 14px; give it an AA-sized hit area. */
+.Toastify__close-button {
+  min-width: 2.75rem;
+  min-height: 2.75rem;
+  display: grid;
+  place-items: center;
+  align-self: center;
+}
+
+@layer components {
+  .shell {
+    @apply mx-auto w-full max-w-shell px-4 sm:px-6 lg:px-8;
+  }
+
+  /* Archivo's width axis carries the banknote voice: expanded for denominations and titles. */
+  .type-display {
+    font-stretch: 125%;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    line-height: 1.02;
+  }
+  .type-title {
+    font-stretch: 115%;
+    font-weight: 750;
+    letter-spacing: -0.01em;
+    line-height: 1.15;
+  }
+  .type-condensed {
+    font-stretch: 85%;
+  }
+  .tabular {
+    font-variant-numeric: tabular-nums;
+  }
+
+  .btn {
+    @apply inline-flex min-h-[44px] select-none items-center justify-center gap-2 rounded-md px-5 text-[0.9375rem] font-semibold transition-colors duration-150 disabled:cursor-not-allowed disabled:opacity-60;
+  }
+  .btn-primary {
+    @apply bg-ink-700 text-white hover:bg-ink-900 active:bg-ink-950;
+  }
+  .btn-secondary {
+    @apply bg-white text-ink-900 ring-1 ring-inset ring-paper-line hover:bg-ink-50;
+  }
+  .btn-thread {
+    @apply bg-thread-300 text-ink-950 hover:bg-thread-500;
+  }
+  .btn-ghost {
+    @apply text-ink-800 hover:bg-ink-50;
+  }
+  .btn-danger {
+    @apply bg-white text-serial ring-1 ring-inset ring-serial/40 hover:bg-serial-soft;
+  }
+  .btn-sm {
+    @apply min-h-[36px] px-3 text-sm;
+  }
+
+  .link {
+    @apply font-medium text-ink-700 underline decoration-ink-300 underline-offset-[3px] hover:text-ink-900 hover:decoration-ink-700;
+  }
+
+  .field-label {
+    @apply mb-1.5 block text-sm font-semibold text-text;
+  }
+  .field-hint {
+    @apply mt-1 text-sm text-text-muted;
+  }
+  .field-error {
+    @apply mt-1 text-sm font-medium text-serial;
+  }
+  .input {
+    @apply block min-h-[44px] w-full rounded-md border border-paper-line bg-white px-3 text-base text-text placeholder:text-text-muted/80 focus:border-ink-700 focus:outline-none focus:ring-2 focus:ring-ink-700/30 aria-[invalid=true]:border-serial;
+  }
+  textarea.input {
+    @apply py-2.5;
+  }
+
+  .panel {
+    @apply rounded-lg border border-paper-line bg-white;
+  }
+
+  .skeleton {
+    @apply animate-shimmer rounded bg-paper-deep;
+    background-image: linear-gradient(90deg, transparent 0%, rgb(255 255 255 / 0.65) 50%, transparent 100%);
+    background-size: 200% 100%;
+  }
+
+  /* Security-paper underprint: fine wave lines, used on hero notes and receipts. */
+  .underprint {
+    background-color: theme("colors.ink.50");
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='16' viewBox='0 0 120 16'%3E%3Cpath d='M0 8 Q15 0 30 8 T60 8 T90 8 T120 8' fill='none' stroke='%230F96C1' stroke-opacity='.16' stroke-width='1'/%3E%3C/svg%3E");
+    background-size: 120px 16px;
+  }
+  .underprint-dark {
+    background-color: theme("colors.ink.900");
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='16' viewBox='0 0 120 16'%3E%3Cpath d='M0 8 Q15 0 30 8 T60 8 T90 8 T120 8' fill='none' stroke='%237CC8E0' stroke-opacity='.14' stroke-width='1'/%3E%3C/svg%3E");
+    background-size: 120px 16px;
+  }
+
+  /* Microprint border text (decorative, aria-hidden). */
+  .microprint {
+    font-size: 0.5625rem;
+    font-stretch: 75%;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    line-height: 1;
+    white-space: nowrap;
+    overflow: hidden;
+  }
+
+  /* Security thread: the gold stripe that marks money moments. */
+  .thread {
+    background: repeating-linear-gradient(
+      90deg,
+      theme("colors.thread.500") 0 6px,
+      theme("colors.thread.300") 6px 12px
+    );
+  }
+
+  .scroll-rail {
+    @apply -mx-4 flex snap-x snap-mandatory gap-3 overflow-x-auto px-4 pb-2 sm:-mx-6 sm:px-6;
+    scrollbar-width: thin;
+  }
 }

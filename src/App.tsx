@@ -1,85 +1,101 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-import {
-  BrowserRouter as Router,
-  Route,
-  Routes,
-} from "react-router-dom";
-import { appRoutes } from "./routes/Router";
-import { ToastContainer } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
-import MainLayout from "./views/main/MainLayout";
-// import { signOut } from "firebase/auth";
-// import { auth } from "./firebase/config";
-// import { useDispatch } from "react-redux";
-// import {
-//   setCartId,
-//   setCheckoutDetailsFilled,
-//   setDeliveryDestination,
-//   setDetailsToAddReview,
-//   setOrderDetailsId,
-//   setOrderId,
-//   setReviewId,
-//   setUser,
-//   setUserToken,
-//   setWishListId,
-// } from "./store/features/userSliceFeature";
-// import { resetUserCart } from "./store/features/cartFeature";
-// import { useEffect } from "react";
-// import useInactivityHook from "./helpers/hooks/inactivityHook";
-// import useBrowserCloseHook from "./helpers/hooks/browserCloseHook";
+import { lazy } from "react";
+import { HelmetProvider } from "react-helmet-async";
+import { createBrowserRouter, RouterProvider } from "react-router";
+import { Layout } from "./components/layout/Layout";
+import { RequireAuth } from "./components/Common";
+import { AuthProvider } from "./context/AuthProvider";
+import { CartProvider } from "./context/CartProvider";
+import Home from "./pages/Home";
+import { RouteError } from "./components/RouteError";
 
-function App() {
-  // useBrowserCloseHook()
+const Category = lazy(() => import("./pages/Category"));
+const Search = lazy(() => import("./pages/Search"));
+const ProductPage = lazy(() => import("./pages/Product"));
+const Store = lazy(() => import("./pages/Store"));
+const Stores = lazy(() => import("./pages/Stores"));
+const Cart = lazy(() => import("./pages/Cart"));
+const Wishlist = lazy(() => import("./pages/Wishlist"));
+const SignIn = lazy(() => import("./pages/auth/SignIn"));
+const SignUp = lazy(() => import("./pages/auth/SignUp"));
+const ForgotPassword = lazy(() => import("./pages/auth/ForgotPassword"));
+const AccountLayout = lazy(() => import("./pages/account/AccountLayout"));
+const Profile = lazy(() => import("./pages/account/Profile"));
+const Orders = lazy(() => import("./pages/account/Orders"));
+const OrderDetail = lazy(() => import("./pages/account/OrderDetail"));
+const MyReviews = lazy(() => import("./pages/account/MyReviews"));
+const Checkout = lazy(() => import("./pages/checkout/Checkout"));
+const CheckoutConfirm = lazy(() => import("./pages/checkout/CheckoutConfirm"));
+const Sell = lazy(() => import("./pages/Sell"));
+const About = lazy(() => import("./pages/info/About"));
+const Contact = lazy(() => import("./pages/info/Contact"));
+const Terms = lazy(() => import("./pages/info/Terms"));
+const Privacy = lazy(() => import("./pages/info/Privacy"));
+const NotFound = lazy(() => import("./pages/NotFound"));
 
-  // const dispatch = useDispatch();
+const router = createBrowserRouter([
+  {
+    element: <Layout />,
+    errorElement: <RouteError />,
+    children: [
+      { index: true, element: <Home /> },
+      { path: "c/:categoryId", element: <Category /> },
+      { path: "search", element: <Search /> },
+      { path: "p/:productId", element: <ProductPage /> },
+      { path: "store/:merchantId", element: <Store /> },
+      { path: "stores", element: <Stores /> },
+      { path: "cart", element: <Cart /> },
+      { path: "wishlist", element: <Wishlist /> },
+      { path: "signin", element: <SignIn /> },
+      { path: "signup", element: <SignUp /> },
+      { path: "forgot-password", element: <ForgotPassword /> },
+      {
+        path: "account",
+        element: (
+          <RequireAuth>
+            <AccountLayout />
+          </RequireAuth>
+        ),
+        children: [
+          { index: true, element: <Profile /> },
+          { path: "orders", element: <Orders /> },
+          { path: "orders/:orderId", element: <OrderDetail /> },
+          { path: "reviews", element: <MyReviews /> },
+        ],
+      },
+      {
+        path: "checkout",
+        element: (
+          <RequireAuth>
+            <Checkout />
+          </RequireAuth>
+        ),
+      },
+      {
+        path: "checkout/confirm",
+        element: (
+          <RequireAuth>
+            <CheckoutConfirm />
+          </RequireAuth>
+        ),
+      },
+      { path: "sell", element: <Sell /> },
+      { path: "about", element: <About /> },
+      { path: "contact", element: <Contact /> },
+      { path: "terms", element: <Terms /> },
+      { path: "privacy", element: <Privacy /> },
+      { path: "*", element: <NotFound /> },
+    ],
+  },
+]);
 
-  // useEffect(() => {
-  //   const handleLogout = (event: any) => {
-  //     signOut(auth).then(() => {
-  //       dispatch(setUser(null));
-  //       dispatch(setUserToken(null));
-  //       dispatch(setCartId(null));
-  //       dispatch(setWishListId(null));
-  //       dispatch(setOrderId(null));
-  //       dispatch(setCheckoutDetailsFilled(false));
-  //       dispatch(setDeliveryDestination(null));
-  //       dispatch(setOrderDetailsId(null));
-  //       dispatch(setDetailsToAddReview(null));
-  //       dispatch(setReviewId(null));
-  //       console.log("User signed out", event);
-
-  //       localStorage.clear();
-  //       dispatch(resetUserCart());
-  //     });
-  //   };
-  //   window.addEventListener("beforeunload", handleLogout);
-
-  //   return () => {
-  //     window.removeEventListener("beforeunload", handleLogout);
-  //   };
-  // }, []);
-  
-  
+export function App() {
   return (
-    <div className="text-black-primary-400 app">
-      <Router>
-        <ToastContainer />
-        {/* <InactivityHandler/> */}
-        <MainLayout>
-          <Routes>
-            {appRoutes.map(({ path, element }, key) => (
-              <Route key={key} path={path} element={element} />
-            ))}
-          </Routes>
-        </MainLayout>
-      </Router>
-    </div>
+    <HelmetProvider>
+      <AuthProvider>
+        <CartProvider>
+          <RouterProvider router={router} />
+        </CartProvider>
+      </AuthProvider>
+    </HelmetProvider>
   );
 }
-
-// function InactivityHandler() {
-//   useInactivityHook();
-//   return null;
-// }
-
-export default App;

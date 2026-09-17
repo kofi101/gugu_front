@@ -1,0 +1,13 @@
+# Replaced at build time by scripts/generate-sitemap.mjs with the VITE_SITE_URL origin.
+User-agent: *
+Allow: /
+Disallow: /account
+Disallow: /cart
+Disallow: /checkout
+Disallow: /wishlist
+Disallow: /signin
+Disallow: /signup
+Disallow: /forgot-password
+Disallow: /search
+
+Sitemap: https://gugumarket.web.app/sitemap.xml

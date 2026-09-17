@@ -1,40 +1,51 @@
 /** @type {import('tailwindcss').Config} */
 export default {
-  content: ["./index.html", "./src/**/*.{js,ts,jsx,tsx}"],
+  content: ["./index.html", "./src/**/*.{ts,tsx}"],
   theme: {
+    screens: { sm: "640px", md: "768px", lg: "1024px", xl: "1280px" },
     extend: {
       fontFamily: {
-        nexa: ['Nexa', 'sans-serif']
+        sans: ['"Archivo Variable"', "Archivo", "system-ui", "-apple-system", "Segoe UI", "Roboto", "sans-serif"],
       },
       colors: {
-        "primary-400": "#0F96C1",
-        "primary-500": "#0F96C1",
-        "primary-600": "#086E8E",
-        "gray-primary-400": "#D9D9D9",
-        "gray-secondary-500": "#969696",
-        "gray-tertiary-600": "#646464",
-        "gray-tertiary-700": "#323232",
-        "red-primary-400": "#e11d27",
-        "red-primary-500": "#FF5353",
-        "blue-primary-400": "#3E33A8",
-        "blue-secondary-500": "#6346fa",
-        "blue-secondary-600": "#32000af",
-        "black-primary-400": "#000",
-        "black-secondary-500": "#303030",
-        "white-primary-400": "#ffffff",
-        "base-gray-200": "#f1f1f1",
-        "shade-orange": "#CEA741",
-        "blue-shade": "#5E7FF2",
-        "primary-yellow": "#FBBF27",
-        "gray-shade-400": "#EEEEEE",
-        "gray-nav-400": "#F9F9F9",
-        "gray-alt-300": "#D9D9D9"
+        // Intaglio ink scale derived from the GUGU brand blue #0F96C1.
+        // White text is only allowed on 700 and darker (AA).
+        ink: {
+          50: "#EEF8FB",
+          100: "#D8EFF6",
+          200: "#B0DEEC",
+          300: "#7CC8E0",
+          400: "#56BCDD",
+          500: "#0F96C1",
+          600: "#0C7FA5",
+          700: "#0A6A8A",
+          800: "#0D526B",
+          900: "#0B3F52",
+          950: "#062532",
+        },
+        paper: { DEFAULT: "#F2F6F5", deep: "#E4ECEB", line: "#C9D8DC" },
+        text: { DEFAULT: "#10222B", muted: "#4A5F68" },
+        thread: { 300: "#F5C04A", 500: "#D69E1B", 700: "#8A5B00" },
+        serial: { DEFAULT: "#B3261E", soft: "#FBE9E7" },
+        leaf: { DEFAULT: "#1E6B3A", soft: "#E3F1E7" },
       },
-      screens: {
-        xs: "480px",
-        sm: "768px",
-        md: "1060px",
-      }
+      maxWidth: { shell: "80rem" },
+      boxShadow: {
+        lift: "0 1px 2px rgba(11,63,82,.08), 0 8px 24px -12px rgba(11,63,82,.25)",
+        sheet: "0 -8px 32px -8px rgba(6,37,50,.35)",
+      },
+      keyframes: {
+        draw: { from: { strokeDashoffset: "1" }, to: { strokeDashoffset: "0" } },
+        shimmer: { "0%": { backgroundPosition: "-200% 0" }, "100%": { backgroundPosition: "200% 0" } },
+        "sheet-up": { from: { transform: "translateY(100%)" }, to: { transform: "translateY(0)" } },
+        "fade-in": { from: { opacity: "0" }, to: { opacity: "1" } },
+      },
+      animation: {
+        draw: "draw 2.4s cubic-bezier(.16,1,.3,1) forwards",
+        shimmer: "shimmer 1.6s linear infinite",
+        "sheet-up": "sheet-up .32s cubic-bezier(.16,1,.3,1)",
+        "fade-in": "fade-in .2s ease-out",
+      },
     },
   },
   plugins: [],

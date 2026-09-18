@@ -136,6 +136,12 @@ export interface PlaceOrderResult {
   orderNumber: string;
   orderTotal: number;
   status: string;
+  /**
+   * `unpaid` | `pending` | `paid` | `failed`. A replayed order may be `paid` even when its status is `cancelled`
+   * or `payment_failed`, so never tell a customer they weren't charged without reading this. Optional because a
+   * server older than the contract change that added it omits it — absent means "unknown", not "unpaid".
+   */
+  paymentStatus?: string;
   checkoutUrl?: string;
 }
 

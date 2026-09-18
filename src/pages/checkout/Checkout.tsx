@@ -105,6 +105,20 @@ const METHODS: { id: PaymentMethod; icon: typeof LuBanknote; detail: string }[] 
   { id: "expresspay", icon: LuCreditCard, detail: "Pay now by card or mobile money on ExpressPay's secure page." },
 ];
 
+/**
+ * What we can honestly say about money for an order `placeOrder` handed back. The status alone says nothing,
+ * because the call may be replaying an earlier attempt: a `cancelled` order can have been paid before it was
+ * cancelled and a `payment_failed` one can be paid afterwards (the server sets `refundRequired` for both).
+ * Only `unpaid` (pay on delivery, nothing taken) and `failed` (ExpressPay refused it) rule a charge out.
+ * `pending` — where an ExpressPay order that reached the checkout page sits — and a missing field (a server
+ * predating the field) both mean "we can't tell", so say nothing the order page can contradict.
+ */
+function chargeNote(paymentStatus: string | undefined): string {
+  return paymentStatus === "unpaid" || paymentStatus === "failed"
+    ? "You have not been charged."
+    : "Open the order to check whether a payment went through — anything taken will be refunded.";
+}
+
 /** A checkout attempt that did not end with the customer at ExpressPay or with a placed order. */
 interface PlaceFailure {
   title: string;
@@ -185,6 +199,15 @@ export default function Checkout() {
   const ids = cart.lines.map((l) => l.productId).sort().join(",");
   const live = useAsync(async () => new Map((await getProductsByIds(ids ? ids.split(",") : [])).map((p) => [p.id, p])), [ids]);
 
+  // The idempotency key belongs to one specific order. Kept across a change of payment method, delivery option,
+  // address or cart it would make the server replay the *previous* order: after a lost response, switching from
+  // ExpressPay to pay on delivery would otherwise hand back the old ExpressPay order and send the customer off to
+  // pay its amount. Retrying the *same* attempt touches none of these inputs, so the key survives that.
+  const orderInputs = JSON.stringify([method, shippingOptionId ?? null, address, cart.lines.map((l) => `${l.productId}:${l.quantity}`).sort()]);
+  useEffect(() => {
+    request.current = null;
+  }, [orderInputs]);
+
   const [prefilled, setPrefilled] = useState(false);
   if (!prefilled && !profile.loading) {
     setPrefilled(true);
@@ -218,9 +241,11 @@ export default function Checkout() {
   const onDelivery = isOnDelivery(method);
   const needsVerification = onDelivery && Boolean(user) && ((!user!.emailVerified && !user!.phoneNumber) || serverWantsVerification);
   const optionMissing = options.length > 0 && !option;
-  // placeOrder requires a shippingOptionId while any option is active, so no options means no order can be placed.
-  // Say so on the delivery step instead of letting the customer reach "Place order" and hit SHIPPING_OPTION_REQUIRED.
-  const optionsUnavailable = !shippingOptions.loading && (Boolean(shippingOptions.error) || options.length === 0);
+  // A failed load and an empty list are different states. placeOrder requires a shippingOptionId only while an
+  // active option exists, so zero configured options is a legal setup the server accepts without one — the order
+  // must still go through. A failed read may be hiding options that do exist, and placing then would hit
+  // SHIPPING_OPTION_REQUIRED, so that case blocks with a retry instead.
+  const optionsFailed = !shippingOptions.loading && Boolean(shippingOptions.error);
   const problems: { productId: string; text: string }[] = [];
   for (const l of cart.lines) {
     const p = live.data?.get(l.productId);
@@ -230,7 +255,7 @@ export default function Checkout() {
       problems.push({ productId: l.productId, text: `${l.name}: pay on delivery allows up to ${ON_DELIVERY_MAX_LINE_QTY} per item` });
   }
   const blocked =
-    placing || problems.length > 0 || live.loading || needsVerification || optionMissing || shippingOptions.loading || optionsUnavailable;
+    placing || problems.length > 0 || live.loading || needsVerification || optionMissing || shippingOptions.loading || optionsFailed;
 
   function continueFromAddress() {
     const errs = validateAddress(address!);
@@ -241,11 +266,13 @@ export default function Checkout() {
       document.getElementById(`checkout-${first}`)?.focus();
       return;
     }
-    if (optionsUnavailable) {
+    if (optionsFailed) {
       toast.error("Delivery options didn't load, so we can't take this order yet.");
       return;
     }
-    if (!option) {
+    // Only insist on a choice when there is one to make: with no options configured the server takes the order
+    // without a shippingOptionId.
+    if (options.length > 0 && !option) {
       toast.error("Choose a delivery option.");
       return;
     }
@@ -296,7 +323,7 @@ export default function Checkout() {
         setFailure({
           title: "We couldn't open ExpressPay",
           detail:
-            "Your order is saved and you have not been charged. Open the order and choose “Pay now” to go to ExpressPay, or cancel it there.",
+            "Your order is saved. Open the order to check its payment status, then choose “Pay now” to go to ExpressPay, or cancel it there.",
           orderId: result.orderId,
           retryable: false,
         });
@@ -304,12 +331,14 @@ export default function Checkout() {
         navigate(`/account/orders/${result.orderId}?placed=1`, { replace: true });
         return;
       } else {
+        // This may be a replay of an earlier attempt rather than an order the server has just opened and closed,
+        // so what happened to the money comes from `paymentStatus`, never from the status.
         setFailure({
-          title: result.status === "cancelled" ? "This order was cancelled" : "Your payment didn't start",
+          title: result.status === "cancelled" ? "This order was cancelled" : "Your payment didn't go through",
           detail:
             result.status === "cancelled"
-              ? "You have not been charged. Place the order again to buy these items."
-              : "ExpressPay didn't accept the payment, so the order was closed. You have not been charged — try again, or pay on delivery.",
+              ? `It won't be delivered. ${chargeNote(result.paymentStatus)} Place the order again to buy these items.`
+              : `ExpressPay didn't accept the payment, so the order was closed. ${chargeNote(result.paymentStatus)} You can try again, or pay on delivery.`,
           orderId: result.orderId,
           retryable: true,
         });
@@ -350,7 +379,9 @@ export default function Checkout() {
           autoClose: 10000,
         });
       } else if (code === "PAYMENT_INIT_FAILED") {
-        // The order was recorded as payment_failed and the cart kept: the customer can simply try again.
+        // The server opened this order and closed it inside this one call, before any payment page existed, so
+        // "not charged" is safe to say here — unlike the replayed payment_failed above. The cart is kept, so the
+        // customer can simply try again.
         setFailure({
           title: "Your payment didn't start",
           detail: "ExpressPay couldn't open a payment page, so the order was closed. You have not been charged — try again, or pay on delivery.",
@@ -396,14 +427,6 @@ export default function Checkout() {
               <div className="mt-6">
                 <ErrorState error={shippingOptions.error} onRetry={shippingOptions.reload} title="Delivery options didn't load" />
               </div>
-            ) : optionsUnavailable ? (
-              <div className="mt-6">
-                <ErrorState
-                  error={new Error("We can't show the delivery options right now, so this order can't be placed yet. Try again in a moment.")}
-                  onRetry={shippingOptions.reload}
-                  title="Delivery options aren't available"
-                />
-              </div>
             ) : options.length > 0 && (
               <fieldset className="mt-6">
                 <legend className="field-label">Delivery option</legend>
@@ -429,7 +452,7 @@ export default function Checkout() {
               type="button"
               className="btn btn-primary mt-5 w-full sm:w-auto"
               onClick={continueFromAddress}
-              disabled={shippingOptions.loading || optionsUnavailable}
+              disabled={shippingOptions.loading || optionsFailed}
             >
               Continue to payment
             </button>
@@ -582,7 +605,17 @@ export default function Checkout() {
                 </div>
                 <div className="flex justify-between">
                   <dt className="text-text-muted">Delivery</dt>
-                  <dd className="tabular">{option ? (option.fee ? formatMoney(option.fee) : "Free") : options.length ? "Choose an option" : "Confirmed with order"}</dd>
+                  <dd className="tabular">
+                    {option
+                      ? option.fee
+                        ? formatMoney(option.fee)
+                        : "Free"
+                      : options.length
+                        ? "Choose an option"
+                        : optionsFailed
+                          ? "Not loaded"
+                          : "Confirmed with order"}
+                  </dd>
                 </div>
               </dl>
               <div className="mt-3 flex items-baseline justify-between border-t border-paper-line pt-3">

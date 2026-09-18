@@ -18,7 +18,9 @@ export function StatusBadge({ status }: { status: string }) {
   );
 }
 
-export function PaymentBadge({ status }: { status: string }) {
+export function PaymentBadge({ status }: { status?: string }) {
+  // An order document with no payment status says nothing about the money, so neither does this badge.
+  if (!status) return null;
   const style =
     status === "paid"
       ? "text-leaf"

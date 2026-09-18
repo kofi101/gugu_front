@@ -16,6 +16,7 @@ import {
 import { httpsCallable } from "firebase/functions";
 import { signOut } from "firebase/auth";
 import { callableCode } from "../lib/errors";
+import type { ChargeFacts } from "../lib/format";
 import { getDownloadURL, ref, uploadBytes } from "firebase/storage";
 import { auth, db, functions, storage } from "../lib/firebase";
 import { date, str, strList, toOrder, toProfile } from "../lib/parse";
@@ -131,17 +132,11 @@ export function newClientRequestId() {
     : `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 14)}`;
 }
 
-export interface PlaceOrderResult {
+export interface PlaceOrderResult extends ChargeFacts {
   orderId: string;
   orderNumber: string;
   orderTotal: number;
   status: string;
-  /**
-   * `unpaid` | `pending` | `paid` | `failed`. A replayed order may be `paid` even when its status is `cancelled`
-   * or `payment_failed`, so never tell a customer they weren't charged without reading this. Optional because a
-   * server older than the contract change that added it omits it — absent means "unknown", not "unpaid".
-   */
-  paymentStatus?: string;
   checkoutUrl?: string;
 }
 
@@ -152,8 +147,13 @@ export async function placeOrder(input: PlaceOrderInput): Promise<PlaceOrderResu
   return call<PlaceOrderInput, PlaceOrderResult>("placeOrder", payload);
 }
 
+export interface PaymentCheckResult extends ChargeFacts {
+  status: string;
+  paymentStatus: string;
+}
+
 export async function confirmExpressPayPayment(orderId: string) {
-  return call<{ orderId: string }, { status: string; paymentStatus: string }>("confirmExpressPayPayment", { orderId });
+  return call<{ orderId: string }, PaymentCheckResult>("confirmExpressPayPayment", { orderId });
 }
 
 export async function startExpressPayCheckout(orderId: string) {

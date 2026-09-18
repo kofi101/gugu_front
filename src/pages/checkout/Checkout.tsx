@@ -16,7 +16,7 @@ import { useAuth } from "../../context/auth";
 import { lineCap, useCart } from "../../context/cart";
 import { useAsync } from "../../hooks/useAsync";
 import { callableCode, callableDetails, errorMessage } from "../../lib/errors";
-import { formatMoney, PAYMENT_METHOD_LABEL, plural } from "../../lib/format";
+import { chargeNote, formatMoney, PAYMENT_METHOD_LABEL, plural } from "../../lib/format";
 import { displayPrice, isInStock } from "../../lib/parse";
 import type { PaymentMethod, ShippingAddress } from "../../lib/types";
 import { AddressFields } from "../../components/AddressFields";
@@ -104,20 +104,6 @@ const METHODS: { id: PaymentMethod; icon: typeof LuBanknote; detail: string }[] 
   { id: "mobile_money_on_delivery", icon: LuSmartphone, detail: "Pay with MTN MoMo, Telecel Cash or AirtelTigo Money when your order arrives." },
   { id: "expresspay", icon: LuCreditCard, detail: "Pay now by card or mobile money on ExpressPay's secure page." },
 ];
-
-/**
- * What we can honestly say about money for an order `placeOrder` handed back. The status alone says nothing,
- * because the call may be replaying an earlier attempt: a `cancelled` order can have been paid before it was
- * cancelled and a `payment_failed` one can be paid afterwards (the server sets `refundRequired` for both).
- * Only `unpaid` (pay on delivery, nothing taken) and `failed` (ExpressPay refused it) rule a charge out.
- * `pending` — where an ExpressPay order that reached the checkout page sits — and a missing field (a server
- * predating the field) both mean "we can't tell", so say nothing the order page can contradict.
- */
-function chargeNote(paymentStatus: string | undefined): string {
-  return paymentStatus === "unpaid" || paymentStatus === "failed"
-    ? "You have not been charged."
-    : "Open the order to check whether a payment went through — anything taken will be refunded.";
-}
 
 /** A checkout attempt that did not end with the customer at ExpressPay or with a placed order. */
 interface PlaceFailure {
@@ -332,13 +318,13 @@ export default function Checkout() {
         return;
       } else {
         // This may be a replay of an earlier attempt rather than an order the server has just opened and closed,
-        // so what happened to the money comes from `paymentStatus`, never from the status.
+        // so what happened to the money comes from the charge flags the server returns, never from the status.
         setFailure({
           title: result.status === "cancelled" ? "This order was cancelled" : "Your payment didn't go through",
           detail:
             result.status === "cancelled"
-              ? `It won't be delivered. ${chargeNote(result.paymentStatus)} Place the order again to buy these items.`
-              : `ExpressPay didn't accept the payment, so the order was closed. ${chargeNote(result.paymentStatus)} You can try again, or pay on delivery.`,
+              ? `It won't be delivered. ${chargeNote(result)} Place the order again to buy these items.`
+              : `ExpressPay didn't accept the payment, so the order was closed. ${chargeNote(result)} You can try again, or pay on delivery.`,
           orderId: result.orderId,
           retryable: true,
         });

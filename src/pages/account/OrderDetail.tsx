@@ -7,7 +7,7 @@ import { getMerchantsByIds } from "../../data/catalog";
 import { useAsync } from "../../hooks/useAsync";
 import { useAuth } from "../../context/auth";
 import { errorMessage } from "../../lib/errors";
-import { amountDueOnDelivery, formatDateTime, formatMoney, PAYMENT_METHOD_LABEL, statusLabel } from "../../lib/format";
+import { amountDueOnDelivery, chargeVerdict, formatDateTime, formatMoney, PAYMENT_METHOD_LABEL, statusLabel } from "../../lib/format";
 import type { Order } from "../../lib/types";
 import { FulfilmentBadge, PaymentBadge, StatusBadge } from "../../components/OrderBits";
 import { ProductImage } from "../../components/ProductCard";
@@ -23,9 +23,14 @@ function Actions({ order }: { order: Order }) {
   if (!canCancel && !canPay) {
     if (cancelState.reason) return <p className="pt-4 text-sm text-text-muted">{cancelState.reason}</p>;
     if (order.status === "payment_failed") {
+      // "You weren't charged" only when the server rules a charge out. A payment that lands after the order
+      // closes leaves the order `payment_failed` *and* sets `refundRequired`, so this line sat directly above
+      // the refund banner telling the same customer both things.
+      const money = chargeVerdict(order);
       return (
         <p className="pt-4 text-sm text-text-muted">
-          This order closed because the ExpressPay payment wasn't completed. You weren't charged.{" "}
+          This order closed because the ExpressPay payment wasn't completed.
+          {money === "not_charged" ? " You weren't charged." : ""}{" "}
           <Link to="/" className="link">
             Shop again
           </Link>
@@ -111,6 +116,21 @@ function RefundNotice({ order }: { order: Order }) {
           don't hear back.
         </>
       )}
+    </p>
+  );
+}
+
+/**
+ * A payment ExpressPay approved that doesn't match this order (wrong amount or currency, or a second approved
+ * checkout token). Nothing in the storefront read this flag before, so the customer saw a stuck order and no
+ * word about the money. When a refund is already flagged, `RefundNotice` is the more useful of the two.
+ */
+function ReviewNotice({ order }: { order: Order }) {
+  if (!order.paymentReviewRequired || order.refundRequired) return null;
+  return (
+    <p className="rounded-md bg-thread-300/25 p-3 text-sm text-text">
+      GUGU is checking a payment on this order against the amount due. Nothing else happens until that's done, so please don't pay again. Get
+      in touch if you don't hear back.
     </p>
   );
 }
@@ -287,6 +307,8 @@ export default function OrderDetail() {
       </div>
 
       <RefundNotice order={o} />
+
+      <ReviewNotice order={o} />
 
       <Fulfilment order={o} />
 

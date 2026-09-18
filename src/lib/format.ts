@@ -59,3 +59,52 @@ export function amountDueOnDelivery(o: { paymentMethod: string; orderTotal: numb
   if (!onDelivery || !(o.cancelledAmount > 0)) return null;
   return Math.max(0, Math.round((o.orderTotal - o.cancelledAmount) * 100) / 100);
 }
+
+/**
+ * What the server has told us about the customer's money. The three fields are exactly what
+ * `placeOrder` / `confirmExpressPayPayment` return and what the order document carries; both flags are
+ * written (and returned) only when true, so an absent flag means "not set", never "unknown".
+ */
+export interface ChargeFacts {
+  paymentStatus?: string;
+  refundRequired?: boolean;
+  paymentReviewRequired?: boolean;
+}
+
+/**
+ * What we may honestly say about that money.
+ *
+ * `paymentStatus` alone never settles it. An ExpressPay order that closed unpaid and was then paid at
+ * ExpressPay keeps `paymentStatus: 'failed'` and gains `refundRequired`; an approved payment whose amount or
+ * currency doesn't match the order sits at `paymentReviewRequired` and can later close to `failed` with no
+ * refund flag. Both flags therefore outrank the status.
+ */
+export type ChargeVerdict = "not_charged" | "refund_due" | "under_review" | "paid" | "unknown";
+
+export function chargeVerdict(f: ChargeFacts): ChargeVerdict {
+  if (f.refundRequired === true) return "refund_due";
+  if (f.paymentReviewRequired === true) return "under_review";
+  // `unpaid` is a pay-on-delivery order that never had a payment channel; `failed` with neither flag set is
+  // ExpressPay refusing the payment. Nothing moved in either case.
+  if (f.paymentStatus === "unpaid" || f.paymentStatus === "failed") return "not_charged";
+  if (f.paymentStatus === "paid") return "paid";
+  // `pending` (an ExpressPay order still at the payment page) and a missing field (a server predating the
+  // contract change) both mean we can't tell, so say nothing the order page can contradict.
+  return "unknown";
+}
+
+/** One sentence about the money, for a page that can point the customer at the order. */
+export function chargeNote(f: ChargeFacts): string {
+  switch (chargeVerdict(f)) {
+    case "not_charged":
+      return "You have not been charged.";
+    case "refund_due":
+      return "A payment did go through, so a refund is due — open the order to follow it.";
+    case "under_review":
+      return "A payment on this order is being checked, so open the order to follow it.";
+    case "paid":
+      return "This order was paid, so open it to see what happens to the money.";
+    default:
+      return "Open the order to check whether a payment went through — anything taken will be refunded.";
+  }
+}

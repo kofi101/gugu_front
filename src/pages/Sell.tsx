@@ -33,12 +33,15 @@ function ApplicationStatus({
   app,
   onReapply,
   onWithdraw,
+  withdrawing = false,
 }: {
   app: MerchantApplication;
   onReapply?: () => void;
   onWithdraw?: () => void;
+  withdrawing?: boolean;
 }) {
   const copy = STATUS_COPY[app.status] ?? STATUS_COPY.pending;
+  const [confirming, setConfirming] = useState(false);
   return (
     <div role="status" className="panel overflow-hidden">
       <div className="thread h-1" aria-hidden />
@@ -65,11 +68,22 @@ function ApplicationStatus({
                 Apply again
               </button>
             )}
-            {onWithdraw && (
-              <button type="button" className="btn btn-secondary" onClick={onWithdraw}>
-                Cancel application
-              </button>
-            )}
+            {onWithdraw &&
+              (confirming ? (
+                <div role="group" aria-label="Confirm cancellation" className="flex flex-wrap items-center gap-2 rounded-md bg-serial-soft p-2">
+                  <span className="px-1 text-sm font-semibold text-serial">Cancel this application? You can apply again later.</span>
+                  <button type="button" className="btn btn-sm bg-serial text-white hover:bg-serial/90" onClick={onWithdraw} disabled={withdrawing}>
+                    {withdrawing ? "Cancelling…" : "Yes, cancel it"}
+                  </button>
+                  <button type="button" className="btn btn-ghost btn-sm" onClick={() => setConfirming(false)} disabled={withdrawing}>
+                    Keep application
+                  </button>
+                </div>
+              ) : (
+                <button type="button" className="btn btn-danger" onClick={() => setConfirming(true)}>
+                  Cancel application
+                </button>
+              ))}
             <Link to="/contact" className="link py-1.5 text-sm">
               Contact GUGU
             </Link>
@@ -86,21 +100,34 @@ function ApplicationStatus({
 
 function ApplicationForm({
   onSubmitted,
+  onCancel,
   previous,
 }: {
   onSubmitted: () => void;
-  /** A rejected application being submitted again: its values prefill the form. */
+  /** Back to the status panel. Absent for a first application: there is nothing to go back to. */
+  onCancel?: () => void;
+  /** A rejected or withdrawn application being submitted again: its values prefill the form. */
   previous?: MerchantApplication;
 }) {
   const { user } = useAuth();
   const regions = useAsync(getRegions, []);
   const regionOptions = regions.data ?? [];
-  const [regionId, setRegionId] = useState(previous?.regionId ?? "");
   // Controlled, not defaultValue: the towns are fetched after the region is
   // known, so at mount the previous town is not yet an option and the browser
   // would silently drop it — leaving a prefilled form that fails validation.
+  const [regionId, setRegionId] = useState(previous?.regionId ?? "");
   const [cityId, setCityId] = useState(previous?.cityId ?? "");
-  const cities = useAsync(async () => (regionId ? getCities(regionId) : []), [regionId]);
+  // The picks, narrowed to what is actually on the list. A stored id the
+  // catalogue no longer has cannot be shown by a <select>, which falls back to
+  // "" — so reading the raw state anywhere else let the form validate a region
+  // the applicant could not see, and enabled a town select with no options that
+  // then blamed the wrong field. Everything below reads these instead, so the
+  // form and the screen cannot disagree.
+  const region = regionOptions.some((r) => r.id === regionId) ? regionId : "";
+  const cities = useAsync(async () => (region ? getCities(region) : []), [region]);
+  // `cities.data` is the previous region's list while the next one loads.
+  const cityOptions = cities.loading ? [] : cities.data ?? [];
+  const city = cityOptions.some((c) => c.id === cityId) ? cityId : "";
   const [files, setFiles] = useState<File[]>([]);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [busy, setBusy] = useState(false);
@@ -131,8 +158,8 @@ function ApplicationForm({
     if (!v("businessName")) errs.businessName = "Enter your business name.";
     if (v("phone").replace(/\D/g, "").length < 9) errs.phone = "Enter a phone number we can call.";
     if (!/^\S+@\S+\.\S+$/.test(v("email"))) errs.email = "Enter a valid email address.";
-    if (!regionId) errs.regionId = "Choose your region.";
-    if (!v("cityId")) errs.cityId = "Choose your town or city.";
+    if (!region) errs.regionId = "Choose your region.";
+    if (!city) errs.cityId = "Choose your town or city.";
     if (v("description").length < 20) errs.description = "Tell us what you sell in at least 20 characters.";
     if (!files.length) errs.documents = "Attach at least one document, such as your business registration or Ghana Card.";
     if (!fd.get("consent")) errs.consent = "Confirm the details are correct.";
@@ -146,7 +173,7 @@ function ApplicationForm({
     try {
       await submitMerchantApplication(
         user.uid,
-        { businessName: v("businessName"), phone: v("phone"), email: v("email"), regionId, cityId: v("cityId"), description: v("description") },
+        { businessName: v("businessName"), phone: v("phone"), email: v("email"), regionId: region, cityId: city, description: v("description") },
         files,
       );
       toast.success("Application sent");
@@ -195,7 +222,7 @@ function ApplicationForm({
           <label htmlFor="regionId" className="field-label">Region</label>
           <select
             className="input"
-            value={regionId}
+            value={region}
             onChange={(e) => {
               setRegionId(e.target.value);
               setCityId("");
@@ -214,13 +241,13 @@ function ApplicationForm({
           <label htmlFor="cityId" className="field-label">Town or city</label>
           <select
             className="input"
-            value={cityId}
+            value={city}
             onChange={(e) => setCityId(e.target.value)}
             {...a11y("cityId")}
-            disabled={busy || !regionId || cities.loading}
+            disabled={busy || !region || cities.loading}
           >
-            <option value="">{regionId ? "Choose a town" : "Choose a region first"}</option>
-            {(cities.data ?? []).map((c) => (
+            <option value="">{region ? "Choose a town" : "Choose a region first"}</option>
+            {cityOptions.map((c) => (
               <option key={c.id} value={c.id}>{c.name}</option>
             ))}
           </select>
@@ -236,6 +263,14 @@ function ApplicationForm({
       <fieldset>
         <legend className="field-label">Documents</legend>
         <p className="field-hint mt-0">Business registration, Ghana Card or similar. JPG, PNG, WebP or PDF, up to 10 MB each, {APPLICATION_MAX_FILES} files max.</p>
+        {previous && (
+          // A re-application replaces the whole document, the old documentUrls
+          // with it. Every other field prefills, so an empty Documents box reads
+          // as a bug until it is said out loud.
+          <p className="field-hint mt-1 font-semibold text-ink-900">
+            The files from your last application aren't carried over. Please attach them again.
+          </p>
+        )}
         <div className="mt-2">
           <label
             htmlFor="documents"
@@ -283,9 +318,16 @@ function ApplicationForm({
         {err("consent")}
       </div>
 
-      <button type="submit" className="btn btn-primary w-full sm:w-auto" disabled={busy}>
-        {busy ? "Sending application…" : "Send application"}
-      </button>
+      <div className="flex flex-wrap items-center gap-3">
+        <button type="submit" className="btn btn-primary w-full sm:w-auto" disabled={busy}>
+          {busy ? "Sending application…" : "Send application"}
+        </button>
+        {onCancel && (
+          <button type="button" className="btn btn-ghost" onClick={onCancel} disabled={busy}>
+            Back to your application
+          </button>
+        )}
+      </div>
     </form>
   );
 }
@@ -300,14 +342,15 @@ export default function Sell() {
   const canReapply = app.data?.status === "rejected" || app.data?.status === "withdrawn";
   const canWithdraw = app.data?.status === "pending";
 
+  // Irreversible for this submission — the applicant can send a new one, but
+  // this one leaves the review queue — so ApplicationStatus asks first, with
+  // the same inline two-step confirm a customer gets for cancelling an order.
   async function withdraw() {
     if (!user || withdrawing) return;
-    // Irreversible for this submission — the applicant can send a new one, but
-    // this one leaves the review queue — so it is worth one question first.
-    if (!window.confirm("Cancel this application? The GUGU team will stop reviewing it. You can apply again later.")) return;
     setWithdrawing(true);
     try {
       await withdrawMerchantApplication(user.uid);
+      toast.success("Application cancelled");
       app.reload();
     } catch (err) {
       toast.error(errorMessage(err, "We couldn't cancel your application. Try again."));
@@ -351,6 +394,7 @@ export default function Sell() {
               app={app.data}
               onReapply={canReapply ? () => setReapplying(true) : undefined}
               onWithdraw={canWithdraw ? withdraw : undefined}
+              withdrawing={withdrawing}
             />
           ) : (
             <>
@@ -364,6 +408,7 @@ export default function Sell() {
               )}
               <ApplicationForm
                 previous={canReapply ? app.data ?? undefined : undefined}
+                onCancel={app.data ? () => setReapplying(false) : undefined}
                 onSubmitted={() => {
                   setReapplying(false);
                   app.reload();

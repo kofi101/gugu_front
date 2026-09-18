@@ -242,7 +242,9 @@ export async function search(q: string): Promise<SearchResult> {
 
 export async function getShippingOptions(): Promise<ShippingOption[]> {
   // Only active options are offered; placeOrder requires one whenever any is active.
-  const snap = await getDocs(query(collection(db, "shipping_options"), limit(20)));
+  // The filter is in the query so an inactive option can never reach the picker, whatever the page size.
+  // Note: docs must carry an explicit `isActive: true` — the server treats a missing field as active.
+  const snap = await getDocs(query(collection(db, "shipping_options"), where("isActive", "==", true), limit(20)));
   return snap.docs
     .map((d) => {
       const data = d.data();
@@ -251,11 +253,9 @@ export async function getShippingOptions(): Promise<ShippingOption[]> {
         name: str(data.name) ?? d.id,
         description: str(data.description),
         fee: num(data.fee),
-        isActive: data.isActive !== false,
         sortOrder: num(data.sortOrder) ?? 0,
       };
     })
-    .filter((o) => o.isActive)
     .sort((a, b) => a.sortOrder - b.sortOrder)
     .map(({ id, name, description, fee }) => ({ id, name, description, fee }));
 }

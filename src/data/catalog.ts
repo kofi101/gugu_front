@@ -242,7 +242,10 @@ export async function search(q: string): Promise<SearchResult> {
 
 export async function getShippingOptions(): Promise<ShippingOption[]> {
   // Only active options are offered; placeOrder requires one whenever any is active.
-  const snap = await getDocs(query(collection(db, "shipping_options"), limit(20)));
+  // "Active" must mean exactly what the server means by it: `placeOrder` reads `opt.get("isActive") !== false`,
+  // so a doc with no `isActive` field is active. A Firestore equality filter cannot match an absent field, so the
+  // filter stays client-side — the collection is small (a handful of docs) and the page size covers the server's own.
+  const snap = await getDocs(query(collection(db, "shipping_options"), limit(50)));
   return snap.docs
     .map((d) => {
       const data = d.data();

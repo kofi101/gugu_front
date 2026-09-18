@@ -180,7 +180,9 @@ export function toOrder(id: string, d: Data): Order {
     userId: str(d.userId) ?? "",
     status: (str(d.status) ?? "placed") as Order["status"],
     paymentMethod: (str(d.paymentMethod) ?? "cash_on_delivery") as Order["paymentMethod"],
-    paymentStatus: (str(d.paymentStatus) ?? "unpaid") as Order["paymentStatus"],
+    // No default: `chargeVerdict` reads "unpaid" as an affirmative "nothing moved", so a document missing
+    // the field would have been read as proof the customer was not charged.
+    paymentStatus: str(d.paymentStatus) as Order["paymentStatus"],
     lines,
     subtotal: num(d.subtotal) ?? 0,
     shippingFee: num(d.shippingFee) ?? 0,
@@ -200,6 +202,7 @@ export function toOrder(id: string, d: Data): Order {
     cancelledMerchantIds: strList(d.cancelledMerchantIds),
     refundRequired: d.refundRequired === true,
     refundAmount: num(d.refundAmount) ?? 0,
+    paymentReviewRequired: d.paymentReviewRequired === true,
     cancelledAmount: num(d.cancelledAmount) ?? 0,
     statusHistory: Array.isArray(d.statusHistory)
       ? (d.statusHistory as Data[]).map((e) => ({ status: str(e.status) ?? "", at: date(e.at), by: str(e.by) }))

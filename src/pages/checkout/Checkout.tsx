@@ -16,7 +16,7 @@ import { useAuth } from "../../context/auth";
 import { lineCap, useCart } from "../../context/cart";
 import { useAsync } from "../../hooks/useAsync";
 import { callableCode, callableDetails, errorMessage } from "../../lib/errors";
-import { formatMoney, PAYMENT_METHOD_LABEL, plural } from "../../lib/format";
+import { canPayAtExpressPay, chargeNote, formatMoney, PAYMENT_METHOD_LABEL, plural } from "../../lib/format";
 import { displayPrice, isInStock } from "../../lib/parse";
 import type { PaymentMethod, ShippingAddress } from "../../lib/types";
 import { AddressFields } from "../../components/AddressFields";
@@ -105,6 +105,16 @@ const METHODS: { id: PaymentMethod; icon: typeof LuBanknote; detail: string }[] 
   { id: "expresspay", icon: LuCreditCard, detail: "Pay now by card or mobile money on ExpressPay's secure page." },
 ];
 
+/** A checkout attempt that did not end with the customer at ExpressPay or with a placed order. */
+interface PlaceFailure {
+  title: string;
+  detail: string;
+  /** Set when the server did create an order we can point the customer at. */
+  orderId?: string;
+  /** False when retrying here can't help (the order exists and must be paid from the order page). */
+  retryable: boolean;
+}
+
 function StepSection({
   n,
   title,
@@ -163,14 +173,26 @@ export default function Checkout() {
   const [shippingOptionId, setShippingOptionId] = useState<string | undefined>();
   const [placing, setPlacing] = useState(false);
   const inFlight = useRef(false);
-  // One id per distinct checkout attempt; retries of the same attempt reuse it so the server returns the same order.
-  const request = useRef<{ signature: string; id: string } | null>(null);
+  // One id per checkout attempt. It is kept while the outcome is unknown (a lost response replays to the same
+  // order instead of creating a second one) and minted afresh only once an attempt has completed or clearly failed.
+  // It must not depend on the address form: editing a character would otherwise mint a key that places a duplicate.
+  const request = useRef<string | null>(null);
   const [serverWantsVerification, setServerWantsVerification] = useState(false);
+  const [failure, setFailure] = useState<PlaceFailure | null>(null);
 
   const profile = useAsync(() => getProfile(user!.uid), [user?.uid]);
   const shippingOptions = useAsync(getShippingOptions, []);
   const ids = cart.lines.map((l) => l.productId).sort().join(",");
   const live = useAsync(async () => new Map((await getProductsByIds(ids ? ids.split(",") : [])).map((p) => [p.id, p])), [ids]);
+
+  // The idempotency key belongs to one specific order. Kept across a change of payment method, delivery option,
+  // address or cart it would make the server replay the *previous* order: after a lost response, switching from
+  // ExpressPay to pay on delivery would otherwise hand back the old ExpressPay order and send the customer off to
+  // pay its amount. Retrying the *same* attempt touches none of these inputs, so the key survives that.
+  const orderInputs = JSON.stringify([method, shippingOptionId ?? null, address, cart.lines.map((l) => `${l.productId}:${l.quantity}`).sort()]);
+  useEffect(() => {
+    request.current = null;
+  }, [orderInputs]);
 
   const [prefilled, setPrefilled] = useState(false);
   if (!prefilled && !profile.loading) {
@@ -183,7 +205,7 @@ export default function Checkout() {
 
   if (cart.loading || cart.merging || profile.loading || !address) return <PageLoader />;
 
-  if (cart.lines.length === 0 && !placing) {
+  if (cart.lines.length === 0 && !placing && !failure) {
     return (
       <div className="shell py-8">
         <Seo title="Checkout" noindex />
@@ -205,6 +227,11 @@ export default function Checkout() {
   const onDelivery = isOnDelivery(method);
   const needsVerification = onDelivery && Boolean(user) && ((!user!.emailVerified && !user!.phoneNumber) || serverWantsVerification);
   const optionMissing = options.length > 0 && !option;
+  // A failed load and an empty list are different states. placeOrder requires a shippingOptionId only while an
+  // active option exists, so zero configured options is a legal setup the server accepts without one — the order
+  // must still go through. A failed read may be hiding options that do exist, and placing then would hit
+  // SHIPPING_OPTION_REQUIRED, so that case blocks with a retry instead.
+  const optionsFailed = !shippingOptions.loading && Boolean(shippingOptions.error);
   const problems: { productId: string; text: string }[] = [];
   for (const l of cart.lines) {
     const p = live.data?.get(l.productId);
@@ -213,7 +240,8 @@ export default function Checkout() {
     else if (onDelivery && l.quantity > ON_DELIVERY_MAX_LINE_QTY)
       problems.push({ productId: l.productId, text: `${l.name}: pay on delivery allows up to ${ON_DELIVERY_MAX_LINE_QTY} per item` });
   }
-  const blocked = placing || problems.length > 0 || live.loading || needsVerification || optionMissing || shippingOptions.loading;
+  const blocked =
+    placing || problems.length > 0 || live.loading || needsVerification || optionMissing || shippingOptions.loading || optionsFailed;
 
   function continueFromAddress() {
     const errs = validateAddress(address!);
@@ -224,6 +252,12 @@ export default function Checkout() {
       document.getElementById(`checkout-${first}`)?.focus();
       return;
     }
+    if (optionsFailed) {
+      toast.error("Delivery options didn't load, so we can't take this order yet.");
+      return;
+    }
+    // Only insist on a choice when there is one to make: with no options configured the server takes the order
+    // without a shippingOptionId.
     if (options.length > 0 && !option) {
       toast.error("Choose a delivery option.");
       return;
@@ -235,8 +269,8 @@ export default function Checkout() {
     if (inFlight.current || !user || !address || blocked) return;
     inFlight.current = true;
     setPlacing(true);
-    const signature = JSON.stringify([method, shippingOptionId, address, cart.lines.map((l) => [l.productId, l.quantity])]);
-    if (!request.current || request.current.signature !== signature) request.current = { signature, id: newClientRequestId() };
+    setFailure(null);
+    request.current ??= newClientRequestId();
     try {
       if (saveAddress) {
         await updateProfile(user.uid, {
@@ -260,20 +294,63 @@ export default function Checkout() {
           phone: address.phone.trim(),
         },
         shippingOptionId,
-        clientRequestId: request.current.id,
+        clientRequestId: request.current,
       });
+      // The attempt is over either way, so the next one is a new order rather than a replay of this one.
       request.current = null;
-      if (method === "expresspay") {
-        const url = safeCheckoutUrl(result.checkoutUrl);
-        if (url) {
-          window.location.assign(url);
-          return; // keep the button disabled while the browser leaves
+      // Trust the status the server returned, not the absence of an exception: placeOrder also replays an
+      // earlier attempt of the same clientRequestId, which may come back payment_failed or cancelled.
+      if (result.status === "awaiting_payment") {
+        // `awaiting_payment` is not the same as payable. This branch also runs for a replay of an earlier
+        // attempt (same clientRequestId), and the order it replays may be one ExpressPay approved for the wrong
+        // amount or currency: the server flags it `paymentReviewRequired`, never expires it, and hands back the
+        // *stale* checkoutUrl from the first attempt. Following that URL would send the customer to pay a second
+        // time for a payment that is already being investigated.
+        if (!canPayAtExpressPay(result)) {
+          setFailure({
+            title: "We're checking a payment on this order",
+            detail:
+              "ExpressPay approved a payment that doesn't match this order, so GUGU is checking it before the order moves on. Don't pay for it again — open the order to follow it, and get in touch if you don't hear back.",
+            orderId: result.orderId,
+            retryable: false,
+          });
+        } else {
+          const url = safeCheckoutUrl(result.checkoutUrl);
+          if (url) {
+            window.location.assign(url);
+            return; // keep the button disabled while the browser leaves
+          }
+          setFailure({
+            title: "We couldn't open ExpressPay",
+            detail:
+              "Your order is saved. Open the order to check its payment status, then choose “Pay now” to go to ExpressPay, or cancel it there.",
+            orderId: result.orderId,
+            retryable: false,
+          });
         }
-        toast.error("Your order was saved, but ExpressPay didn't open. Use Pay now on the order page.");
+      } else if (result.status === "placed") {
+        navigate(`/account/orders/${result.orderId}?placed=1`, { replace: true });
+        return;
+      } else {
+        // This may be a replay of an earlier attempt rather than an order the server has just opened and closed,
+        // so what happened to the money comes from the charge flags the server returns, never from the status.
+        setFailure({
+          title: result.status === "cancelled" ? "This order was cancelled" : "Your payment didn't go through",
+          detail:
+            result.status === "cancelled"
+              ? `It won't be delivered. ${chargeNote(result)} Place the order again to buy these items.`
+              : `ExpressPay didn't accept the payment, so the order was closed. ${chargeNote(result)} You can try again, or pay on delivery.`,
+          orderId: result.orderId,
+          retryable: true,
+        });
       }
-      navigate(`/account/orders/${result.orderId}?placed=1`, { replace: true });
+      inFlight.current = false;
+      setPlacing(false);
     } catch (err) {
       const code = callableCode(err);
+      // A coded rejection means the server decided this attempt: the next one should be a new order.
+      // An unknown error (network, timeout) may have placed the order anyway, so keep the id to replay it.
+      if (code) request.current = null;
       const details = callableDetails<{ productId?: string; reason?: string }>(err);
       if (code === "PRODUCT_UNAVAILABLE" && details?.reason === "own_product") {
         const line = cart.lines.find((l) => l.productId === details.productId);
@@ -303,8 +380,15 @@ export default function Checkout() {
           autoClose: 10000,
         });
       } else if (code === "PAYMENT_INIT_FAILED") {
-        // The order was recorded as payment_failed and the cart kept: the customer can simply try again.
-        toast.error(errorMessage(err), { autoClose: 10000 });
+        // The server opened this order and closed it inside this one call, before any payment page existed, so
+        // "not charged" is safe to say here — unlike the replayed payment_failed above. The cart is kept, so the
+        // customer can simply try again.
+        setFailure({
+          title: "Your payment didn't start",
+          detail: "ExpressPay couldn't open a payment page, so the order was closed. You have not been charged — try again, or pay on delivery.",
+          orderId: callableDetails<{ orderId?: string }>(err)?.orderId,
+          retryable: true,
+        });
       } else {
         toast.error(errorMessage(err, "We couldn't place your order. Nothing was charged. Try again."), { autoClose: 8000 });
       }
@@ -369,7 +453,7 @@ export default function Checkout() {
               type="button"
               className="btn btn-primary mt-5 w-full sm:w-auto"
               onClick={continueFromAddress}
-              disabled={shippingOptions.loading || Boolean(shippingOptions.error)}
+              disabled={shippingOptions.loading || optionsFailed}
             >
               Continue to payment
             </button>
@@ -389,6 +473,7 @@ export default function Checkout() {
                       onChange={() => {
                         setMethod(id);
                         setServerWantsVerification(false);
+                        setFailure(null);
                       }}
                       className="mt-1 h-4 w-4 accent-ink-700"
                     />
@@ -412,6 +497,43 @@ export default function Checkout() {
           </StepSection>
 
           <StepSection n={3} title="Review and place order" current={step}>
+            {failure && (
+              <div role="alert" className="mb-4 rounded-md bg-serial-soft p-4 text-sm text-serial">
+                <p className="text-base font-bold">{failure.title}</p>
+                <p className="mt-1">{failure.detail}</p>
+                <div className="mt-3 flex flex-wrap gap-2">
+                  {failure.retryable && cart.lines.length > 0 && (
+                    <button type="button" className="btn btn-primary btn-sm" onClick={place}>
+                      Try again
+                    </button>
+                  )}
+                  {failure.retryable && cart.lines.length > 0 && method === "expresspay" && (
+                    <button
+                      type="button"
+                      className="btn btn-secondary btn-sm"
+                      onClick={() => {
+                        setMethod("cash_on_delivery");
+                        setServerWantsVerification(false);
+                        setFailure(null);
+                        setStep(2);
+                      }}
+                    >
+                      Pay on delivery instead
+                    </button>
+                  )}
+                  {failure.orderId && (
+                    <Link to={`/account/orders/${failure.orderId}`} className="btn btn-secondary btn-sm">
+                      See the order
+                    </Link>
+                  )}
+                  {cart.lines.length === 0 && (
+                    <Link to="/" className="btn btn-secondary btn-sm">
+                      Keep shopping
+                    </Link>
+                  )}
+                </div>
+              </div>
+            )}
             {live.error ? (
               <ErrorState error={live.error} onRetry={live.reload} title="We couldn't check prices and stock" />
             ) : null}
@@ -484,7 +606,19 @@ export default function Checkout() {
                 </div>
                 <div className="flex justify-between">
                   <dt className="text-text-muted">Delivery</dt>
-                  <dd className="tabular">{option ? (option.fee ? formatMoney(option.fee) : "Free") : options.length ? "Choose an option" : "Confirmed with order"}</dd>
+                  <dd className="tabular">
+                    {option
+                      ? option.fee
+                        ? formatMoney(option.fee)
+                        : "Free"
+                      : options.length
+                        ? "Choose an option"
+                        : shippingOptions.loading
+                          ? "Loading…"
+                          : optionsFailed
+                            ? "Not loaded"
+                            : "Confirmed with order"}
+                  </dd>
                 </div>
               </dl>
               <div className="mt-3 flex items-baseline justify-between border-t border-paper-line pt-3">

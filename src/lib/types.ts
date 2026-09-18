@@ -130,7 +130,8 @@ export interface Order {
   userId: string;
   status: OrderStatus;
   paymentMethod: PaymentMethod;
-  paymentStatus: PaymentStatus;
+  /** Absent on a document written before the field existed: "we can't tell", never "unpaid". */
+  paymentStatus?: PaymentStatus;
   lines: OrderLine[];
   subtotal: number;
   shippingFee: number;
@@ -147,6 +148,8 @@ export interface Order {
   cancelledMerchantIds: string[];
   refundRequired: boolean;
   refundAmount: number;
+  /** ExpressPay approved a payment that doesn't match this order, was paid twice, or paid after it closed. */
+  paymentReviewRequired: boolean;
   /** GHS of cancelled lines (plus shipping when nothing was delivered), any payment method. */
   cancelledAmount: number;
 }

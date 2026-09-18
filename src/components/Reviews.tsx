@@ -165,6 +165,10 @@ export function Reviews({ product }: { product: Product }) {
               // Without knowing whether a review already exists the form would take the create path and
               // rewrite createdAt, which the rules reject — so ask for a retry instead of guessing.
               <ErrorState error={mine.error} onRetry={mine.reload} title="We couldn't check your review" />
+            ) : eligibility.error ? (
+              // A failed eligibility read says nothing about the customer: falling through would tell a genuine
+              // buyer they haven't received the product, with no way back. Offer the retry instead.
+              <ErrorState error={eligibility.error} onRetry={eligibility.reload} title="We couldn't check whether you can review this" />
             ) : eligibility.data?.canReview || mine.data ? (
               <ReviewForm key={mine.data?.updatedAt?.getTime() ?? "new"} product={product} existing={mine.data ?? null} onSaved={reloadAll} />
             ) : (

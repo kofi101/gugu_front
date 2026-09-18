@@ -89,15 +89,28 @@ function Actions({ order }: { order: Order }) {
 }
 
 /**
- * Money owed back after a cancellation. Kept outside `Fulfilment`, which renders nothing for orders placed
- * before per-merchant fulfilment existed (empty `fulfilment` map) — those orders can still be owed a refund.
+ * Money owed back. Kept outside `Fulfilment`, which renders nothing for orders placed before per-merchant
+ * fulfilment existed (empty `fulfilment` map) — those orders can still be owed a refund.
+ *
+ * `refundRequired` is the flag to trust: the server also sets it *without* a `refundAmount` for a duplicate
+ * ExpressPay payment and for one that lands after the order closed, so keying the banner off the amount hid it
+ * from exactly the customers who were charged twice.
  */
 function RefundNotice({ order }: { order: Order }) {
-  if (!order.refundRequired || !(order.refundAmount > 0)) return null;
+  if (!order.refundRequired) return null;
   return (
     <p className="rounded-md bg-leaf-soft p-3 text-sm text-leaf">
-      A refund of <strong className="tabular">{formatMoney(order.refundAmount)}</strong> is due for the cancelled items. GUGU will return it to
-      the account you paid from.
+      {order.refundAmount > 0 ? (
+        <>
+          A refund of <strong className="tabular">{formatMoney(order.refundAmount)}</strong> is due on this order. GUGU will return it to the
+          account you paid from.
+        </>
+      ) : (
+        <>
+          A refund is due on this order. GUGU is working out the amount and will return it to the account you paid from. Get in touch if you
+          don't hear back.
+        </>
+      )}
     </p>
   );
 }

@@ -242,9 +242,10 @@ export async function search(q: string): Promise<SearchResult> {
 
 export async function getShippingOptions(): Promise<ShippingOption[]> {
   // Only active options are offered; placeOrder requires one whenever any is active.
-  // The filter is in the query so an inactive option can never reach the picker, whatever the page size.
-  // Note: docs must carry an explicit `isActive: true` — the server treats a missing field as active.
-  const snap = await getDocs(query(collection(db, "shipping_options"), where("isActive", "==", true), limit(20)));
+  // "Active" must mean exactly what the server means by it: `placeOrder` reads `opt.get("isActive") !== false`,
+  // so a doc with no `isActive` field is active. A Firestore equality filter cannot match an absent field, so the
+  // filter stays client-side — the collection is small (a handful of docs) and the page size covers the server's own.
+  const snap = await getDocs(query(collection(db, "shipping_options"), limit(50)));
   return snap.docs
     .map((d) => {
       const data = d.data();
@@ -253,9 +254,11 @@ export async function getShippingOptions(): Promise<ShippingOption[]> {
         name: str(data.name) ?? d.id,
         description: str(data.description),
         fee: num(data.fee),
+        isActive: data.isActive !== false,
         sortOrder: num(data.sortOrder) ?? 0,
       };
     })
+    .filter((o) => o.isActive)
     .sort((a, b) => a.sortOrder - b.sortOrder)
     .map(({ id, name, description, fee }) => ({ id, name, description, fee }));
 }

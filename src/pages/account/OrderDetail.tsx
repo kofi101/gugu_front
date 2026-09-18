@@ -7,20 +7,30 @@ import { getMerchantsByIds } from "../../data/catalog";
 import { useAsync } from "../../hooks/useAsync";
 import { useAuth } from "../../context/auth";
 import { errorMessage } from "../../lib/errors";
-import { amountDueOnDelivery, chargeVerdict, formatDateTime, formatMoney, PAYMENT_METHOD_LABEL, statusLabel } from "../../lib/format";
+import { amountDueOnDelivery, canPayAtExpressPay, chargeVerdict, formatDateTime, formatMoney, PAYMENT_METHOD_LABEL, statusLabel } from "../../lib/format";
 import type { Order } from "../../lib/types";
 import { FulfilmentBadge, PaymentBadge, StatusBadge } from "../../components/OrderBits";
 import { ProductImage } from "../../components/ProductCard";
 import { Seo } from "../../components/Seo";
 import { ErrorState } from "../../components/States";
 
+/** Why an ExpressPay order that still says "Awaiting payment" has no "Pay now" button. */
+const REVIEW_HOLD_NOTE =
+  "GUGU is checking a payment on this order with ExpressPay, so there is nothing to pay here. Please don't pay again — this order updates as soon as the check is done.";
+
 function Actions({ order }: { order: Order }) {
   const [confirming, setConfirming] = useState(false);
   const [busy, setBusy] = useState(false);
   const cancelState = customerCancelState(order);
   const canCancel = cancelState.allowed;
-  const canPay = order.paymentMethod === "expresspay" && order.status === "awaiting_payment";
+  // Not `expresspay && awaiting_payment`: an order ExpressPay approved for the wrong amount or currency keeps
+  // that status for good (the server stops expiring it once money is held against it), and offering "Pay now"
+  // for it invited a second charge — the server refuses it with ORDER_ALREADY_PAID, so the button could only
+  // ever produce "This order is already paid."
+  const canPay = canPayAtExpressPay(order);
+  const heldForReview = order.paymentMethod === "expresspay" && order.status === "awaiting_payment" && !canPay;
   if (!canCancel && !canPay) {
+    if (heldForReview) return <p className="pt-4 text-sm text-text-muted">{REVIEW_HOLD_NOTE}</p>;
     if (cancelState.reason) return <p className="pt-4 text-sm text-text-muted">{cancelState.reason}</p>;
     if (order.status === "payment_failed") {
       // "You weren't charged" only when the server rules a charge out. A payment that lands after the order
@@ -67,28 +77,31 @@ function Actions({ order }: { order: Order }) {
   }
 
   return (
-    <div className="flex flex-wrap items-center gap-2">
-      {canPay && (
-        <button type="button" className="btn btn-primary" onClick={pay} disabled={busy}>
-          {busy ? "Opening ExpressPay…" : `Pay ${formatMoney(order.orderTotal)} with ExpressPay`}
-        </button>
-      )}
-      {canCancel &&
-        (confirming ? (
-          <div role="group" aria-label="Confirm cancellation" className="flex flex-wrap items-center gap-2 rounded-md bg-serial-soft p-2">
-            <span className="px-1 text-sm font-semibold text-serial">Cancel this order?</span>
-            <button type="button" className="btn btn-sm bg-serial text-white hover:bg-serial/90" onClick={cancel} disabled={busy}>
-              {busy ? "Cancelling…" : "Yes, cancel order"}
-            </button>
-            <button type="button" className="btn btn-ghost btn-sm" onClick={() => setConfirming(false)} disabled={busy}>
-              Keep order
-            </button>
-          </div>
-        ) : (
-          <button type="button" className="btn btn-danger" onClick={() => setConfirming(true)}>
-            Cancel order
+    <div className="space-y-3">
+      {heldForReview && <p className="text-sm text-text-muted">{REVIEW_HOLD_NOTE}</p>}
+      <div className="flex flex-wrap items-center gap-2">
+        {canPay && (
+          <button type="button" className="btn btn-primary" onClick={pay} disabled={busy}>
+            {busy ? "Opening ExpressPay…" : `Pay ${formatMoney(order.orderTotal)} with ExpressPay`}
           </button>
-        ))}
+        )}
+        {canCancel &&
+          (confirming ? (
+            <div role="group" aria-label="Confirm cancellation" className="flex flex-wrap items-center gap-2 rounded-md bg-serial-soft p-2">
+              <span className="px-1 text-sm font-semibold text-serial">Cancel this order?</span>
+              <button type="button" className="btn btn-sm bg-serial text-white hover:bg-serial/90" onClick={cancel} disabled={busy}>
+                {busy ? "Cancelling…" : "Yes, cancel order"}
+              </button>
+              <button type="button" className="btn btn-ghost btn-sm" onClick={() => setConfirming(false)} disabled={busy}>
+                Keep order
+              </button>
+            </div>
+          ) : (
+            <button type="button" className="btn btn-danger" onClick={() => setConfirming(true)}>
+              Cancel order
+            </button>
+          ))}
+      </div>
     </div>
   );
 }

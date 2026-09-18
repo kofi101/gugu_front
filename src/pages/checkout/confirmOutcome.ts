@@ -6,7 +6,7 @@ export type Outcome =
   | { kind: "paid"; money: ChargeVerdict }
   | { kind: "pending"; money: ChargeVerdict }
   | { kind: "cancelled"; money: ChargeVerdict }
-  | { kind: "failed"; canRetry: boolean; money: ChargeVerdict }
+  | { kind: "failed"; money: ChargeVerdict }
   | { kind: "error"; message: string };
 
 /**
@@ -23,11 +23,14 @@ export function confirmOutcome(res: PaymentCheckResult): Outcome {
   // that leaves `status: 'cancelled'` with `paymentStatus: 'paid'`. Reading `paymentStatus` first showed that
   // customer "Payment received … Your order is with the store" for an order nobody is going to deliver.
   if (res.status === "cancelled") return { kind: "cancelled", money };
-  if (res.status === "payment_failed") return { kind: "failed", canRetry: false, money };
+  if (res.status === "payment_failed") return { kind: "failed", money };
   if (res.paymentStatus === "paid") return { kind: "paid", money };
-  // Offering "pay again" while money of ours is in flight would invite a second charge.
-  if (res.paymentStatus === "failed")
-    return { kind: "failed", canRetry: res.status === "awaiting_payment" && money === "not_charged", money };
+  // A guard, not a state the server reaches: every `paymentStatus: 'failed'` write in gugu_2.0 `orders.js`
+  // (lines 267, 535, 693, 853) sets `cancelled` or `payment_failed` in the same update, and both are caught
+  // above. A server that ever did leave an order `failed` but open should still land on the closed panel
+  // rather than be read as "still pending" — but it gets no offer to pay again from this page: that belongs to
+  // the order page, which checks whether the order is payable at all.
+  if (res.paymentStatus === "failed") return { kind: "failed", money };
   return { kind: "pending", money };
 }
 
@@ -35,7 +38,7 @@ export function confirmOutcome(res: PaymentCheckResult): Outcome {
  * The failure copy. `money` comes from the server's flags, never from the status: this page is where a customer
  * who paid at ExpressPay *after* their order expired lands, and the order is `payment_failed` for them too.
  */
-export function failedCopy(money: ChargeVerdict, canRetry: boolean): { title: string; detail: string } {
+export function failedCopy(money: ChargeVerdict): { title: string; detail: string } {
   if (money === "refund_due")
     return {
       title: "This order closed, but you were charged",
@@ -51,13 +54,35 @@ export function failedCopy(money: ChargeVerdict, canRetry: boolean): { title: st
   if (money === "not_charged")
     return {
       title: "Payment didn't go through",
-      detail: canRetry
-        ? "You haven't been charged. You can try paying again."
-        : "This order was closed without payment, and you haven't been charged. Add the items to your cart again to place a new order.",
+      detail: "This order was closed without payment, and you haven't been charged. Add the items to your cart again to place a new order.",
     };
   return {
     title: "Payment didn't go through",
     detail: "This order was closed. Open the order to check whether a payment went through — anything taken will be refunded.",
+  };
+}
+
+/**
+ * The copy for a payment ExpressPay has not settled yet — including one it approved for the wrong amount or
+ * currency, which leaves the order `awaiting_payment` with `paymentReviewRequired` and, since gugu_2.0 #12,
+ * keeps it there: the expiry job never closes an order money is held against.
+ *
+ * It lives here rather than in the page so the state can be tested.
+ */
+export function pendingCopy(money: ChargeVerdict): { title: string; detail: string } {
+  if (money === "under_review" || money === "refund_due")
+    return {
+      title: "We're checking this payment",
+      detail:
+        "ExpressPay approved a payment that doesn't match this order, so GUGU is checking it before the order moves on. Open the order to follow it, and don't pay again in the meantime.",
+    };
+  // The hour this used to promise was `EXPIRE_AWAITING_AFTER_MS`, the expiry job's scan cutoff. Every customer
+  // who reads this has a PENDING ExpressPay result on the order, and the job then leaves such an order alone
+  // until `EXPIRE_PENDING_HARD_MS` — 3 h (gugu_2.0 `functions/src/orders.js:28`).
+  return {
+    title: "Payment not confirmed yet",
+    detail:
+      "ExpressPay hasn't confirmed this payment yet. If you approved it on your phone, it can take a few minutes. Don't pay twice: an order whose payment never confirms closes on its own about three hours after you place it.",
   };
 }
 

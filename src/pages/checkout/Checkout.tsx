@@ -16,7 +16,7 @@ import { useAuth } from "../../context/auth";
 import { lineCap, useCart } from "../../context/cart";
 import { useAsync } from "../../hooks/useAsync";
 import { callableCode, callableDetails, errorMessage } from "../../lib/errors";
-import { chargeNote, formatMoney, PAYMENT_METHOD_LABEL, plural } from "../../lib/format";
+import { canPayAtExpressPay, chargeNote, formatMoney, PAYMENT_METHOD_LABEL, plural } from "../../lib/format";
 import { displayPrice, isInStock } from "../../lib/parse";
 import type { PaymentMethod, ShippingAddress } from "../../lib/types";
 import { AddressFields } from "../../components/AddressFields";
@@ -301,18 +301,33 @@ export default function Checkout() {
       // Trust the status the server returned, not the absence of an exception: placeOrder also replays an
       // earlier attempt of the same clientRequestId, which may come back payment_failed or cancelled.
       if (result.status === "awaiting_payment") {
-        const url = safeCheckoutUrl(result.checkoutUrl);
-        if (url) {
-          window.location.assign(url);
-          return; // keep the button disabled while the browser leaves
+        // `awaiting_payment` is not the same as payable. This branch also runs for a replay of an earlier
+        // attempt (same clientRequestId), and the order it replays may be one ExpressPay approved for the wrong
+        // amount or currency: the server flags it `paymentReviewRequired`, never expires it, and hands back the
+        // *stale* checkoutUrl from the first attempt. Following that URL would send the customer to pay a second
+        // time for a payment that is already being investigated.
+        if (!canPayAtExpressPay(result)) {
+          setFailure({
+            title: "We're checking a payment on this order",
+            detail:
+              "ExpressPay approved a payment that doesn't match this order, so GUGU is checking it before the order moves on. Don't pay for it again — open the order to follow it, and get in touch if you don't hear back.",
+            orderId: result.orderId,
+            retryable: false,
+          });
+        } else {
+          const url = safeCheckoutUrl(result.checkoutUrl);
+          if (url) {
+            window.location.assign(url);
+            return; // keep the button disabled while the browser leaves
+          }
+          setFailure({
+            title: "We couldn't open ExpressPay",
+            detail:
+              "Your order is saved. Open the order to check its payment status, then choose “Pay now” to go to ExpressPay, or cancel it there.",
+            orderId: result.orderId,
+            retryable: false,
+          });
         }
-        setFailure({
-          title: "We couldn't open ExpressPay",
-          detail:
-            "Your order is saved. Open the order to check its payment status, then choose “Pay now” to go to ExpressPay, or cancel it there.",
-          orderId: result.orderId,
-          retryable: false,
-        });
       } else if (result.status === "placed") {
         navigate(`/account/orders/${result.orderId}?placed=1`, { replace: true });
         return;

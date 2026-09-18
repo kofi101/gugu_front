@@ -113,3 +113,25 @@ export function chargeNoteFor(verdict: ChargeVerdict): string {
       return "Open the order to check whether a payment went through — anything taken will be refunded.";
   }
 }
+
+/**
+ * Whether the storefront may send this order to ExpressPay to be paid.
+ *
+ * `status: 'awaiting_payment'` is not enough on its own. An approval ExpressPay returns for the wrong amount or
+ * currency sets `paymentReviewRequired` and leaves the order `awaiting_payment`, and since gugu_2.0 #12 the
+ * expiry job deliberately never closes such an order — ExpressPay is holding real money against it, so it stays
+ * open until a person settles it. The contract is explicit: a client "should treat a long-lived
+ * `awaiting_payment` order with that flag as 'being checked', not as payable". Offering to pay it invites a
+ * second charge; the server refuses it anyway (`ORDER_ALREADY_PAID`) after re-querying ExpressPay.
+ *
+ * So the money flags decide, not the status: only an order nothing has been taken for ('not_charged') or one
+ * still at the payment page ('unknown', a `pending` ExpressPay result) may be paid. `paymentMethod` is checked
+ * when the caller knows it; a `placeOrder` result that comes back `awaiting_payment` is an ExpressPay order by
+ * construction, since every other method is `placed` at once.
+ */
+export function canPayAtExpressPay(o: ChargeFacts & { status: string; paymentMethod?: string }): boolean {
+  if (o.paymentMethod != null && o.paymentMethod !== "expresspay") return false;
+  if (o.status !== "awaiting_payment") return false;
+  const money = chargeVerdict(o);
+  return money === "not_charged" || money === "unknown";
+}

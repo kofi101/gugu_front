@@ -34,7 +34,9 @@ function ReviewForm({ product, existing, onSaved }: { product: Product; existing
     } catch (err) {
       toast.error(
         isCode(err, "permission-denied")
-          ? "Only customers who have received this product can review it."
+          ? existing
+            ? "We couldn't save that change to your review. Reload the page and try again."
+            : "Only customers who have received this product can review it."
           : errorMessage(err, "Couldn't save your review. Try again."),
       );
     } finally {
@@ -159,6 +161,10 @@ export function Reviews({ product }: { product: Product }) {
           {user ? (
             mine.loading || eligibility.loading ? (
               <div className="skeleton h-48" aria-hidden />
+            ) : mine.error ? (
+              // Without knowing whether a review already exists the form would take the create path and
+              // rewrite createdAt, which the rules reject — so ask for a retry instead of guessing.
+              <ErrorState error={mine.error} onRetry={mine.reload} title="We couldn't check your review" />
             ) : eligibility.data?.canReview || mine.data ? (
               <ReviewForm key={mine.data?.updatedAt?.getTime() ?? "new"} product={product} existing={mine.data ?? null} onSaved={reloadAll} />
             ) : (

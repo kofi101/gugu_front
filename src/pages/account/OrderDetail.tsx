@@ -88,6 +88,20 @@ function Actions({ order }: { order: Order }) {
   );
 }
 
+/**
+ * Money owed back after a cancellation. Kept outside `Fulfilment`, which renders nothing for orders placed
+ * before per-merchant fulfilment existed (empty `fulfilment` map) — those orders can still be owed a refund.
+ */
+function RefundNotice({ order }: { order: Order }) {
+  if (!order.refundRequired || !(order.refundAmount > 0)) return null;
+  return (
+    <p className="rounded-md bg-leaf-soft p-3 text-sm text-leaf">
+      A refund of <strong className="tabular">{formatMoney(order.refundAmount)}</strong> is due for the cancelled items. GUGU will return it to
+      the account you paid from.
+    </p>
+  );
+}
+
 /** Per-store progress. Multi-store orders move separately; parts can be cancelled while others are delivered. */
 function Fulfilment({ order }: { order: Order }) {
   const merchantIds = Object.keys(order.fulfilment);
@@ -102,12 +116,6 @@ function Fulfilment({ order }: { order: Order }) {
       {partlyCancelled && (
         <p className="mt-2 rounded-md bg-thread-300/25 p-3 text-sm text-text">
           Part of this order was cancelled. You received the items from the stores marked Delivered.
-        </p>
-      )}
-      {order.refundRequired && order.refundAmount > 0 && (
-        <p className="mt-2 rounded-md bg-leaf-soft p-3 text-sm text-leaf">
-          A refund of <strong className="tabular">{formatMoney(order.refundAmount)}</strong> is due for the cancelled items. GUGU will return it
-          to the account you paid from.
         </p>
       )}
       <ul className="mt-3 divide-y divide-paper-line">
@@ -264,6 +272,8 @@ export default function OrderDetail() {
           <Actions order={o} />
         </div>
       </div>
+
+      <RefundNotice order={o} />
 
       <Fulfilment order={o} />
 

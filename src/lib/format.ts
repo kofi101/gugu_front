@@ -95,7 +95,12 @@ export function chargeVerdict(f: ChargeFacts): ChargeVerdict {
 
 /** One sentence about the money, for a page that can point the customer at the order. */
 export function chargeNote(f: ChargeFacts): string {
-  switch (chargeVerdict(f)) {
+  return chargeNoteFor(chargeVerdict(f));
+}
+
+/** The same sentence, for a page that has already worked out the verdict. */
+export function chargeNoteFor(verdict: ChargeVerdict): string {
+  switch (verdict) {
     case "not_charged":
       return "You have not been charged.";
     case "refund_due":

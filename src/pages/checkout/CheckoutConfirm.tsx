@@ -3,61 +3,43 @@ import { Link, useSearchParams } from "react-router";
 import { LuCircleCheck, LuCircleX, LuClock } from "react-icons/lu";
 import { confirmExpressPayPayment, safeCheckoutUrl, startExpressPayCheckout } from "../../data/account";
 import { errorMessage } from "../../lib/errors";
-import { chargeVerdict, type ChargeVerdict } from "../../lib/format";
+import type { ChargeVerdict } from "../../lib/format";
+import { cancelledCopy, confirmOutcome, failedCopy, paidMoneyNote, type Outcome } from "./confirmOutcome";
 import { Seo } from "../../components/Seo";
 import { Spinner } from "../../components/States";
 
-type Outcome =
-  | { kind: "checking" }
-  | { kind: "paid"; money: ChargeVerdict }
-  | { kind: "pending"; money: ChargeVerdict }
-  | { kind: "failed"; canRetry: boolean; money: ChargeVerdict }
-  | { kind: "error"; message: string };
-
-/**
- * The failure copy. `money` comes from the server's flags, never from the status: this page is where a customer
- * who paid at ExpressPay *after* their order expired lands, and the order is `payment_failed` for them too.
- */
-function failedCopy(money: ChargeVerdict, canRetry: boolean): { title: string; detail: string } {
-  if (money === "refund_due")
-    return {
-      title: "This order closed, but you were charged",
-      detail:
-        "ExpressPay took a payment for an order that had already closed, so it won't be delivered and a refund is due. Open the order to follow the refund — GUGU returns it to the account you paid from.",
-    };
-  if (money === "under_review")
-    return {
-      title: "We're checking this payment",
-      detail:
-        "ExpressPay approved a payment that doesn't match this order, so GUGU is checking it before anything else happens. Open the order to follow it, and don't pay again in the meantime.",
-    };
-  if (money === "not_charged")
-    return {
-      title: "Payment didn't go through",
-      detail: canRetry
-        ? "You haven't been charged. You can try paying again."
-        : "This order was closed without payment, and you haven't been charged. Add the items to your cart again to place a new order.",
-    };
-  return {
-    title: "Payment didn't go through",
-    detail: "This order was closed. Open the order to check whether a payment went through — anything taken will be refunded.",
-  };
+function PaidPanel({ money, orderLink }: { money: ChargeVerdict; orderLink: string }) {
+  const note = paidMoneyNote(money);
+  return (
+    <>
+      <LuCircleCheck aria-hidden className="mx-auto h-14 w-14 text-leaf" />
+      <h1 className="type-title mt-3 text-2xl text-ink-950">Payment received</h1>
+      <p className="mt-2 text-text-muted">ExpressPay confirmed your payment. Your order is with the store.</p>
+      {note && <p className="mt-2 text-text-muted">{note}</p>}
+      <Link to={orderLink} className="btn btn-primary mt-6">
+        View your order
+      </Link>
+    </>
+  );
 }
 
-function FailedPanel({
+/** Everything that isn't going to be delivered: a failed payment, and an order that was cancelled. */
+function ClosedPanel({
+  copy,
   money,
   canRetry,
   orderLink,
   retrying,
   onPayAgain,
 }: {
+  copy: { title: string; detail: string };
   money: ChargeVerdict;
   canRetry: boolean;
   orderLink: string;
   retrying: boolean;
   onPayAgain: () => void;
 }) {
-  const { title, detail } = failedCopy(money, canRetry);
+  const { title, detail } = copy;
   // When money of the customer's is in play, the order page is where the answer is, so it takes the main button.
   const orderFirst = !canRetry && (money === "refund_due" || money === "under_review");
   return (
@@ -106,16 +88,7 @@ export default function CheckoutConfirm() {
   const check = useCallback(async () => {
     setOutcome({ kind: "checking" });
     try {
-      const res = await confirmExpressPayPayment(orderId);
-      const money = chargeVerdict(res);
-      // ExpressPay result 1 = paid, 2 = failed, 3/4 = still pending (the server maps these). Whether the customer
-      // was charged is a separate question, answered by `refundRequired` / `paymentReviewRequired`.
-      if (res.paymentStatus === "paid") setOutcome({ kind: "paid", money });
-      else if (res.status === "payment_failed" || res.status === "cancelled") setOutcome({ kind: "failed", canRetry: false, money });
-      // Offering "pay again" while money of ours is in flight would invite a second charge.
-      else if (res.paymentStatus === "failed")
-        setOutcome({ kind: "failed", canRetry: res.status === "awaiting_payment" && money === "not_charged", money });
-      else setOutcome({ kind: "pending", money });
+      setOutcome(confirmOutcome(await confirmExpressPayPayment(orderId)));
     } catch (err) {
       setOutcome({ kind: "error", message: errorMessage(err, "We couldn't check your payment. Try again.") });
     }
@@ -171,22 +144,7 @@ export default function CheckoutConfirm() {
               </div>
             </>
           )}
-          {outcome.kind === "paid" && (
-            <>
-              <LuCircleCheck aria-hidden className="mx-auto h-14 w-14 text-leaf" />
-              <h1 className="type-title mt-3 text-2xl text-ink-950">Payment received</h1>
-              <p className="mt-2 text-text-muted">ExpressPay confirmed your payment. Your order is with the store.</p>
-              {outcome.money === "refund_due" && (
-                <p className="mt-2 text-text-muted">More than one payment went through, so a refund is due. Open the order to follow it.</p>
-              )}
-              {outcome.money === "under_review" && (
-                <p className="mt-2 text-text-muted">GUGU is checking this payment against the order. Open the order to follow it.</p>
-              )}
-              <Link to={orderLink} className="btn btn-primary mt-6">
-                View your order
-              </Link>
-            </>
-          )}
+          {outcome.kind === "paid" && <PaidPanel money={outcome.money} orderLink={orderLink} />}
           {outcome.kind === "pending" && (
             <>
               <LuClock aria-hidden className="mx-auto h-14 w-14 text-thread-700" />
@@ -208,8 +166,25 @@ export default function CheckoutConfirm() {
               </div>
             </>
           )}
+          {outcome.kind === "cancelled" && (
+            <ClosedPanel
+              copy={cancelledCopy(outcome.money)}
+              money={outcome.money}
+              canRetry={false}
+              orderLink={orderLink}
+              retrying={retrying}
+              onPayAgain={payAgain}
+            />
+          )}
           {outcome.kind === "failed" && (
-            <FailedPanel money={outcome.money} canRetry={outcome.canRetry} orderLink={orderLink} retrying={retrying} onPayAgain={payAgain} />
+            <ClosedPanel
+              copy={failedCopy(outcome.money, outcome.canRetry)}
+              money={outcome.money}
+              canRetry={outcome.canRetry}
+              orderLink={orderLink}
+              retrying={retrying}
+              onPayAgain={payAgain}
+            />
           )}
           {outcome.kind === "error" && (
             <>

@@ -598,9 +598,11 @@ export default function Checkout() {
                         : "Free"
                       : options.length
                         ? "Choose an option"
-                        : optionsFailed
-                          ? "Not loaded"
-                          : "Confirmed with order"}
+                        : shippingOptions.loading
+                          ? "Loading…"
+                          : optionsFailed
+                            ? "Not loaded"
+                            : "Confirmed with order"}
                   </dd>
                 </div>
               </dl>

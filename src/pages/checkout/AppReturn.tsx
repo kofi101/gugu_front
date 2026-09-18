@@ -31,17 +31,20 @@ export default function AppReturn() {
         <div className="thread h-1" aria-hidden />
         <div className="p-6 sm:p-10">
           <LuSmartphone aria-hidden className="mx-auto h-14 w-14 text-ink-700" />
-          <h1 className="type-title mt-3 text-2xl text-ink-950">Payment submitted</h1>
+          {/* ExpressPay sends approved, declined and cancelled payments to this same URL, and this page reads no
+              order data, so it must not claim any outcome. The app checks with ExpressPay and shows the result. */}
+          <h1 className="type-title mt-3 text-2xl text-ink-950">Back to the Gugu app</h1>
           {appUrl ? (
             <>
               <p className="mt-2 text-text-muted">
-                Go back to the Gugu app to see whether your payment went through. The app checks with ExpressPay and shows your order.
+                ExpressPay has finished with this payment. Go back to the Gugu app to see the result: it checks with ExpressPay and shows your
+                order.
               </p>
               <a href={appUrl} className="btn btn-primary mt-6">
                 Open the Gugu app
               </a>
               <p className="mt-4 text-sm text-text-muted">
-                If the app doesn't open, switch back to it yourself. Don't pay again: your order updates on its own once ExpressPay confirms.
+                If the app doesn't open, switch back to it yourself. Check the order in the app before paying again.
               </p>
             </>
           ) : (

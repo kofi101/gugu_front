@@ -21,10 +21,13 @@ import { ErrorState, PageLoader } from "../components/States";
 const STATUS_COPY: Record<string, { title: string; body: string }> = {
   pending: { title: "Application received", body: "The GUGU team is reviewing your details. We'll contact you by phone or email." },
   approved: { title: "You're approved", body: "Sign in to the GUGU merchant dashboard with this account to set up your store." },
-  rejected: { title: "Application not approved", body: "Your application wasn't approved this time. Contact us if you'd like to know more." },
+  rejected: {
+    title: "Application not approved",
+    body: "Your application wasn't approved this time. You can fix what's below and apply again, or contact us if you'd like to know more.",
+  },
 };
 
-function ApplicationStatus({ app }: { app: MerchantApplication }) {
+function ApplicationStatus({ app, onReapply }: { app: MerchantApplication; onReapply?: () => void }) {
   const copy = STATUS_COPY[app.status] ?? STATUS_COPY.pending;
   return (
     <div role="status" className="panel overflow-hidden">
@@ -45,19 +48,41 @@ function ApplicationStatus({ app }: { app: MerchantApplication }) {
           )}
         </dl>
         {app.note && <p className="mt-4 rounded-md bg-paper p-3 text-sm">{app.note}</p>}
-        <Link to="/contact" className="link mt-3 inline-block py-1.5 text-sm">
-          Contact GUGU
-        </Link>
+        {onReapply ? (
+          <div className="mt-5 flex flex-wrap items-center gap-3">
+            <button type="button" className="btn btn-primary" onClick={onReapply}>
+              Apply again
+            </button>
+            <Link to="/contact" className="link py-1.5 text-sm">
+              Contact GUGU
+            </Link>
+          </div>
+        ) : (
+          <Link to="/contact" className="link mt-3 inline-block py-1.5 text-sm">
+            Contact GUGU
+          </Link>
+        )}
       </div>
     </div>
   );
 }
 
-function ApplicationForm({ onSubmitted }: { onSubmitted: () => void }) {
+function ApplicationForm({
+  onSubmitted,
+  previous,
+}: {
+  onSubmitted: () => void;
+  /** A rejected application being submitted again: its values prefill the form. */
+  previous?: MerchantApplication;
+}) {
   const { user } = useAuth();
   const regions = useAsync(getRegions, []);
   const regionOptions = regions.data ?? [];
-  const [regionId, setRegionId] = useState("");
+  const [regionId, setRegionId] = useState(previous?.regionId ?? "");
+  // Controlled, not defaultValue: the towns are fetched after the region is
+  // known, so at mount the previous town is not yet an option and the browser
+  // would silently drop it — leaving a prefilled form that fails validation.
+  const [cityId, setCityId] = useState(previous?.cityId ?? "");
   const cities = useAsync(async () => (regionId ? getCities(regionId) : []), [regionId]);
   const [files, setFiles] = useState<File[]>([]);
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -136,22 +161,31 @@ function ApplicationForm({ onSubmitted }: { onSubmitted: () => void }) {
       <div className="grid gap-4 sm:grid-cols-2">
         <div className="sm:col-span-2">
           <label htmlFor="businessName" className="field-label">Business name</label>
-          <input className="input" autoComplete="organization" {...a11y("businessName")} />
+          <input className="input" autoComplete="organization" defaultValue={previous?.businessName ?? ""} {...a11y("businessName")} />
           {err("businessName")}
         </div>
         <div>
           <label htmlFor="phone" className="field-label">Phone</label>
-          <input className="input" type="tel" autoComplete="tel" {...a11y("phone")} />
+          <input className="input" type="tel" autoComplete="tel" defaultValue={previous?.phone ?? ""} {...a11y("phone")} />
           {err("phone")}
         </div>
         <div>
           <label htmlFor="email" className="field-label">Email</label>
-          <input className="input" type="email" autoComplete="email" defaultValue={user?.email ?? ""} {...a11y("email")} />
+          <input className="input" type="email" autoComplete="email" defaultValue={previous?.email ?? user?.email ?? ""} {...a11y("email")} />
           {err("email")}
         </div>
         <div>
           <label htmlFor="regionId" className="field-label">Region</label>
-          <select className="input" value={regionId} onChange={(e) => setRegionId(e.target.value)} {...a11y("regionId")} disabled={busy || regions.loading}>
+          <select
+            className="input"
+            value={regionId}
+            onChange={(e) => {
+              setRegionId(e.target.value);
+              setCityId("");
+            }}
+            {...a11y("regionId")}
+            disabled={busy || regions.loading}
+          >
             <option value="">Choose a region</option>
             {regionOptions.map((r) => (
               <option key={r.id} value={r.id}>{r.name}</option>
@@ -161,7 +195,13 @@ function ApplicationForm({ onSubmitted }: { onSubmitted: () => void }) {
         </div>
         <div>
           <label htmlFor="cityId" className="field-label">Town or city</label>
-          <select className="input" {...a11y("cityId")} disabled={busy || !regionId || cities.loading}>
+          <select
+            className="input"
+            value={cityId}
+            onChange={(e) => setCityId(e.target.value)}
+            {...a11y("cityId")}
+            disabled={busy || !regionId || cities.loading}
+          >
             <option value="">{regionId ? "Choose a town" : "Choose a region first"}</option>
             {(cities.data ?? []).map((c) => (
               <option key={c.id} value={c.id}>{c.name}</option>
@@ -171,7 +211,7 @@ function ApplicationForm({ onSubmitted }: { onSubmitted: () => void }) {
         </div>
         <div className="sm:col-span-2">
           <label htmlFor="description" className="field-label">What do you sell?</label>
-          <textarea className="input min-h-[120px]" maxLength={2000} {...a11y("description")} />
+          <textarea className="input min-h-[120px]" maxLength={2000} defaultValue={previous?.description ?? ""} {...a11y("description")} />
           {err("description")}
         </div>
       </div>
@@ -236,6 +276,10 @@ function ApplicationForm({ onSubmitted }: { onSubmitted: () => void }) {
 export default function Sell() {
   const { user, initializing } = useAuth();
   const app = useAsync(async () => (user ? getMerchantApplication(user.uid) : null), [user?.uid]);
+  const [reapplying, setReapplying] = useState(false);
+  // Only a rejected application may be replaced (firestore.rules: the stored
+  // status must be 'rejected'), so that is the only status offered the form.
+  const canReapply = app.data?.status === "rejected";
 
   return (
     <div>
@@ -267,10 +311,29 @@ export default function Sell() {
             </div>
           ) : app.error ? (
             <ErrorState error={app.error} onRetry={app.reload} />
-          ) : app.data ? (
-            <ApplicationStatus app={app.data} />
+          ) : app.data && !(canReapply && reapplying) ? (
+            <ApplicationStatus
+              app={app.data}
+              onReapply={canReapply ? () => setReapplying(true) : undefined}
+            />
           ) : (
-            <ApplicationForm onSubmitted={app.reload} />
+            <>
+              {canReapply && app.data?.note && (
+                // The re-submission replaces the document, so this reason is
+                // about to disappear — it has to be readable while they edit.
+                <div role="status" className="panel mb-4 p-4 text-sm">
+                  <p className="font-semibold text-ink-950">Why it wasn't approved</p>
+                  <p className="mt-1 text-text-muted">{app.data.note}</p>
+                </div>
+              )}
+              <ApplicationForm
+                previous={canReapply ? app.data ?? undefined : undefined}
+                onSubmitted={() => {
+                  setReapplying(false);
+                  app.reload();
+                }}
+              />
+            </>
           )}
         </div>
         <aside className="space-y-4 text-sm">

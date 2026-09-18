@@ -3,6 +3,7 @@ import { Link, useSearchParams } from "react-router";
 import { LuCircleCheck, LuCircleX, LuClock } from "react-icons/lu";
 import { confirmExpressPayPayment } from "../../data/account";
 import { errorMessage } from "../../lib/errors";
+import { orderIdFromReturn } from "../../lib/expresspayReturn";
 import type { ChargeVerdict } from "../../lib/format";
 import { cancelledCopy, confirmOutcome, failedCopy, paidMoneyNote, pendingCopy, type Outcome } from "./confirmOutcome";
 import { Seo } from "../../components/Seo";
@@ -66,7 +67,7 @@ function ClosedPanel({ copy, money, orderLink }: { copy: { title: string; detail
 
 export default function CheckoutConfirm() {
   const [params] = useSearchParams();
-  const orderId = params.get("orderId") ?? "";
+  const orderId = orderIdFromReturn(params);
   const [outcome, setOutcome] = useState<Outcome>({ kind: "checking" });
   const started = useRef<string | null>(null);
 

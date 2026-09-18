@@ -1,4 +1,5 @@
 import { useEffect, useRef } from "react";
+import { orderIdFromReturn } from "../../lib/expresspayReturn";
 import { Link, useSearchParams } from "react-router";
 import { LuSmartphone } from "react-icons/lu";
 import { Seo } from "../../components/Seo";
@@ -14,7 +15,7 @@ function appConfirmUrl(orderId: string): string | null {
 
 export default function AppReturn() {
   const [params] = useSearchParams();
-  const appUrl = appConfirmUrl(params.get("orderId") ?? "");
+  const appUrl = appConfirmUrl(orderIdFromReturn(params));
   const opened = useRef(false);
 
   useEffect(() => {

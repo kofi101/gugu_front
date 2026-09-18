@@ -26,8 +26,8 @@ export function confirmOutcome(res: PaymentCheckResult): Outcome {
   if (res.status === "payment_failed") return { kind: "failed", money };
   if (res.paymentStatus === "paid") return { kind: "paid", money };
   // A guard, not a state the server reaches: every `paymentStatus: 'failed'` write in gugu_2.0 `orders.js`
-  // (lines 267, 535, 693, 853) sets `cancelled` or `payment_failed` in the same update, and both are caught
-  // above. A server that ever did leave an order `failed` but open should still land on the closed panel
+  // (grep the field — cancelInTx, closeOrder's two callers and the DECLINED branch) sets `cancelled` or
+  // `payment_failed` in the same update, and both are caught above. A server that ever did leave an order `failed` but open should still land on the closed panel
   // rather than be read as "still pending" — but it gets no offer to pay again from this page: that belongs to
   // the order page, which checks whether the order is payable at all.
   if (res.paymentStatus === "failed") return { kind: "failed", money };

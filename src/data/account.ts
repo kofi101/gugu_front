@@ -280,6 +280,16 @@ export async function getMerchantApplication(uid: string): Promise<MerchantAppli
   };
 }
 
+/**
+ * Withdraws a pending application: `status` only, so the details the applicant
+ * sent stay on the record (firestore.rules refuses an update that touches
+ * anything else). They can submit again afterwards — a withdrawn application is
+ * re-applicable in the same way a rejected one is.
+ */
+export async function withdrawMerchantApplication(uid: string): Promise<void> {
+  await updateDoc(doc(db, "merchant_applications", uid), { status: "withdrawn" });
+}
+
 export const APPLICATION_FILE_TYPES = ["image/jpeg", "image/png", "image/webp", "application/pdf"];
 
 export function validateApplicationFile(f: File): string | null {

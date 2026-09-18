@@ -7,6 +7,7 @@ import {
   getMerchantApplication,
   submitMerchantApplication,
   validateApplicationFile,
+  withdrawMerchantApplication,
 } from "../data/account";
 import { getCities, getRegions } from "../data/catalog";
 import { useAuth } from "../context/auth";
@@ -21,13 +22,22 @@ import { ErrorState, PageLoader } from "../components/States";
 const STATUS_COPY: Record<string, { title: string; body: string }> = {
   pending: { title: "Application received", body: "The GUGU team is reviewing your details. We'll contact you by phone or email." },
   approved: { title: "You're approved", body: "Sign in to the GUGU merchant dashboard with this account to set up your store." },
+  withdrawn: { title: "Application cancelled", body: "You cancelled this application. You can send a new one whenever you're ready." },
   rejected: {
     title: "Application not approved",
     body: "Your application wasn't approved this time. You can fix what's below and apply again, or contact us if you'd like to know more.",
   },
 };
 
-function ApplicationStatus({ app, onReapply }: { app: MerchantApplication; onReapply?: () => void }) {
+function ApplicationStatus({
+  app,
+  onReapply,
+  onWithdraw,
+}: {
+  app: MerchantApplication;
+  onReapply?: () => void;
+  onWithdraw?: () => void;
+}) {
   const copy = STATUS_COPY[app.status] ?? STATUS_COPY.pending;
   return (
     <div role="status" className="panel overflow-hidden">
@@ -48,11 +58,18 @@ function ApplicationStatus({ app, onReapply }: { app: MerchantApplication; onRea
           )}
         </dl>
         {app.note && <p className="mt-4 rounded-md bg-paper p-3 text-sm">{app.note}</p>}
-        {onReapply ? (
+        {onReapply || onWithdraw ? (
           <div className="mt-5 flex flex-wrap items-center gap-3">
-            <button type="button" className="btn btn-primary" onClick={onReapply}>
-              Apply again
-            </button>
+            {onReapply && (
+              <button type="button" className="btn btn-primary" onClick={onReapply}>
+                Apply again
+              </button>
+            )}
+            {onWithdraw && (
+              <button type="button" className="btn btn-secondary" onClick={onWithdraw}>
+                Cancel application
+              </button>
+            )}
             <Link to="/contact" className="link py-1.5 text-sm">
               Contact GUGU
             </Link>
@@ -277,9 +294,27 @@ export default function Sell() {
   const { user, initializing } = useAuth();
   const app = useAsync(async () => (user ? getMerchantApplication(user.uid) : null), [user?.uid]);
   const [reapplying, setReapplying] = useState(false);
-  // Only a rejected application may be replaced (firestore.rules: the stored
-  // status must be 'rejected'), so that is the only status offered the form.
-  const canReapply = app.data?.status === "rejected";
+  const [withdrawing, setWithdrawing] = useState(false);
+  // firestore.rules allows a replacement only from these two, so they are the
+  // only statuses offered the form.
+  const canReapply = app.data?.status === "rejected" || app.data?.status === "withdrawn";
+  const canWithdraw = app.data?.status === "pending";
+
+  async function withdraw() {
+    if (!user || withdrawing) return;
+    // Irreversible for this submission — the applicant can send a new one, but
+    // this one leaves the review queue — so it is worth one question first.
+    if (!window.confirm("Cancel this application? The GUGU team will stop reviewing it. You can apply again later.")) return;
+    setWithdrawing(true);
+    try {
+      await withdrawMerchantApplication(user.uid);
+      app.reload();
+    } catch (err) {
+      toast.error(errorMessage(err, "We couldn't cancel your application. Try again."));
+    } finally {
+      setWithdrawing(false);
+    }
+  }
 
   return (
     <div>
@@ -315,10 +350,11 @@ export default function Sell() {
             <ApplicationStatus
               app={app.data}
               onReapply={canReapply ? () => setReapplying(true) : undefined}
+              onWithdraw={canWithdraw ? withdraw : undefined}
             />
           ) : (
             <>
-              {canReapply && app.data?.note && (
+              {app.data?.status === "rejected" && app.data?.note && (
                 // The re-submission replaces the document, so this reason is
                 // about to disappear — it has to be readable while they edit.
                 <div role="status" className="panel mb-4 p-4 text-sm">

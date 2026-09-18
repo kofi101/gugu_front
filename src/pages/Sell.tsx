@@ -1,4 +1,4 @@
-import { useRef, useState, type FormEvent } from "react";
+import { useEffect, useRef, useState, type FormEvent } from "react";
 import { Link } from "react-router";
 import { toast } from "react-toastify";
 import { LuFileText, LuUpload, LuX } from "react-icons/lu";
@@ -125,14 +125,23 @@ function ApplicationForm({
   // form and the screen cannot disagree.
   const region = regionOptions.some((r) => r.id === regionId) ? regionId : "";
   const cities = useAsync(async () => (region ? getCities(region) : []), [region]);
+  // A rejected fetch is its own state, not an empty list: with `cities.data`
+  // undefined and `loading` false the town select used to render enabled with
+  // nothing in it, and submit then blamed `cityId` — a field the applicant had
+  // no way to fill. It now says what happened and offers a retry.
+  const citiesFailed = Boolean(region) && Boolean(cities.error);
   // `cities.data` is the previous region's list while the next one loads.
-  const cityOptions = cities.loading ? [] : cities.data ?? [];
+  const cityOptions = cities.loading || citiesFailed ? [] : cities.data ?? [];
   const city = cityOptions.some((c) => c.id === cityId) ? cityId : "";
+  // No town list yet, for a reason no field can fix. Blocks the submit on its
+  // own so validation never has to invent a field error for it.
+  const townsPending = Boolean(region) && cities.loading;
   const [files, setFiles] = useState<File[]>([]);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [busy, setBusy] = useState(false);
   const inFlight = useRef(false);
   const fileInput = useRef<HTMLInputElement>(null);
+  const formRef = useRef<HTMLFormElement>(null);
 
   function addFiles(list: FileList | null) {
     if (!list) return;
@@ -149,23 +158,65 @@ function ApplicationForm({
     if (fileInput.current) fileInput.current.value = "";
   }
 
-  async function submit(e: FormEvent<HTMLFormElement>) {
-    e.preventDefault();
-    if (!user || inFlight.current) return;
-    const fd = new FormData(e.currentTarget);
+  /**
+   * The one validation pass. Both submit() and the as-you-fix clearing below
+   * call it, so a message on screen cannot disagree with what submit decides —
+   * and `region`/`city` here are the same derived values the payload sends, in
+   * the same render, so an unlisted id can never reach Firestore.
+   */
+  function validate(fd: FormData): Record<string, string> {
     const v = (k: string) => String(fd.get(k) ?? "").trim();
     const errs: Record<string, string> = {};
     if (!v("businessName")) errs.businessName = "Enter your business name.";
     if (v("phone").replace(/\D/g, "").length < 9) errs.phone = "Enter a phone number we can call.";
     if (!/^\S+@\S+\.\S+$/.test(v("email"))) errs.email = "Enter a valid email address.";
     if (!region) errs.regionId = "Choose your region.";
-    if (!city) errs.cityId = "Choose your town or city.";
+    // Only the applicant's to fix once the list is actually there. While it
+    // loads, say so; when it failed, the field renders its own message and a
+    // retry, so adding one here would just blame a disabled control twice.
+    if (townsPending) errs.cityId = "The towns are still loading. Try again in a moment.";
+    else if (!city && !citiesFailed) errs.cityId = "Choose your town or city.";
     if (v("description").length < 20) errs.description = "Tell us what you sell in at least 20 characters.";
     if (!files.length) errs.documents = "Attach at least one document, such as your business registration or Ghana Card.";
     if (!fd.get("consent")) errs.consent = "Confirm the details are correct.";
+    return errs;
+  }
+
+  /**
+   * Drops a field's error as soon as that field is valid again, so a message
+   * cannot outlive the problem it describes — the towns arriving late used to
+   * leave "Choose your town or city." sitting under a correctly filled select.
+   * It only ever removes what validate() no longer reports; it never adds an
+   * error while the applicant is still typing.
+   */
+  function clearFixedErrors() {
+    const form = formRef.current;
+    if (!form || !Object.keys(errors).length) return;
+    const still = validate(new FormData(form));
+    setErrors((prev) => {
+      const kept = Object.fromEntries(Object.entries(prev).filter(([k]) => still[k]));
+      return Object.keys(kept).length === Object.keys(prev).length ? prev : kept;
+    });
+  }
+
+  // The towns arriving is not a change event — it re-renders the select from an
+  // async result — so the submit-time errors have to be re-examined here too.
+  // A no-op unless something actually became valid, so it cannot loop.
+  useEffect(clearFixedErrors);
+
+  async function submit(e: FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    if (!user || inFlight.current) return;
+    // One read of the form, validated and sent — the payload cannot describe a
+    // different form state than the one that was just checked.
+    const fd = new FormData(e.currentTarget);
+    const v = (k: string) => String(fd.get(k) ?? "").trim();
+    const errs = validate(fd);
     setErrors(errs);
-    if (Object.keys(errs).length) {
-      document.getElementById(Object.keys(errs)[0])?.focus();
+    if (Object.keys(errs).length || citiesFailed) {
+      // With the towns missing the select is disabled, so send focus to the
+      // retry that can actually undo the block.
+      document.getElementById(Object.keys(errs)[0] ?? "cityId-retry")?.focus();
       return;
     }
     inFlight.current = true;
@@ -200,7 +251,7 @@ function ApplicationForm({
     ) : null;
 
   return (
-    <form onSubmit={submit} noValidate className="panel space-y-5 p-5 sm:p-8">
+    <form ref={formRef} onSubmit={submit} onChange={clearFixedErrors} noValidate className="panel space-y-5 p-5 sm:p-8">
       <h2 className="type-title text-xl text-ink-950">Your business</h2>
       <div className="grid gap-4 sm:grid-cols-2">
         <div className="sm:col-span-2">
@@ -244,14 +295,33 @@ function ApplicationForm({
             value={city}
             onChange={(e) => setCityId(e.target.value)}
             {...a11y("cityId")}
-            disabled={busy || !region || cities.loading}
+            aria-invalid={errors.cityId || citiesFailed ? true : undefined}
+            aria-describedby={errors.cityId || citiesFailed ? "cityId-error" : undefined}
+            disabled={busy || !region || townsPending || citiesFailed}
           >
-            <option value="">{region ? "Choose a town" : "Choose a region first"}</option>
+            <option value="">
+              {!region
+                ? "Choose a region first"
+                : citiesFailed
+                  ? "Towns couldn't be loaded"
+                  : townsPending
+                    ? "Loading towns…"
+                    : "Choose a town"}
+            </option>
             {cityOptions.map((c) => (
               <option key={c.id} value={c.id}>{c.name}</option>
             ))}
           </select>
-          {err("cityId")}
+          {citiesFailed ? (
+            <p id="cityId-error" role="alert" className="field-error">
+              We couldn't load the towns for this region.{" "}
+              <button type="button" id="cityId-retry" className="link font-semibold" onClick={cities.reload}>
+                Try again
+              </button>
+            </p>
+          ) : (
+            err("cityId")
+          )}
         </div>
         <div className="sm:col-span-2">
           <label htmlFor="description" className="field-label">What do you sell?</label>
@@ -337,6 +407,12 @@ export default function Sell() {
   const app = useAsync(async () => (user ? getMerchantApplication(user.uid) : null), [user?.uid]);
   const [reapplying, setReapplying] = useState(false);
   const [withdrawing, setWithdrawing] = useState(false);
+  // `withdrawing` is render state: activations dispatched in one React batch all
+  // read the same pre-update closure and every one of them writes. A ref updates
+  // synchronously, so only the first gets through — the same guard
+  // ApplicationForm.submit uses. The `disabled` attribute is presentation, not
+  // the guard.
+  const withdrawInFlight = useRef(false);
   // firestore.rules allows a replacement only from these two, so they are the
   // only statuses offered the form.
   const canReapply = app.data?.status === "rejected" || app.data?.status === "withdrawn";
@@ -346,7 +422,8 @@ export default function Sell() {
   // this one leaves the review queue — so ApplicationStatus asks first, with
   // the same inline two-step confirm a customer gets for cancelling an order.
   async function withdraw() {
-    if (!user || withdrawing) return;
+    if (!user || withdrawInFlight.current) return;
+    withdrawInFlight.current = true;
     setWithdrawing(true);
     try {
       await withdrawMerchantApplication(user.uid);
@@ -355,6 +432,7 @@ export default function Sell() {
     } catch (err) {
       toast.error(errorMessage(err, "We couldn't cancel your application. Try again."));
     } finally {
+      withdrawInFlight.current = false;
       setWithdrawing(false);
     }
   }

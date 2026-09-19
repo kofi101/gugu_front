@@ -111,7 +111,16 @@ function ApplicationForm({
 }) {
   const { user } = useAuth();
   const regions = useAsync(getRegions, []);
-  const regionOptions = regions.data ?? [];
+  // A rejected getRegions() is its own state, not an empty catalogue — the same
+  // distinction the towns draw below. Left as a plain `?? []` the select
+  // rendered enabled with only its placeholder, and submit blamed `regionId`, a
+  // field holding nothing the applicant could choose. There was no retry and no
+  // second-submit escape either, so only a page reload cleared it.
+  const regionsFailed = Boolean(regions.error);
+  const regionOptions = regions.loading || regionsFailed ? [] : regions.data ?? [];
+  // No region list yet, for a reason no field can fix. Blocks the submit on its
+  // own so validation never has to invent a field error for it.
+  const regionsPending = regions.loading;
   // Controlled, not defaultValue: the towns are fetched after the region is
   // known, so at mount the previous town is not yet an option and the browser
   // would silently drop it — leaving a prefilled form that fails validation.
@@ -170,12 +179,20 @@ function ApplicationForm({
     if (!v("businessName")) errs.businessName = "Enter your business name.";
     if (v("phone").replace(/\D/g, "").length < 9) errs.phone = "Enter a phone number we can call.";
     if (!/^\S+@\S+\.\S+$/.test(v("email"))) errs.email = "Enter a valid email address.";
-    if (!region) errs.regionId = "Choose your region.";
-    // Only the applicant's to fix once the list is actually there. While it
-    // loads, say so; when it failed, the field renders its own message and a
-    // retry, so adding one here would just blame a disabled control twice.
-    if (townsPending) errs.cityId = "The towns are still loading. Try again in a moment.";
-    else if (!city && !citiesFailed) errs.cityId = "Choose your town or city.";
+    // Same three-way split for both selects: still loading, failed, or simply
+    // not chosen. Only the last is the applicant's to fix, so only the last
+    // names the field. A failed list renders its own message and retry beside
+    // the control, so adding one here would blame a disabled select twice.
+    if (regionsPending) errs.regionId = "The regions are still loading. Try again in a moment.";
+    else if (!region && !regionsFailed) errs.regionId = "Choose your region.";
+    // Without a region the town select is disabled and says why, so a town
+    // error here would point at a control that cannot be used until the field
+    // above is settled — and when the regions failed, that is not a block the
+    // town field has any part in.
+    if (region) {
+      if (townsPending) errs.cityId = "The towns are still loading. Try again in a moment.";
+      else if (!city && !citiesFailed) errs.cityId = "Choose your town or city.";
+    }
     if (v("description").length < 20) errs.description = "Tell us what you sell in at least 20 characters.";
     if (!files.length) errs.documents = "Attach at least one document, such as your business registration or Ghana Card.";
     if (!fd.get("consent")) errs.consent = "Confirm the details are correct.";
@@ -183,19 +200,25 @@ function ApplicationForm({
   }
 
   /**
-   * Drops a field's error as soon as that field is valid again, so a message
-   * cannot outlive the problem it describes — the towns arriving late used to
-   * leave "Choose your town or city." sitting under a correctly filled select.
-   * It only ever removes what validate() no longer reports; it never adds an
-   * error while the applicant is still typing.
+   * Keeps the shown errors in step with validate(), so a message cannot outlive
+   * the problem it describes. A field can stay invalid while the *reason*
+   * changes under it — submit during the town fetch says the towns are still
+   * loading, and once they land with nothing chosen the honest message is
+   * "Choose your town or city." — so this re-reads the current reason rather
+   * than keeping the string captured at submit. It still only narrows: a field
+   * with no current error is dropped, and one that never had an error is not
+   * added while the applicant is still typing.
    */
   function clearFixedErrors() {
     const form = formRef.current;
     if (!form || !Object.keys(errors).length) return;
     const still = validate(new FormData(form));
     setErrors((prev) => {
-      const kept = Object.fromEntries(Object.entries(prev).filter(([k]) => still[k]));
-      return Object.keys(kept).length === Object.keys(prev).length ? prev : kept;
+      const next: Record<string, string> = {};
+      for (const k of Object.keys(prev)) if (still[k]) next[k] = still[k];
+      const same =
+        Object.keys(next).length === Object.keys(prev).length && Object.keys(next).every((k) => next[k] === prev[k]);
+      return same ? prev : next;
     });
   }
 
@@ -213,10 +236,14 @@ function ApplicationForm({
     const v = (k: string) => String(fd.get(k) ?? "").trim();
     const errs = validate(fd);
     setErrors(errs);
-    if (Object.keys(errs).length || citiesFailed) {
-      // With the towns missing the select is disabled, so send focus to the
-      // retry that can actually undo the block.
-      document.getElementById(Object.keys(errs)[0] ?? "cityId-retry")?.focus();
+    // A failed list names no field, so it has to block here on its own —
+    // otherwise an application with no region could pass validation clean.
+    if (Object.keys(errs).length || regionsFailed || citiesFailed) {
+      // With a list missing its select is disabled, so fall back to the retry
+      // that can actually undo the block — the region's first, since a missing
+      // region is what leaves the town field unusable.
+      const target = Object.keys(errs)[0] ?? (regionsFailed ? "regionId-retry" : "cityId-retry");
+      document.getElementById(target)?.focus();
       return;
     }
     inFlight.current = true;
@@ -279,14 +306,27 @@ function ApplicationForm({
               setCityId("");
             }}
             {...a11y("regionId")}
-            disabled={busy || regions.loading}
+            aria-invalid={errors.regionId || regionsFailed ? true : undefined}
+            aria-describedby={errors.regionId || regionsFailed ? "regionId-error" : undefined}
+            disabled={busy || regionsPending || regionsFailed}
           >
-            <option value="">Choose a region</option>
+            <option value="">
+              {regionsFailed ? "Regions couldn't be loaded" : regionsPending ? "Loading regions…" : "Choose a region"}
+            </option>
             {regionOptions.map((r) => (
               <option key={r.id} value={r.id}>{r.name}</option>
             ))}
           </select>
-          {err("regionId")}
+          {regionsFailed ? (
+            <p id="regionId-error" role="alert" className="field-error">
+              We couldn't load the regions.{" "}
+              <button type="button" id="regionId-retry" className="link font-semibold" onClick={regions.reload}>
+                Try again
+              </button>
+            </p>
+          ) : (
+            err("regionId")
+          )}
         </div>
         <div>
           <label htmlFor="cityId" className="field-label">Town or city</label>

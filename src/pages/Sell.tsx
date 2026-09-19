@@ -144,6 +144,15 @@ function ApplicationForm({
   const city = cityOptions.some((c) => c.id === cityId) ? cityId : "";
   // No town list yet, for a reason no field can fix. Blocks the submit on its
   // own so validation never has to invent a field error for it.
+  /**
+   * A region with no towns at all: the fetch succeeded and returned nothing. The
+   * select would otherwise sit enabled and empty while submit said "Choose your
+   * town or city." forever — only changing region escapes, and nothing said so.
+   * Seed data has towns for every region today, so this is a guard against the
+   * next region somebody adds.
+   */
+  const townsEmpty =
+    Boolean(region) && !citiesFailed && !cities.loading && (cities.data?.length ?? 0) === 0;
   const townsPending = Boolean(region) && cities.loading;
   const [files, setFiles] = useState<File[]>([]);
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -175,12 +184,40 @@ function ApplicationForm({
   }
 
   /**
+   * Removing a file is the third way the document set changes, and the other two
+   * both answer for the message. Without this, "You can attach up to 5 files."
+   * survives being down to two, and a refusal names a file that is no longer
+   * there — a message outliving its reason, which is the failure this form keeps
+   * being fixed for. Re-validating also raises the error again when the last
+   * document goes, rather than waiting for the next submit to say so.
+   */
+  function removeFile(index: number) {
+    const next = files.filter((_, j) => j !== index);
+    setFiles(next);
+    setFileProblem("");
+    setErrors((prev) => {
+      if (!Object.keys(prev).length && next.length) return prev;
+      const form = formRef.current;
+      if (!form) return prev;
+      const still = validateWith(new FormData(form), next);
+      const out: Record<string, string> = {};
+      for (const k of Object.keys(prev)) if (still[k]) out[k] = still[k];
+      if (!next.length && still.documents) out.documents = still.documents;
+      return out;
+    });
+  }
+
+  /**
    * The one validation pass. Both submit() and the as-you-fix clearing below
    * call it, so a message on screen cannot disagree with what submit decides —
    * and `region`/`city` here are the same derived values the payload sends, in
    * the same render, so an unlisted id can never reach Firestore.
    */
   function validate(fd: FormData): Record<string, string> {
+    return validateWith(fd, files);
+  }
+
+  function validateWith(fd: FormData, documents: File[]): Record<string, string> {
     const v = (k: string) => String(fd.get(k) ?? "").trim();
     const errs: Record<string, string> = {};
     if (!v("businessName")) errs.businessName = "Enter your business name.";
@@ -192,16 +229,18 @@ function ApplicationForm({
     // the control, so adding one here would blame a disabled select twice.
     if (regionsPending) errs.regionId = "The regions are still loading. Try again in a moment.";
     else if (!region && !regionsFailed) errs.regionId = "Choose your region.";
-    // Without a region the town select is disabled and says why, so a town
-    // error here would point at a control that cannot be used until the field
-    // above is settled — and when the regions failed, that is not a block the
-    // town field has any part in.
+    // Skipped only while the region list itself is unusable: a failed or loading
+    // list renders its own message and retry, and a town error beside it would
+    // blame a control that has no part in that block. Merely not having chosen a
+    // region yet is not that case — both fields are then the applicant's to fix,
+    // and naming only one would make them submit twice to learn both.
     if (!regionsFailed && !regionsPending) {
       if (townsPending) errs.cityId = "The towns are still loading. Try again in a moment.";
+      else if (townsEmpty) errs.cityId = "We don't deliver to that region yet. Choose another one.";
       else if (!city && !citiesFailed) errs.cityId = "Choose your town or city.";
     }
     if (v("description").length < 20) errs.description = "Tell us what you sell in at least 20 characters.";
-    if (!files.length) errs.documents = "Attach at least one document, such as your business registration or Ghana Card.";
+    if (!documents.length) errs.documents = "Attach at least one document, such as your business registration or Ghana Card.";
     if (!fd.get("consent")) errs.consent = "Confirm the details are correct.";
     return errs;
   }
@@ -352,7 +391,7 @@ function ApplicationForm({
             {...a11y("cityId")}
             aria-invalid={errors.cityId || citiesFailed ? true : undefined}
             aria-describedby={errors.cityId || citiesFailed ? "cityId-error" : undefined}
-            disabled={busy || !region || townsPending || citiesFailed}
+            disabled={busy || !region || townsPending || citiesFailed || townsEmpty}
           >
             <option value="">
               {!region
@@ -361,7 +400,9 @@ function ApplicationForm({
                   ? "Towns couldn't be loaded"
                   : townsPending
                     ? "Loading towns…"
-                    : "Choose a town"}
+                    : townsEmpty
+                      ? "No towns in this region yet"
+                      : "Choose a town"}
             </option>
             {cityOptions.map((c) => (
               <option key={c.id} value={c.id}>{c.name}</option>
@@ -421,7 +462,7 @@ function ApplicationForm({
                   <LuFileText aria-hidden className="h-4 w-4 shrink-0 text-ink-700" />
                   <span className="min-w-0 flex-1 truncate">{f.name}</span>
                   <span className="tabular text-text-muted">{(f.size / 1024 / 1024).toFixed(1)} MB</span>
-                  <button type="button" className="grid h-8 w-8 place-items-center rounded hover:bg-paper-deep" onClick={() => setFiles(files.filter((_, j) => j !== i))} disabled={busy}>
+                  <button type="button" className="grid h-8 w-8 place-items-center rounded hover:bg-paper-deep" onClick={() => removeFile(i)} disabled={busy}>
                     <LuX aria-hidden className="h-4 w-4" />
                     <span className="sr-only">Remove {f.name}</span>
                   </button>

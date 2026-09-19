@@ -147,6 +147,8 @@ function ApplicationForm({
   const townsPending = Boolean(region) && cities.loading;
   const [files, setFiles] = useState<File[]>([]);
   const [errors, setErrors] = useState<Record<string, string>>({});
+  /** Why the last chosen file was refused. See addFiles. */
+  const [fileProblem, setFileProblem] = useState("");
   const [busy, setBusy] = useState(false);
   const inFlight = useRef(false);
   const fileInput = useRef<HTMLInputElement>(null);
@@ -163,7 +165,12 @@ function ApplicationForm({
       else problems.push(`You can attach up to ${APPLICATION_MAX_FILES} files.`);
     }
     setFiles(next);
-    setErrors((e) => ({ ...e, documents: problems.join(" ") }));
+    // Kept apart from the validated errors: "notes.txt: use a JPG, PNG, WebP or
+    // PDF file." is a reason validate() cannot re-derive from the form, and the
+    // clearing pass below re-reads every message from validate(). Merged at
+    // render, so the applicant sees why their file was refused rather than a
+    // generic "attach a document" immediately after attaching one.
+    setFileProblem(problems.join(" "));
     if (fileInput.current) fileInput.current.value = "";
   }
 
@@ -189,7 +196,7 @@ function ApplicationForm({
     // error here would point at a control that cannot be used until the field
     // above is settled — and when the regions failed, that is not a block the
     // town field has any part in.
-    if (region) {
+    if (!regionsFailed && !regionsPending) {
       if (townsPending) errs.cityId = "The towns are still loading. Try again in a moment.";
       else if (!city && !citiesFailed) errs.cityId = "Choose your town or city.";
     }
@@ -230,6 +237,8 @@ function ApplicationForm({
   async function submit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
     if (!user || inFlight.current) return;
+    // The refusal belongs to the choosing, not to this attempt.
+    setFileProblem("");
     // One read of the form, validated and sent — the payload cannot describe a
     // different form state than the one that was just checked.
     const fd = new FormData(e.currentTarget);
@@ -263,19 +272,25 @@ function ApplicationForm({
     }
   }
 
+  // A refused file explains itself better than validate() can ("notes.txt: use a
+  // JPG, PNG, WebP or PDF file." versus "Attach at least one document"), so it
+  // wins for that field while it stands.
+  const messageFor = (id: string) => (id === "documents" && fileProblem ? fileProblem : errors[id]);
   const a11y = (id: string) => ({
     id,
     name: id,
-    "aria-invalid": errors[id] ? true : undefined,
-    "aria-describedby": errors[id] ? `${id}-error` : undefined,
+    "aria-invalid": messageFor(id) ? true : undefined,
+    "aria-describedby": messageFor(id) ? `${id}-error` : undefined,
     disabled: busy,
   });
-  const err = (id: string) =>
-    errors[id] ? (
+  const err = (id: string) => {
+    const message = messageFor(id);
+    return message ? (
       <p id={`${id}-error`} className="field-error">
-        {errors[id]}
+        {message}
       </p>
     ) : null;
+  };
 
   return (
     <form ref={formRef} onSubmit={submit} onChange={clearFixedErrors} noValidate className="panel space-y-5 p-5 sm:p-8">
